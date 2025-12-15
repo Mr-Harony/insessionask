@@ -76,7 +76,7 @@
   </div>
 
   <script>
-    // ضع Production Webhook URL هنا
+    // 🔗 Production Webhook URL (مُثبت)
     const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/ask-question";
 
     const usernameEl = document.getElementById("username");
@@ -85,7 +85,7 @@
     const resultEl   = document.getElementById("result");
     const sendBtn    = document.getElementById("sendBtn");
 
-    // تحميل البيانات المحفوظة عند فتح الصفحة
+    // تحميل اليوزر والباسورد المحفوظين
     window.onload = () => {
       const savedUsername = localStorage.getItem("student_username");
       const savedPassword = localStorage.getItem("student_password");
@@ -106,12 +106,7 @@
         return;
       }
 
-      if (!WEBHOOK_URL || WEBHOOK_URL === "WEBHOOK_URL_HERE") {
-        resultEl.innerText = "❌ لازم تحط Production Webhook URL من n8n";
-        return;
-      }
-
-      // حفظ اليوزر والباسورد محليًا
+      // حفظ البيانات محليًا
       localStorage.setItem("student_username", username);
       localStorage.setItem("student_password", password);
 
@@ -133,7 +128,7 @@
         if (!text || !text.trim()) {
           resultEl.innerText = "⚠️ وصلني رد فاضي من النظام";
         } else {
-          // تنسيق الأسطر
+          // احترام الأسطر الجديدة
           resultEl.innerHTML = text.replace(/\n/g, "<br>");
         }
       } catch (err) {
@@ -155,4 +150,3 @@
   </script>
 </body>
 </html>
-
