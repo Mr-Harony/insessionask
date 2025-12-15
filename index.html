@@ -1,80 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Ask Mr. Harony</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask Mr. Harony – AI Assistant</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --text: #111;
+  --muted: #666;
+  --primary: #4c7ef3;
+  --bubble: #eef3ff;
+}
 
-    body {
-      font-family: 'Inter', Arial, sans-serif;
-      background: linear-gradient(135deg, #f4f6f8, #e9edf2);
-      margin: 0;
-      padding: 20px;
-    }
+body.dark {
+  --bg: #0f1220;
+  --card: #171a2b;
+  --text: #f1f1f1;
+  --muted: #aaa;
+  --bubble: #1f2550;
+}
 
-    .card {
-      max-width: 600px;
-      margin: 40px auto;
-      background: #ffffff;
-      padding: 28px;
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-    }
+* { box-sizing: border-box; }
 
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  transition: 0.3s;
+}
 
-    .header h2 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 600;
-    }
+.container {
+  max-width: 720px;
+  margin: auto;
+}
 
-    .header p {
-      margin-top: 6px;
-      color: #666;
-      font-size: 14px;
-    }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-    label {
-      display: block;
-      margin-top: 14px;
-      font-weight: 500;
-      font-size: 14px;
-    }
+.header h1 {
+  font-size: 22px;
+  margin: 0;
+}
 
-    input, textarea {
-      width: 100%;
-      margin-top: 6px;
-      padding: 12px;
-      font-size: 15px;
-      border-radius: 10px;
-      border: 1px solid #dcdfe4;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
+.toggle {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--primary);
+}
 
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: #4c7ef3;
-      box-shadow: 0 0 0 3px rgba(76,126,243,0.15);
-    }
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
 
-    textarea {
-      min-height: 130px;
-      resize: vertical;
-    }
+label {
+  display: block;
+  margin-top: 14px;
+  font-weight: 500;
+  font-size: 14px;
+}
 
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 60
+input, textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: transparent;
+  color: var(--text);
+}
+
+textarea { min-height: 120px; }
+
+button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled { opacity: .6; }
+
+.chat {
+  margin-top: 24px;
+  display: none;
+}
+
+.bubble {
+  background: var(--bubble);
+  padding: 16px;
+  border-radius: 14px;
+  line-height: 1.7;
+  animation: pop .3s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 14px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🤖 Ask Mr. Harony</h1>
+    <div class="toggle" onclick="toggleTheme()">🌙 Dark mode</div>
+  </div>
+
+  <div class="card">
+    <label>Username</label>
+    <input id="username">
+
+    <label>Password</label>
+    <input id="password" type="password">
+
+    <label>Your Question</label>
+    <textarea id="question" placeholder="Type your physics question..."></textarea>
+
+    <button id="sendBtn">Ask AI</button>
+
+    <div class="chat" id="chat">
+      <div class="bubble" id="answer"></div>
+    </div>
+
+    <div class="footer">
+      Your credentials are saved on this device only.
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/ask-question";
+
+const u = document.getElementById("username");
+const p = document.getElementById("password");
+const q = document.getElementById("question");
+const btn = document.getElementById("sendBtn");
+const chat = document.getElementById("chat");
+const answer = document.getElementById("answer");
+
+u.value = localStorage.getItem("u") || "";
+p.value = localStorage.getItem("p") || "";
+
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+}
+
+btn.onclick = async () => {
+  if(!u.value || !p.value || !q.value){
+    alert("Fill all fields");
+    return;
+  }
+
+  localStorage.setItem("u", u.value);
+  localStorage.setItem("p", p.value);
+
+  btn.disabled = true;
+  chat.style.display = "block";
+  answer.innerHTML = "⏳ Thinking...";
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: u.value,
+        password: p.value,
+        question: q.value
+      })
+    });
+
+    const text = await res.text();
+    answer.innerHTML = text.replace(/\n/g,"<br>");
+  } catch {
+    answer.innerHTML = "❌ Error connecting to server";
+  } finally {
+    btn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
