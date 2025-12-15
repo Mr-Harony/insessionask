@@ -6,79 +6,186 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+/* ===== Color Variables ===== */
 :root {
   --bg: #f5f7ff;
   --card: #ffffff;
   --text: #111;
+  --muted: #666;
   --primary: #4f6df5;
+  --answer-bg: #f4f6ff;
+  --border: #ccc;
 }
 
+/* ===== Dark mode ===== */
 body.dark {
   --bg: #0f1220;
   --card: #171a2b;
-  --text: #ffffff;
+  --text: #f1f1f1;
+  --muted: #aaa;
   --primary: #6a82ff;
+  --answer-bg: #1f2550;
+  --border: #2d335a;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
-  font-family: Arial, sans-serif;
+  padding: 24px;
+  background: radial-gradient(circle at top, var(--bg), #e6ebf5);
+  font-family: "Segoe UI", Arial, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text);
+  transition: background 0.3s, color 0.3s;
 }
 
+/* ===== Card ===== */
 .card {
-  width: min(600px, 100%);
-  padding: 24px;
+  width: min(720px, 100%);
+  padding: 32px;
   background: var(--card);
-  border-radius: 12px;
+  border-radius: 18px;
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.15),
+    0 10px 20px rgba(0,0,0,0.08);
 }
 
-h1 {
-  margin-top: 0;
+/* ===== Header ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
 }
 
-label {
-  display: block;
-  margin-top: 12px;
-  font-weight: bold;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-}
-
-textarea {
-  min-height: 120px;
-}
-
-button {
-  margin-top: 16px;
-  width: 100%;
-  padding: 12px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-#answer {
-  margin-top: 20px;
-  white-space: pre-wrap;
+.header h1 {
+  margin: 0;
+  font-size: 26px;
 }
 
 .toggle {
   cursor: pointer;
   font-size: 14px;
   color: var(--primary);
+  user-select: none;
+}
+
+/* ===== Form ===== */
+label {
+  font-weight: bold;
+  margin-top: 16px;
+  display: block;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* ===== Button (3D effect محفوظ 👌) ===== */
+button {
+  position: relative;
+  overflow: hidden;
+
+  margin-top: 22px;
+  margin-bottom: 40px;
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #4f6df5, #6a82ff);
+  color: #fff;
+
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+
+  box-shadow: none;
+}
+
+/* ✨ اللمعة اللي بتمشي بعرض الزر */
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.75),
+    transparent
+  );
+
+  opacity: 0;
+}
+
+/* عند مرور الماوس */
+button:hover::after {
+  opacity: 1;
+  animation: sweep 0.8s ease-in-out;
+}
+
+/* ضغط */
+button:active {
+  transform: scale(0.97);
+}
+
+/* الحركة */
+@keyframes sweep {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+/* ===== Answer ===== */
+#answer {
+  background: var(--answer-bg);
+  padding: 16px;
+  border-radius: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+/* ===== Footer ===== */
+.footer {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
 }
 </style>
 </head>
@@ -86,21 +193,32 @@ button {
 <body>
 
 <div class="card">
-  <h1>Ask Mr. Harony</h1>
-  <div class="toggle" onclick="toggleTheme()">Toggle dark mode</div>
+
+  <div class="header">
+    <h1>Ask Mr. Harony</h1>
+    <div class="toggle" onclick="toggleTheme()">🌙 Dark mode</div>
+  </div>
 
   <label>Username</label>
-  <input id="username">
+  <input id="username" autocomplete="username">
 
   <label>Password</label>
-  <input id="password" type="password">
+  <input id="password" type="password" autocomplete="current-password">
 
   <label>Your Question</label>
-  <textarea id="question"></textarea>
+  <textarea id="question" placeholder="Type your question here..."></textarea>
 
-  <button id="sendBtn">Send</button>
+  <button id="sendBtn">Ask Mr. Harony</button>
+
+  <!-- ⭐ المسافة السحرية -->
+  <div class="button-space"></div>
 
   <div id="answer"></div>
+
+  <div class="footer">
+    Secure academic assistant • Mr. Harony
+  </div>
+
 </div>
 
 <script>
@@ -112,11 +230,11 @@ const questionEl = document.getElementById("question");
 const answerEl   = document.getElementById("answer");
 const sendBtn    = document.getElementById("sendBtn");
 
-/* restore saved data */
-usernameEl.value = localStorage.getItem("username") || "";
-passwordEl.value = localStorage.getItem("password") || "";
+/* Load saved credentials */
+usernameEl.value = localStorage.getItem("student_username") || "";
+passwordEl.value = localStorage.getItem("student_password") || "";
 
-/* theme */
+/* Theme */
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
 }
@@ -129,21 +247,22 @@ function toggleTheme() {
   );
 }
 
-/* send */
-sendBtn.onclick = async () => {
+/* Send Question */
+sendBtn.addEventListener("click", async () => {
   const u = usernameEl.value.trim();
   const p = passwordEl.value.trim();
   const q = questionEl.value.trim();
 
   if (!u || !p || !q) {
-    answerEl.innerText = "Please fill all fields";
+    answerEl.innerText = "❌ Please fill all fields";
     return;
   }
 
-  localStorage.setItem("username", u);
-  localStorage.setItem("password", p);
+  localStorage.setItem("student_username", u);
+  localStorage.setItem("student_password", p);
 
-  answerEl.innerText = "Sending...";
+  answerEl.innerText = "⏳ Thinking...";
+  sendBtn.disabled = true;
 
   try {
     const res = await fetch(WEBHOOK_URL, {
@@ -153,11 +272,18 @@ sendBtn.onclick = async () => {
     });
 
     const text = await res.text();
-    answerEl.innerText = text;
+    const formatted = text
+  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+  .replace(/\*(.*?)\*/g, "<strong>$1</strong>");
+
+answerEl.innerHTML = formatted || "⚠️ Empty response";
+
   } catch {
-    answerEl.innerText = "Connection error";
+    answerEl.innerText = "❌ Connection error";
+  } finally {
+    sendBtn.disabled = false;
   }
-};
+});
 </script>
 
 </body>
