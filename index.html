@@ -272,7 +272,12 @@ sendBtn.addEventListener("click", async () => {
     });
 
     const text = await res.text();
-    answerEl.innerText = text || "⚠️ Empty response";
+    const formatted = text
+  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+  .replace(/\*(.*?)\*/g, "<strong>$1</strong>");
+
+answerEl.innerHTML = formatted || "⚠️ Empty response";
+
   } catch {
     answerEl.innerText = "❌ Connection error";
   } finally {
@@ -283,6 +288,7 @@ sendBtn.addEventListener("click", async () => {
 
 </body>
 </html>
+
 
 
 
