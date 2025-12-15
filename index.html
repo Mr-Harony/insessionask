@@ -17,7 +17,7 @@
   --border: #ccc;
 }
 
-/* Dark mode variables */
+/* ===== Dark mode ===== */
 body.dark {
   --bg: #0f1220;
   --card: #171a2b;
@@ -28,11 +28,19 @@ body.dark {
   --border: #2d335a;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
+  padding: 24px; /* ⭐ يحل مشكلة اليمين */
   background: radial-gradient(circle at top, var(--bg), #e6ebf5);
   font-family: Arial, sans-serif;
   display: flex;
@@ -44,10 +52,10 @@ body {
 
 /* ===== Card ===== */
 .card {
-  width: 620px;
-  max-width: 92vw;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 32px;
   background: var(--card);
-  padding: 28px;
   border-radius: 18px;
   box-shadow:
     0 25px 60px rgba(0,0,0,0.15),
@@ -59,12 +67,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 26px;
 }
 
 .toggle {
@@ -77,12 +85,14 @@ body {
 /* ===== Form ===== */
 label {
   font-weight: bold;
-  margin-top: 14px;
+  margin-top: 16px;
   display: block;
 }
 
 input, textarea {
+  display: block;
   width: 100%;
+  max-width: 100%;
   padding: 12px;
   margin-top: 6px;
   border-radius: 8px;
@@ -93,7 +103,8 @@ input, textarea {
 }
 
 textarea {
-  min-height: 140px;
+  min-height: 150px;
+  resize: vertical;
 }
 
 input:focus, textarea:focus {
@@ -103,11 +114,11 @@ input:focus, textarea:focus {
 
 /* ===== Button ===== */
 button {
-  margin-top: 20px;
+  margin-top: 22px;
   width: 100%;
   padding: 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: linear-gradient(135deg, var(--primary), #6a82ff);
   color: #fff;
   font-size: 16px;
@@ -122,17 +133,17 @@ button:disabled {
 
 /* ===== Answer ===== */
 #answer {
-  margin-top: 20px;
+  margin-top: 22px;
   background: var(--answer-bg);
-  padding: 14px;
-  border-radius: 10px;
+  padding: 16px;
+  border-radius: 12px;
   white-space: pre-wrap;
   line-height: 1.6;
 }
 
 /* ===== Footer ===== */
 .footer {
-  margin-top: 14px;
+  margin-top: 18px;
   font-size: 12px;
   color: var(--muted);
   text-align: center;
@@ -150,13 +161,13 @@ button:disabled {
   </div>
 
   <label>Username</label>
-  <input id="username">
+  <input id="username" autocomplete="username">
 
   <label>Password</label>
-  <input id="password" type="password">
+  <input id="password" type="password" autocomplete="current-password">
 
   <label>Your Question</label>
-  <textarea id="question"></textarea>
+  <textarea id="question" placeholder="Type your question here..."></textarea>
 
   <button id="sendBtn">Ask Mr. Harony</button>
 
@@ -177,7 +188,7 @@ const questionEl = document.getElementById("question");
 const answerEl   = document.getElementById("answer");
 const sendBtn    = document.getElementById("sendBtn");
 
-/* ===== Load saved data ===== */
+/* ===== Load saved credentials ===== */
 usernameEl.value = localStorage.getItem("student_username") || "";
 passwordEl.value = localStorage.getItem("student_password") || "";
 
