@@ -111,8 +111,11 @@ input:focus, textarea:focus {
 
 /* ===== Button (3D effect محفوظ 👌) ===== */
 button {
+  position: relative;
+  overflow: hidden;
+
   margin-top: 22px;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
   width: 100%;
   padding: 14px;
 
@@ -126,33 +129,48 @@ button {
   font-weight: bold;
   cursor: pointer;
 
-  /* ❌ بدون ظل */
   box-shadow: none;
-
-  /* انتقال ناعم */
-  transition: box-shadow 0.25s ease, transform 0.15s ease;
 }
 
-/* ✨ GLOW واضح جدًا */
-button:hover {
-  box-shadow:
-    0 0 0 3px rgba(79, 109, 245, 0.35),
-    0 0 18px rgba(79, 109, 245, 0.65);
+/* ✨ اللمعة اللي بتمشي بعرض الزر */
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.75),
+    transparent
+  );
+
+  opacity: 0;
 }
 
-/* إحساس ضغط */
+/* عند مرور الماوس */
+button:hover::after {
+  opacity: 1;
+  animation: sweep 0.8s ease-in-out;
+}
+
+/* ضغط */
 button:active {
   transform: scale(0.97);
 }
 
-/* Disabled */
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+/* الحركة */
+@keyframes sweep {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
 }
-
 /* ===== Answer ===== */
 #answer {
   background: var(--answer-bg);
@@ -265,6 +283,7 @@ sendBtn.addEventListener("click", async () => {
 
 </body>
 </html>
+
 
 
 
