@@ -111,39 +111,71 @@ input:focus, textarea:focus {
 
 /* ===== Button (3D effect محفوظ 👌) ===== */
 button {
+  position: relative;
+  overflow: hidden;
+
   margin-top: 22px;
   width: 100%;
   padding: 14px;
   border: none;
   border-radius: 12px;
+
   background: linear-gradient(135deg, #4f6df5, #6a82ff);
   color: #fff;
+
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
 
-  box-shadow:
-    0 8px 0 #3b54c7,
-    0 14px 25px rgba(0,0,0,0.35);
+  box-shadow: none;
 
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.15s ease;
 }
 
+/* ✨ Glow layer */
+button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: opacity 0.25s ease;
+}
+
+/* 🖱️ Hover = glow بعرض الزر */
+button:hover::before {
+  opacity: 1;
+  animation: glow-sweep 0.8s linear;
+}
+
+/* 👆 Click */
 button:active {
-  transform: translateY(6px);
-  box-shadow:
-    0 2px 0 #3b54c7,
-    0 6px 12px rgba(0,0,0,0.35);
+  transform: scale(0.98);
 }
 
+/* Disabled */
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* ===== مسافة محترمة تحت الزر 👇 ===== */
-.button-space {
-  height: 34px;
+/* ✨ Animation */
+@keyframes glow-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 /* ===== Answer ===== */
@@ -258,3 +290,4 @@ sendBtn.addEventListener("click", async () => {
 
 </body>
 </html>
+
