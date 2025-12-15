@@ -42,7 +42,7 @@ body {
   min-height: 100vh;
   padding: 24px;
   background: radial-gradient(circle at top, var(--bg), #e6ebf5);
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +53,6 @@ body {
 /* ===== Card ===== */
 .card {
   width: min(720px, 100%);
-  margin: 0 auto;
   padding: 32px;
   background: var(--card);
   border-radius: 18px;
@@ -90,9 +89,7 @@ label {
 }
 
 input, textarea {
-  display: block;
   width: 100%;
-  max-width: 100%;
   padding: 12px;
   margin-top: 6px;
   border-radius: 8px;
@@ -112,7 +109,7 @@ input:focus, textarea:focus {
   border-color: var(--primary);
 }
 
-/* ===== Button (3D) ===== */
+/* ===== Button (3D effect محفوظ 👌) ===== */
 button {
   margin-top: 22px;
   width: 100%;
@@ -129,9 +126,7 @@ button {
     0 8px 0 #3b54c7,
     0 14px 25px rgba(0,0,0,0.35);
 
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 button:active {
@@ -144,23 +139,25 @@ button:active {
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
-/* ===== Answer (⭐ التعديل المهم) ===== */
+/* ===== مسافة محترمة تحت الزر 👇 ===== */
+.button-space {
+  height: 34px;
+}
+
+/* ===== Answer ===== */
 #answer {
-  margin-top: 26px;              /* 👈 المسافة المطلوبة */
-  padding: 16px;
   background: var(--answer-bg);
+  padding: 16px;
   border-radius: 12px;
-  border: 1px solid var(--border);
   line-height: 1.7;
   white-space: pre-wrap;
 }
 
 /* ===== Footer ===== */
 .footer {
-  margin-top: 20px;
+  margin-top: 18px;
   font-size: 12px;
   color: var(--muted);
   text-align: center;
@@ -187,6 +184,9 @@ button:disabled {
   <textarea id="question" placeholder="Type your question here..."></textarea>
 
   <button id="sendBtn">Ask Mr. Harony</button>
+
+  <!-- ⭐ المسافة السحرية -->
+  <div class="button-space"></div>
 
   <div id="answer"></div>
 
