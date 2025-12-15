@@ -7,81 +7,48 @@
 
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  padding: 30px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: radial-gradient(circle at top, #f0f4ff, #e6e9f0);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* 3D card */
 .card {
-  max-width: 600px;
-  background: #fff;
-  margin: auto;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-textarea, input {
   width: 100%;
-  margin-top: 8px;
-  padding: 10px;
+  max-width: 620px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.12),
+    0 6px 12px rgba(0,0,0,0.08);
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
-button {
-  margin-top: 12px;
-  padding: 10px;
+.card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.18),
+    0 10px 20px rgba(0,0,0,0.12);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 26px;
+}
+
+label {
+  font-weight: 600;
+  margin-top: 14px;
+  display: block;
+}
+
+input, textarea {
   width: 100%;
-}
-
-#answer {
-  margin-top: 20px;
-  white-space: pre-wrap;
-}
-</style>
-</head>
-
-<body>
-
-<div class="card">
-  <h2>Ask Mr. Harony</h2>
-
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
-
-  <textarea id="question" placeholder="Type your question"></textarea>
-
-  <button onclick="send()">Send</button>
-
-  <div id="answer"></div>
-</div>
-
-<script>
-const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/ask-question";
-
-async function send() {
-  const q = document.getElementById("question").value;
-  const u = document.getElementById("username").value;
-  const p = document.getElementById("password").value;
-
-  document.getElementById("answer").innerText = "Sending...";
-
-  try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: u,
-        password: p,
-        question: q
-      })
-    });
-
-    const text = await res.text();
-    document.getElementById("answer").innerText = text;
-  } catch (e) {
-    document.getElementById("answer").innerText = "Error connecting to server";
-  }
-}
-</script>
-
-</body>
-</html>
+  padding: 12px;
+  margin-top:
