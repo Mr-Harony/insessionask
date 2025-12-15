@@ -40,7 +40,7 @@ html, body {
 body {
   margin: 0;
   min-height: 100vh;
-  padding: 24px; /* ⭐ يحل مشكلة اليمين */
+  padding: 24px;
   background: radial-gradient(circle at top, var(--bg), #e6ebf5);
   font-family: Arial, sans-serif;
   display: flex;
@@ -112,33 +112,28 @@ input:focus, textarea:focus {
   border-color: var(--primary);
 }
 
-/* ===== Button ===== */
+/* ===== Button (3D) ===== */
 button {
   margin-top: 22px;
   width: 100%;
   padding: 14px;
-
   border: none;
   border-radius: 12px;
-
   background: linear-gradient(135deg, #4f6df5, #6a82ff);
   color: #fff;
-
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
 
-  /* 👇 البروز الثلاثي الأبعاد */
   box-shadow:
-    0 8px 0 #3b54c7,        /* قاعدة الزر */
+    0 8px 0 #3b54c7,
     0 14px 25px rgba(0,0,0,0.35);
 
   transition:
-    transform 0.1s ease,
-    box-shadow 0.1s ease;
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
-/* عند الضغط (كمبيوتر + موبايل) */
 button:active {
   transform: translateY(6px);
   box-shadow:
@@ -146,20 +141,26 @@ button:active {
     0 6px 12px rgba(0,0,0,0.35);
 }
 
-/* Disabled */
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow:
-    0 6px 0 #999,
-    0 10px 18px rgba(0,0,0,0.25);
 }
 
+/* ===== Answer (⭐ التعديل المهم) ===== */
+#answer {
+  margin-top: 26px;              /* 👈 المسافة المطلوبة */
+  padding: 16px;
+  background: var(--answer-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
 
 /* ===== Footer ===== */
 .footer {
-  margin-top: 18px;
+  margin-top: 20px;
   font-size: 12px;
   color: var(--muted);
   text-align: center;
@@ -204,11 +205,11 @@ const questionEl = document.getElementById("question");
 const answerEl   = document.getElementById("answer");
 const sendBtn    = document.getElementById("sendBtn");
 
-/* ===== Load saved credentials ===== */
+/* Load saved credentials */
 usernameEl.value = localStorage.getItem("student_username") || "";
 passwordEl.value = localStorage.getItem("student_password") || "";
 
-/* ===== Theme ===== */
+/* Theme */
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
 }
@@ -221,7 +222,7 @@ function toggleTheme() {
   );
 }
 
-/* ===== Send Question ===== */
+/* Send Question */
 sendBtn.addEventListener("click", async () => {
   const u = usernameEl.value.trim();
   const p = passwordEl.value.trim();
@@ -242,11 +243,7 @@ sendBtn.addEventListener("click", async () => {
     const res = await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: u,
-        password: p,
-        question: q
-      })
+      body: JSON.stringify({ username: u, password: p, question: q })
     });
 
     const text = await res.text();
@@ -261,7 +258,3 @@ sendBtn.addEventListener("click", async () => {
 
 </body>
 </html>
-
-
-
-
