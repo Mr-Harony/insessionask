@@ -124,12 +124,37 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+
+  /* ✨ Animation basics */
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
 }
 
+/* 🖱️ Hover effect */
+button:hover {
+  transform: translateY(-3px); /* يطلع لفوق سنة */
+  box-shadow:
+    0 12px 28px rgba(79, 109, 245, 0.45);
+  filter: brightness(1.05);
+}
+
+/* 👆 Click effect */
+button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 6px 14px rgba(79, 109, 245, 0.35);
+}
+
+/* Disabled */
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
+
 
 /* ===== Answer ===== */
 #answer {
@@ -245,3 +270,4 @@ sendBtn.addEventListener("click", async () => {
 
 </body>
 </html>
+
