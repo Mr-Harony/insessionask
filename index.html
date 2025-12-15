@@ -6,82 +6,147 @@
   <title>اسأل مستر حاروني</title>
 
   <style>
-    body { font-family: Arial, sans-serif; background:#f6f6f6; margin:0; }
-    .card { max-width: 560px; margin: 60px auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
-    textarea { width:100%; height:140px; font-size:16px; padding:10px; box-sizing:border-box; }
-    button { margin-top:12px; padding:10px 18px; font-size:16px; cursor:pointer; }
-    #result { margin-top:16px; white-space:pre-wrap; line-height:1.6; }
-    .muted { color:#666; font-size:13px; margin-top:10px; }
+    body {
+      font-family: Arial, sans-serif;
+      background:#f6f6f6;
+      margin:0;
+    }
+    .card {
+      max-width: 560px;
+      margin: 60px auto;
+      background:#fff;
+      padding:24px;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,.08);
+    }
+    label {
+      display:block;
+      margin-top:12px;
+      font-weight:bold;
+    }
+    input, textarea {
+      width:100%;
+      font-size:16px;
+      padding:10px;
+      box-sizing:border-box;
+      margin-top:6px;
+    }
+    textarea {
+      height:140px;
+    }
+    button {
+      margin-top:14px;
+      padding:10px 18px;
+      font-size:16px;
+      cursor:pointer;
+    }
+    #result {
+      margin-top:16px;
+      white-space:pre-wrap;
+      line-height:1.6;
+    }
+    .muted {
+      color:#666;
+      font-size:13px;
+      margin-top:10px;
+    }
   </style>
 </head>
 
 <body>
   <div class="card">
-    <h2>👇 اكتب سؤالك</h2>
+    <h2>🔐 بيانات الطالب</h2>
 
+    <label>Username</label>
+    <input id="username" placeholder="اكتب اليوزر نيم" />
+
+    <label>Password</label>
+    <input id="password" type="password" placeholder="اكتب الباسورد" />
+
+    <label>👇 السؤال</label>
     <textarea id="question" placeholder="اكتب سؤالك هنا..."></textarea>
 
-    <br />
     <button id="sendBtn" type="button">إرسال</button>
 
     <div id="result"></div>
 
-    <div class="muted">لو مفيش استجابة، غالبًا لينك الـ Webhook مش متحطوط صح.</div>
+    <div class="muted">
+      يتم حفظ اليوزر نيم والباسورد على جهازك لتسهيل الاستخدام.
+    </div>
   </div>
 
   <script>
-    // 1) حط لينك الويبهوك الحقيقي هنا (Production URL)
+    // ضع Production Webhook URL هنا
     const WEBHOOK_URL = "WEBHOOK_URL_HERE";
 
+    const usernameEl = document.getElementById("username");
+    const passwordEl = document.getElementById("password");
     const questionEl = document.getElementById("question");
     const resultEl   = document.getElementById("result");
     const sendBtn    = document.getElementById("sendBtn");
 
+    // تحميل البيانات المحفوظة عند فتح الصفحة
+    window.onload = () => {
+      const savedUsername = localStorage.getItem("student_username");
+      const savedPassword = localStorage.getItem("student_password");
+
+      if (savedUsername) usernameEl.value = savedUsername;
+      if (savedPassword) passwordEl.value = savedPassword;
+    };
+
     async function sendQuestion() {
+      const username = (usernameEl.value || "").trim();
+      const password = (passwordEl.value || "").trim();
       const question = (questionEl.value || "").trim();
 
-      // إحساس فوري إن الزر اشتغل
       resultEl.innerText = "⏳ جاري إرسال السؤال...";
 
-      if (!question) {
-        resultEl.innerText = "❌ من فضلك اكتب سؤال الأول";
+      if (!username || !password || !question) {
+        resultEl.innerText = "❌ من فضلك املأ كل الخانات";
         return;
       }
 
-      if (!WEBHOOK_URL || WEBHOOK_URL === "https://n8n.sciencetoonz.com/webhook/ask-question") {
-        resultEl.innerText = "❌ لازم تحط Production Webhook URL من n8n جوه WEBHOOK_URL";
+      if (!WEBHOOK_URL || WEBHOOK_URL === "WEBHOOK_URL_HERE") {
+        resultEl.innerText = "❌ لازم تحط Production Webhook URL من n8n";
         return;
       }
 
-      // تعطيل الزر أثناء الإرسال
+      // حفظ اليوزر والباسورد محليًا
+      localStorage.setItem("student_username", username);
+      localStorage.setItem("student_password", password);
+
       sendBtn.disabled = true;
 
       try {
         const res = await fetch(WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question })
+          body: JSON.stringify({
+            username: username,
+            password: password,
+            question: question
+          })
         });
 
         const text = await res.text();
 
-        // لو رجع فاضي
         if (!text || !text.trim()) {
-          resultEl.innerText = "⚠️ وصلني رد فاضي من n8n";
+          resultEl.innerText = "⚠️ وصلني رد فاضي من النظام";
         } else {
-          resultEl.innerText = text;
+          // تنسيق الأسطر
+          resultEl.innerHTML = text.replace(/\n/g, "<br>");
         }
       } catch (err) {
-        resultEl.innerText = "❌ حصل خطأ في الاتصال. (غالبًا CORS أو لينك الويبهوك غلط)";
+        resultEl.innerText = "❌ حصل خطأ في الاتصال، حاول مرة تانية";
       } finally {
         sendBtn.disabled = false;
       }
     }
 
-    // 2) تشغيل عند الضغط على الزر
+    // زر الإرسال
     sendBtn.addEventListener("click", sendQuestion);
 
-    // 3) تشغيل عند Enter (Ctrl+Enter) داخل مربع الكتابة
+    // Ctrl + Enter للإرسال
     questionEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         sendQuestion();
