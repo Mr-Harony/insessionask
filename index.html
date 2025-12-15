@@ -10,10 +10,7 @@
 :root {
   --bg: #f5f7ff;
   --card: #ffffff;
-
-  --text: #111;        /* نص عادي */
-  --bold: #1e40ff;    /* Bold أزرق */
-
+  --text: #111;
   --muted: #666;
   --primary: #4f6df5;
   --answer-bg: #f4f6ff;
@@ -24,17 +21,16 @@
 body.dark {
   --bg: #0f1220;
   --card: #171a2b;
-
-  --text: #ffffff;    /* نص أبيض */
-  --bold: #ffd84d;    /* Bold أصفر */
-
+  --text: #f1f1f1;
   --muted: #aaa;
   --primary: #6a82ff;
   --answer-bg: #1f2550;
   --border: #2d335a;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 html, body {
   width: 100%;
@@ -113,24 +109,30 @@ input:focus, textarea:focus {
   border-color: var(--primary);
 }
 
-/* ===== Button ===== */
+/* ===== Button (3D effect محفوظ 👌) ===== */
 button {
   position: relative;
   overflow: hidden;
+
   margin-top: 22px;
   margin-bottom: 40px;
   width: 100%;
   padding: 14px;
+
   border: none;
   border-radius: 12px;
+
   background: linear-gradient(135deg, #4f6df5, #6a82ff);
   color: #fff;
+
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+
+  box-shadow: none;
 }
 
-/* ✨ اللمعة */
+/* ✨ اللمعة اللي بتمشي بعرض الزر */
 button::after {
   content: "";
   position: absolute;
@@ -138,29 +140,37 @@ button::after {
   left: -40%;
   width: 40%;
   height: 100%;
+
   background: linear-gradient(
     120deg,
     transparent,
     rgba(255,255,255,0.75),
     transparent
   );
+
   opacity: 0;
 }
 
+/* عند مرور الماوس */
 button:hover::after {
   opacity: 1;
   animation: sweep 0.8s ease-in-out;
 }
 
+/* ضغط */
 button:active {
   transform: scale(0.97);
 }
 
+/* الحركة */
 @keyframes sweep {
-  from { left: -40%; }
-  to   { left: 100%; }
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
 }
-
 /* ===== Answer ===== */
 #answer {
   background: var(--answer-bg);
@@ -168,13 +178,6 @@ button:active {
   border-radius: 12px;
   line-height: 1.7;
   white-space: pre-wrap;
-  color: var(--text);
-}
-
-/* ⭐ Bold coloring */
-#answer strong {
-  color: var(--bold);
-  font-weight: 700;
 }
 
 /* ===== Footer ===== */
@@ -190,27 +193,32 @@ button:active {
 <body>
 
 <div class="card">
+
   <div class="header">
     <h1>Ask Mr. Harony</h1>
     <div class="toggle" onclick="toggleTheme()">🌙 Dark mode</div>
   </div>
 
   <label>Username</label>
-  <input id="username">
+  <input id="username" autocomplete="username">
 
   <label>Password</label>
-  <input id="password" type="password">
+  <input id="password" type="password" autocomplete="current-password">
 
   <label>Your Question</label>
-  <textarea id="question"></textarea>
+  <textarea id="question" placeholder="Type your question here..."></textarea>
 
   <button id="sendBtn">Ask Mr. Harony</button>
+
+  <!-- ⭐ المسافة السحرية -->
+  <div class="button-space"></div>
 
   <div id="answer"></div>
 
   <div class="footer">
     Secure academic assistant • Mr. Harony
   </div>
+
 </div>
 
 <script>
@@ -222,9 +230,11 @@ const questionEl = document.getElementById("question");
 const answerEl   = document.getElementById("answer");
 const sendBtn    = document.getElementById("sendBtn");
 
+/* Load saved credentials */
 usernameEl.value = localStorage.getItem("student_username") || "";
 passwordEl.value = localStorage.getItem("student_password") || "";
 
+/* Theme */
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
 }
@@ -237,6 +247,7 @@ function toggleTheme() {
   );
 }
 
+/* Send Question */
 sendBtn.addEventListener("click", async () => {
   const u = usernameEl.value.trim();
   const p = passwordEl.value.trim();
@@ -247,6 +258,9 @@ sendBtn.addEventListener("click", async () => {
     return;
   }
 
+  localStorage.setItem("student_username", u);
+  localStorage.setItem("student_password", p);
+
   answerEl.innerText = "⏳ Thinking...";
   sendBtn.disabled = true;
 
@@ -254,4 +268,23 @@ sendBtn.addEventListener("click", async () => {
     const res = await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ us
+      body: JSON.stringify({ username: u, password: p, question: q })
+    });
+
+    const text = await res.text();
+    const formatted = text
+  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+  .replace(/\*(.*?)\*/g, "<strong>$1</strong>");
+
+answerEl.innerHTML = formatted || "⚠️ Empty response";
+
+  } catch {
+    answerEl.innerText = "❌ Connection error";
+  } finally {
+    sendBtn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>
