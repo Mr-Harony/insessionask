@@ -1,154 +1,80 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ask Mr. Harony</title>
 
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      background:#f6f6f6;
-      margin:0;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #f4f6f8, #e9edf2);
+      margin: 0;
+      padding: 20px;
     }
+
     .card {
-      max-width: 560px;
-      margin: 60px auto;
-      background:#fff;
-      padding:24px;
-      border-radius:12px;
-      box-shadow:0 4px 12px rgba(0,0,0,.08);
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
     }
-    h2 {
-      margin-top: 0;
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
     }
+
+    .header h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .header p {
+      margin-top: 6px;
+      color: #666;
+      font-size: 14px;
+    }
+
     label {
-      display:block;
-      margin-top:12px;
-      font-weight:bold;
+      display: block;
+      margin-top: 14px;
+      font-weight: 500;
+      font-size: 14px;
     }
+
     input, textarea {
-      width:100%;
-      font-size:16px;
-      padding:10px;
-      box-sizing:border-box;
-      margin-top:6px;
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 10px;
+      border: 1px solid #dcdfe4;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #4c7ef3;
+      box-shadow: 0 0 0 3px rgba(76,126,243,0.15);
+    }
+
     textarea {
-      height:140px;
+      min-height: 130px;
+      resize: vertical;
     }
+
     button {
-      margin-top:14px;
-      padding:10px 18px;
-      font-size:16px;
-      cursor:pointer;
-    }
-    #result {
-      margin-top:16px;
-      white-space:pre-wrap;
-      line-height:1.6;
-    }
-    .muted {
-      color:#666;
-      font-size:13px;
-      margin-top:10px;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="card">
-    <h2>🔐 Student Details</h2>
-
-    <label>Username</label>
-    <input id="username" placeholder="Enter your username" />
-
-    <label>Password</label>
-    <input id="password" type="password" placeholder="Enter your password" />
-
-    <label>👇 Your Question</label>
-    <textarea id="question" placeholder="Type your question here..."></textarea>
-
-    <button id="sendBtn" type="button">Send</button>
-
-    <div id="result"></div>
-
-    <div class="muted">
-      Your username and password are saved on this device for convenience.
-    </div>
-  </div>
-
-  <script>
-    // Production Webhook URL
-    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/ask-question";
-
-    const usernameEl = document.getElementById("username");
-    const passwordEl = document.getElementById("password");
-    const questionEl = document.getElementById("question");
-    const resultEl   = document.getElementById("result");
-    const sendBtn    = document.getElementById("sendBtn");
-
-    // Load saved credentials
-    window.onload = () => {
-      const savedUsername = localStorage.getItem("student_username");
-      const savedPassword = localStorage.getItem("student_password");
-
-      if (savedUsername) usernameEl.value = savedUsername;
-      if (savedPassword) passwordEl.value = savedPassword;
-    };
-
-    async function sendQuestion() {
-      const username = (usernameEl.value || "").trim();
-      const password = (passwordEl.value || "").trim();
-      const question = (questionEl.value || "").trim();
-
-      resultEl.innerText = "⏳ Sending your question...";
-
-      if (!username || !password || !question) {
-        resultEl.innerText = "❌ Please fill in all fields";
-        return;
-      }
-
-      // Save credentials locally
-      localStorage.setItem("student_username", username);
-      localStorage.setItem("student_password", password);
-
-      sendBtn.disabled = true;
-
-      try {
-        const res = await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: username,
-            password: password,
-            question: question
-          })
-        });
-
-        const text = await res.text();
-
-        if (!text || !text.trim()) {
-          resultEl.innerText = "⚠️ No response received from the system";
-        } else {
-          resultEl.innerHTML = text.replace(/\n/g, "<br>");
-        }
-      } catch (err) {
-        resultEl.innerText = "❌ Connection error. Please try again.";
-      } finally {
-        sendBtn.disabled = false;
-      }
-    }
-
-    // Button click
-    sendBtn.addEventListener("click", sendQuestion);
-
-    // Ctrl + Enter to send
-    questionEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-        sendQuestion();
-      }
-    });
-  </script>
-</body>
-</html>
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 60
