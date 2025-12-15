@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>اسأل مستر حاروني</title>
+</head>
+
+<body style="font-family:Arial; background:#f5f5f5;">
+
+<div style="max-width:600px;margin:50px auto;background:#fff;padding:20px;border-radius:10px;">
+  <h2>اكتب سؤالك 👇</h2>
+
+  <textarea id="question" style="width:100%;height:120px;font-size:16px;"></textarea><br><br>
+
+  <button onclick="sendQuestion()" style="padding:10px 20px;font-size:16px;">
+    إرسال
+  </button>
+
+  <p id="result" style="margin-top:15px;color:green;"></p>
+</div>
+
+<script>
+function sendQuestion() {
+  var q = document.getElementById("question").value;
+  if (!q) {
+    alert("اكتب السؤال الأول");
+    return;
+  }
+
+  fetch("https://n8n.sciencetoonz.com/webhook-test/ask-question", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ question: q })
+  })
+  .then(() => {
+    document.getElementById("result").innerText =
+      "تم إرسال سؤالك بنجاح ✅";
+  })
+  .catch(() => {
+    document.getElementById("result").innerText =
+      "حصل خطأ ❌ حاول مرة تانية";
+  });
+}
+</script>
+
+</body>
+</html>
