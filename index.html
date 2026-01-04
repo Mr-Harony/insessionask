@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-/* ===== Colors ===== */
 :root {
   --bg: #f5f7ff;
   --card: #ffffff;
@@ -110,7 +109,6 @@ button {
   cursor: pointer;
 }
 
-/* shine */
 button::after {
   content: "";
   position: absolute;
@@ -132,11 +130,6 @@ button:hover::after {
   animation: sweep 0.8s ease-in-out;
 }
 
-button:active {
-  transform: scale(0.97);
-}
-
-/* ===== Disabled + Loading ===== */
 button.loading {
   background: linear-gradient(135deg, #9aa0b8, #7d839c);
   cursor: not-allowed;
@@ -147,7 +140,6 @@ button.loading::after {
   display: none;
 }
 
-/* spinner */
 button.loading::before {
   content: "";
   position: absolute;
@@ -180,7 +172,6 @@ button.loading::before {
   white-space: pre-wrap;
 }
 
-/* ===== Footer ===== */
 .footer {
   margin-top: 18px;
   font-size: 12px;
@@ -205,6 +196,10 @@ button.loading::before {
   <label>Password</label>
   <input id="password" type="password" autocomplete="current-password">
 
+  <!-- ✅ الخانة الجديدة -->
+  <label>Part of the lesson</label>
+  <input id="lessonPart" placeholder="e.g. Newton’s laws – Question 3">
+
   <label>Your Question</label>
   <textarea id="question" placeholder="Type your question here..."></textarea>
 
@@ -221,15 +216,17 @@ button.loading::before {
 <script>
 const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/ask-question";
 
-const usernameEl = document.getElementById("username");
-const passwordEl = document.getElementById("password");
-const questionEl = document.getElementById("question");
-const answerEl   = document.getElementById("answer");
-const sendBtn    = document.getElementById("sendBtn");
+const usernameEl   = document.getElementById("username");
+const passwordEl   = document.getElementById("password");
+const lessonPartEl = document.getElementById("lessonPart");
+const questionEl   = document.getElementById("question");
+const answerEl     = document.getElementById("answer");
+const sendBtn      = document.getElementById("sendBtn");
 
-/* Load saved credentials */
-usernameEl.value = localStorage.getItem("student_username") || "";
-passwordEl.value = localStorage.getItem("student_password") || "";
+/* Load saved data */
+usernameEl.value   = localStorage.getItem("student_username") || "";
+passwordEl.value   = localStorage.getItem("student_password") || "";
+lessonPartEl.value = localStorage.getItem("lesson_part") || "";
 
 /* Theme */
 if (localStorage.getItem("theme") === "dark") {
@@ -250,15 +247,17 @@ sendBtn.addEventListener("click", async () => {
 
   const u = usernameEl.value.trim();
   const p = passwordEl.value.trim();
+  const l = lessonPartEl.value.trim();
   const q = questionEl.value.trim();
 
   if (!u || !p || !q) {
-    answerEl.innerText = "❌ Please fill all fields";
+    answerEl.innerText = "❌ Please fill all required fields";
     return;
   }
 
   localStorage.setItem("student_username", u);
   localStorage.setItem("student_password", p);
+  localStorage.setItem("lesson_part", l);
 
   sendBtn.disabled = true;
   sendBtn.classList.add("loading");
@@ -269,7 +268,12 @@ sendBtn.addEventListener("click", async () => {
     const res = await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: u, password: p, question: q })
+      body: JSON.stringify({
+        username: u,
+        password: p,
+        lesson_part: l,
+        question: q
+      })
     });
 
     const text = await res.text();
