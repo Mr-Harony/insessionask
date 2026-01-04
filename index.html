@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-/* ===== Color Variables ===== */
 :root {
   --bg: #f5f7ff;
   --card: #ffffff;
@@ -17,7 +16,6 @@
   --border: #ccc;
 }
 
-/* ===== Dark mode ===== */
 body.dark {
   --bg: #0f1220;
   --card: #171a2b;
@@ -32,11 +30,6 @@ body.dark {
   box-sizing: border-box;
 }
 
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-}
-
 body {
   margin: 0;
   min-height: 100vh;
@@ -47,10 +40,8 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--text);
-  transition: background 0.3s, color 0.3s;
 }
 
-/* ===== Card ===== */
 .card {
   width: min(720px, 100%);
   padding: 32px;
@@ -61,7 +52,6 @@ body {
     0 10px 20px rgba(0,0,0,0.08);
 }
 
-/* ===== Header ===== */
 .header {
   display: flex;
   justify-content: space-between;
@@ -78,10 +68,8 @@ body {
   cursor: pointer;
   font-size: 14px;
   color: var(--primary);
-  user-select: none;
 }
 
-/* ===== Form ===== */
 label {
   font-weight: bold;
   margin-top: 16px;
@@ -104,35 +92,22 @@ textarea {
   resize: vertical;
 }
 
-input:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-/* ===== Button (3D effect محفوظ 👌) ===== */
 button {
   position: relative;
   overflow: hidden;
-
   margin-top: 22px;
   margin-bottom: 40px;
   width: 100%;
   padding: 14px;
-
   border: none;
   border-radius: 12px;
-
   background: linear-gradient(135deg, #4f6df5, #6a82ff);
   color: #fff;
-
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-
-  box-shadow: none;
 }
 
-/* ✨ اللمعة اللي بتمشي بعرض الزر */
 button::after {
   content: "";
   position: absolute;
@@ -140,38 +115,40 @@ button::after {
   left: -40%;
   width: 40%;
   height: 100%;
-
   background: linear-gradient(
     120deg,
     transparent,
     rgba(255,255,255,0.75),
     transparent
   );
-
   opacity: 0;
 }
 
-/* عند مرور الماوس */
 button:hover::after {
   opacity: 1;
   animation: sweep 0.8s ease-in-out;
 }
 
-/* ضغط */
 button:active {
   transform: scale(0.97);
 }
 
-/* الحركة */
-@keyframes sweep {
-  from {
-    left: -40%;
-  }
-  to {
-    left: 100%;
-  }
+/* 🔒 شكل الزرار وهو Disabled */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
-/* ===== Answer ===== */
+
+button:disabled::after {
+  display: none;
+}
+
+@keyframes sweep {
+  from { left: -40%; }
+  to { left: 100%; }
+}
+
 #answer {
   background: var(--answer-bg);
   padding: 16px;
@@ -180,7 +157,6 @@ button:active {
   white-space: pre-wrap;
 }
 
-/* ===== Footer ===== */
 .footer {
   margin-top: 18px;
   font-size: 12px;
@@ -209,9 +185,6 @@ button:active {
   <textarea id="question" placeholder="Type your question here..."></textarea>
 
   <button id="sendBtn">Ask Mr. Harony</button>
-
-  <!-- ⭐ المسافة السحرية -->
-  <div class="button-space"></div>
 
   <div id="answer"></div>
 
@@ -249,6 +222,8 @@ function toggleTheme() {
 
 /* Send Question */
 sendBtn.addEventListener("click", async () => {
+  if (sendBtn.disabled) return; // 🔒 حماية إضافية
+
   const u = usernameEl.value.trim();
   const p = passwordEl.value.trim();
   const q = questionEl.value.trim();
@@ -261,8 +236,10 @@ sendBtn.addEventListener("click", async () => {
   localStorage.setItem("student_username", u);
   localStorage.setItem("student_password", p);
 
-  answerEl.innerText = "⏳ Thinking...";
+  // 🔒 اقفل الزرار فورًا
   sendBtn.disabled = true;
+  sendBtn.innerText = "⏳ Waiting for answer...";
+  answerEl.innerText = "⏳ Thinking...";
 
   try {
     const res = await fetch(WEBHOOK_URL, {
@@ -272,16 +249,19 @@ sendBtn.addEventListener("click", async () => {
     });
 
     const text = await res.text();
-    const formatted = text
-  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-  .replace(/\*(.*?)\*/g, "<strong>$1</strong>");
 
-answerEl.innerHTML = formatted || "⚠️ Empty response";
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<strong>$1</strong>");
+
+    answerEl.innerHTML = formatted || "⚠️ Empty response";
 
   } catch {
     answerEl.innerText = "❌ Connection error";
   } finally {
+    // 🔓 افتح الزرار تاني
     sendBtn.disabled = false;
+    sendBtn.innerText = "Ask Mr. Harony";
   }
 });
 </script>
