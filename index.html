@@ -247,7 +247,6 @@ const sendBtn      = document.getElementById("sendBtn");
 /* Load saved */
 usernameEl.value   = localStorage.getItem("student_username") || "";
 passwordEl.value   = localStorage.getItem("student_password") || "";
-lessonPartEl.value = localStorage.getItem("lesson_part") || "";
 
 /* Theme */
 if (localStorage.getItem("theme") === "dark") {
@@ -302,13 +301,18 @@ sendBtn.addEventListener("click", async () => {
 
   } catch {
     answerEl.innerText = "❌ Connection error";
-  } finally {
-    sendBtn.disabled = false;
-    sendBtn.classList.remove("loading");
-    sendBtn.innerHTML = "<span>Ask Mr. Harony</span>";
-  }
+} finally {
+  sendBtn.disabled = false;
+  sendBtn.classList.remove("loading");
+  sendBtn.innerHTML = "<span>Ask Mr. Harony</span>";
+
+  // ✅ مسح Part of the lesson بعد الإرسال
+  lessonPartEl.value = "";
+}
+
 });
 </script>
 
 </body>
 </html>
+
