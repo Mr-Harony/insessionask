@@ -277,10 +277,15 @@ sendBtn.addEventListener("click", async () => {
   const l = lessonPartEl.value.trim();
   const q = questionEl.value.trim();
 
-  if (!u || !p || !l || !q) {
-    answerEl.innerText = "❌ Please fill all required fields";
-    return;
-  }
+  if (!l) {
+  answerEl.innerText = "❌ Please specify the part of the lesson before asking your question.";
+  return;
+}
+
+if (!u || !p || !q) {
+  answerEl.innerText = "❌ Please fill all required fields";
+  return;
+}
 
   localStorage.setItem("student_username", u);
   localStorage.setItem("student_password", p);
@@ -326,6 +331,7 @@ answerEl.innerHTML = formatted || "⚠️ Empty response";
 
 </body>
 </html>
+
 
 
 
