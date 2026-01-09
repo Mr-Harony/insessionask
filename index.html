@@ -277,7 +277,7 @@ sendBtn.addEventListener("click", async () => {
   const l = lessonPartEl.value.trim();
   const q = questionEl.value.trim();
 
-  if (!u || !p || !q) {
+  if (!u || !p || !l || !q) {
     answerEl.innerText = "❌ Please fill all required fields";
     return;
   }
@@ -326,6 +326,7 @@ answerEl.innerHTML = formatted || "⚠️ Empty response";
 
 </body>
 </html>
+
 
 
 
