@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Session 01 - Sciencetoonz</title>
+    <style>
+        /* تنسيق الألوان الأساسية والخلفية الداكنة */
+        body {
+            background-color: #1e2230;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #111420;
+            width: 100%;
+            max-width: 700px;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* الهيدر والعنوان */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .theme-badge {
+            color: #ffb703;
+            font-size: 14px;
+        }
+
+        /* 📺 مربع فيديو اليوتيوب المتجاوب */
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* نسبة 16:9 للحفاظ على أبعاد الفيديو */
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* تنسيق حقول المدخلات */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #181c2e;
+            border: 1px solid #272d4a;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: #5865f2;
+            outline: none;
+        }
+
+        /* الزرار الأزرق */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #5865f2;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4752c4;
+        }
+
+        button:disabled {
+            background-color: #3c4270;
+            cursor: not-allowed;
+        }
+
+        /* صندوق الإجابة */
+        .response-container {
+            background-color: #1c2035;
+            border-left: 4px solid #5865f2;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 25px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* الفوتر */
+        .footer {
+            text-align: center;
+            color: #545d82;
+            font-size: 12px;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- العنوان الرئيسي -->
+        <div class="header">
+            <h1>Ask Mr. Harony</h1>
+            <span class="theme-badge">🌙 Dark mode</span>
+        </div>
+
+        <!-- 📺 مربع فيديو يوتيوب المتجاوب -->
+        <div class="video-wrapper">
+            <iframe 
+                id="lesson-video"
+                src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <!-- 📝 فورم إرسال الأسئلة للـ Webhook -->
+        <form id="qa-form">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="email" id="username" placeholder="JamesBond@gmail.com" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••••••" required>
+            </div>
+
+            <div class="input-group">
+                <label for="lesson-part">Part of the lesson</label>
+                <input type="text" id="lesson-part" placeholder="e.g. Part 1 or Q 03-b" required>
+            </div>
+
+            <div class="input-group">
+                <label for="question">Your Question</label>
+                <textarea id="question" rows="5" placeholder="Type your question here regarding the lesson part..." required></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn">Ask Mr. Harony</button>
+        </form>
+
+        <!-- صندوق ظهور إجابة الـ AI للطالب مباشرة هنا -->
+        <div id="response-box" class="response-container hidden">
+            <h3>🤖 Assistant Response:</h3>
+            <div id="ai-output"></div>
+        </div>
+
+        <div class="footer">
+            Secure academic assistant • Mr. Harony
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('qa-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const responseBox = document.getElementById('response-box');
+            const aiOutput = document.getElementById('ai-output');
+            
+            btn.innerText = "Processing your question... ⏳";
+            btn.disabled = true;
+
+            const payload = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                lesson_part: document.getElementById('lesson-part').value,
+                question: document.getElementById('question').value
+            };
+
+            try {
+                // ضع رابط الـ Webhook الخاص بـ n8n هنا
+                const webhookUrl = 'رابط_الـ_Webhook_بتاعك_هنا'; 
+                
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                
+                responseBox.classList.remove('hidden');
+                aiOutput.innerText = data.output || "Question processed!";
+            } catch (error) {
+                alert('Something went wrong, please try again.');
+            } finally {
+                btn.innerText = "Ask Mr. Harony";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
