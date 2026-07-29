@@ -9,22 +9,26 @@
 /* ===== Colors ===== */
 :root {
   --bg: #f5f7ff;
-  --card: #808080;
+  --card: #ffffff;
   --text: #111;
   --muted: #666;
   --primary: #4f6df5;
   --answer-bg: #f4f6ff;
   --border: #ccc;
+  --btn-bg: linear-gradient(135deg, #4f6df5, #6a82ff);
+  --card-border: transparent;
 }
 
 body.dark {
   --bg: #0f1220;
-  --card: #808080;
+  --card: #2a2d34; /* جراي غامق للمربع الداخلي في الدارك مود فقط */
   --text: #f1f1f1;
   --muted: #aaa;
-  --primary: #6a82ff;
-  --answer-bg: #1f2550;
-  --border: #2d335a;
+  --primary: #8a99ad;
+  --answer-bg: #1c1e24; /* درجة جراي متناسقة لمربع التفكير والإجابة */
+  --border: #000000; /* أوت لاين أسود للحقول */
+  --btn-bg: linear-gradient(135deg, #3d414d, #525765); /* زرار من درجات الجراي */
+  --card-border: #000000; /* أوت لاين أسود للمربع الداخلي */
 }
 
 * { box-sizing: border-box; }
@@ -46,6 +50,7 @@ body {
   padding: 32px;
   background: var(--card);
   border-radius: 18px;
+  border: 1px solid var(--card-border);
   box-shadow:
     0 25px 60px rgba(0,0,0,0.15),
     0 10px 20px rgba(0,0,0,0.08);
@@ -78,6 +83,7 @@ body {
   overflow: hidden;
   border-radius: 12px;
   margin-bottom: 22px;
+  border: 1px solid var(--border);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -131,9 +137,9 @@ button {
   margin-bottom: 30px;
   width: 100%;
   padding: 14px;
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: linear-gradient(135deg, #4f6df5, #6a82ff);
+  background: var(--btn-bg);
   color: #fff;
   font-size: 16px;
   font-weight: bold;
@@ -236,6 +242,7 @@ button.loading span::after {
   background: var(--answer-bg);
   padding: 16px;
   border-radius: 12px;
+  border: 1px solid var(--border);
   line-height: 1.7;
   white-space: pre-wrap;
 }
