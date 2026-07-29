@@ -90,6 +90,16 @@ body {
   border: 0;
 }
 
+/* ===== Form Row (Username & Password side by side) ===== */
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-group {
+  flex: 1;
+}
+
 /* ===== Form ===== */
 label {
   font-weight: bold;
@@ -259,11 +269,17 @@ button.loading span::after {
     </iframe>
   </div>
 
-  <label>Username</label>
-  <input id="username">
-
-  <label>Password</label>
-  <input id="password" type="password">
+  <!-- Credentials Row -->
+  <div class="form-row">
+    <div class="form-group">
+      <label>Username</label>
+      <input id="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input id="password" type="password">
+    </div>
+  </div>
 
   <label>Part of the lesson</label>
   <input id="lessonPart" placeholder="e.g. Part 1 or Q 03-b">
@@ -282,7 +298,7 @@ button.loading span::after {
 </div>
 
 <script>
-const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/Nsession-sat";
+const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/ask-question";
 
 const usernameEl   = document.getElementById("username");
 const passwordEl   = document.getElementById("password");
