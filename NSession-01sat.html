@@ -60,9 +60,26 @@ body {
   margin-bottom: 22px;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .header h1 {
   margin: 0;
   font-size: 26px;
+}
+
+/* ===== Badge ===== */
+.session-badge {
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
 }
 
 .toggle {
@@ -258,7 +275,10 @@ button.loading span::after {
 <div class="card">
 
   <div class="header">
-    <h1>Ask Mr. Harony</h1>
+    <div class="header-left">
+      <h1>Ask Mr. Harony</h1>
+      <span class="session-badge">Saturday Session</span>
+    </div>
     <div class="toggle" onclick="toggleTheme()">🌙 Dark mode</div>
   </div>
 
