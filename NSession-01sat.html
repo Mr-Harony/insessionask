@@ -14,17 +14,17 @@
   --muted: #666;
   --primary: #4f6df5;
   --answer-bg: #f4f6ff;
-  --border: #ccc;
+  --border: #000000; /* توحيد الأوت لاين باللون الأسود */
 }
 
 body.dark {
   --bg: #0f1220;
-  --card: #2b2e38; /* رمادي للمربع الداخلي في الدارك مود فقط */
+  --card: #2b2e38;
   --text: #f1f1f1;
   --muted: #aaa;
   --primary: #6a82ff;
   --answer-bg: #1f2550;
-  --border: #2d335a;
+  --border: #000000; /* توحيد الأوت لاين باللون الأسود */
 }
 
 * { box-sizing: border-box; }
@@ -46,6 +46,7 @@ body {
   padding: 32px;
   background: var(--card);
   border-radius: 18px;
+  border: 1px solid var(--border); /* أوت لاين أسود للمربع الرئيسي */
   box-shadow:
     0 25px 60px rgba(0,0,0,0.15),
     0 10px 20px rgba(0,0,0,0.08);
@@ -78,6 +79,7 @@ body {
   overflow: hidden;
   border-radius: 12px;
   margin-bottom: 22px;
+  border: 1px solid var(--border); /* أوت لاين أسود لمربع الفيديو */
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -112,7 +114,7 @@ input, textarea {
   padding: 12px;
   margin-top: 6px;
   border-radius: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border); /* أوت لاين أسود لحقول الإدخال */
   background: transparent;
   color: var(--text);
   font-size: 15px;
@@ -131,7 +133,7 @@ button {
   margin-bottom: 30px;
   width: 100%;
   padding: 14px;
-  border: none;
+  border: 1px solid var(--border); /* أوت لاين أسود للزر */
   border-radius: 12px;
   background: linear-gradient(135deg, #4f6df5, #6a82ff);
   color: #fff;
@@ -236,6 +238,7 @@ button.loading span::after {
   background: var(--answer-bg);
   padding: 16px;
   border-radius: 12px;
+  border: 1px solid var(--border); /* أوت لاين أسود لمربع الإجابة */
   line-height: 1.7;
   white-space: pre-wrap;
 }
