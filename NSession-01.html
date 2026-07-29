@@ -7,18 +7,23 @@
     <style>
         /* تعريف الألوان كمتغيرات لسهولة التحويل */
         :root {
-            --bg-body: #1e2230;
-            --bg-container: #111420;
-            --bg-input: #181c2e;
-            --border-input: #272d4a;
+            /* خلفية الموقع: رمادي فاتح مدرج */
+            --bg-body: linear-gradient(135deg, #e2e8f0, #ffffff);
+            
+            /* الجزء الأوسط (كارت الصفحة): لون نبيتي غامق ورصين */
+            --bg-container: #4a0e17;
+            
+            /* ألوان حقول المدخلات والنصوص */
+            --bg-input: #380a11;
+            --border-input: #6e1824;
             --text-main: #ffffff;
-            --text-footer: #545d82;
-            --bg-response: #1c2035;
+            --text-footer: #d8b4bc;
+            --bg-response: #2d070d;
         }
 
         /* ألوان المود الفاتح (Light Mode) */
         [data-theme="light"] {
-            --bg-body: #f0f2f5;
+            --bg-body: linear-gradient(135deg, #f0f2f5, #ffffff);
             --bg-container: #ffffff;
             --bg-input: #f8f9fa;
             --border-input: #ced4da;
@@ -29,7 +34,8 @@
 
         /* تنسيق الألوان الأساسية والخلفية */
         body {
-            background-color: var(--bg-body);
+            background: var(--bg-body);
+            background-attachment: fixed;
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
@@ -39,7 +45,7 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background 0.3s, color 0.3s;
         }
 
         .container {
@@ -48,7 +54,7 @@
             max-width: 700px;
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             transition: background-color 0.3s;
         }
 
@@ -75,7 +81,7 @@
             border-radius: 20px;
             font-size: 14px;
             cursor: pointer;
-            width: auto; /* إلغاء خاصية الـ 100% للزرار ده */
+            width: auto;
             font-weight: normal;
             transition: background-color 0.3s;
         }
@@ -92,7 +98,7 @@
             overflow: hidden;
             border-radius: 10px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .video-wrapper iframe {
@@ -140,15 +146,15 @@
         }
 
         .input-group input:focus, .input-group textarea:focus {
-            border-color: #5865f2;
+            border-color: #a32a3b;
             outline: none;
         }
 
-        /* الزرار الأزرق للإرسال */
+        /* الزرار للإرسال */
         .submit-btn {
             width: 100%;
             padding: 14px;
-            background-color: #5865f2;
+            background-color: #8b1e2d;
             border: none;
             border-radius: 8px;
             color: white;
@@ -159,18 +165,18 @@
         }
 
         .submit-btn:hover {
-            background-color: #4752c4;
+            background-color: #a32a3b;
         }
 
         .submit-btn:disabled {
-            background-color: #3c4270;
+            background-color: #5c1822;
             cursor: not-allowed;
         }
 
         /* صندوق الإجابة */
         .response-container {
             background-color: var(--bg-response);
-            border-left: 4px solid #5865f2;
+            border-left: 4px solid #a32a3b;
             padding: 15px;
             border-radius: 6px;
             margin-top: 25px;
