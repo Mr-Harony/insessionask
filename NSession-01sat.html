@@ -344,16 +344,31 @@
                     body: JSON.stringify(payload)
                 });
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`Server returned status: ${response.status}`);
+                }
+
+                // التعامل مع الرد سواء كان نص عادي أو JSON لتفادي خطأ الـ Parsing
+                const responseText = await response.text();
+                let finalOutput = "";
+
+                try {
+                    const data = JSON.parse(responseText);
+                    finalOutput = data.output || data.text || data.message || JSON.stringify(data);
+                } catch (parseError) {
+                    // إذا كان الرد نصاً عادياً
+                    finalOutput = responseText;
+                }
                 
                 responseBox.classList.remove('hidden');
-                aiOutput.innerText = data.output || "Question processed!";
+                aiOutput.innerText = finalOutput || "Question processed!";
 
                 // تفريغ خانة السؤال وجزء الدرس فقط مع الاحتفاظ بالبيانات الشخصية
                 questionInput.value = '';
                 lessonPartInput.value = '';
                 
             } catch (error) {
+                console.error("Submission error:", error);
                 alert('Something went wrong, please try again.');
             } finally {
                 btn.innerText = "Ask Mr. Harony";
