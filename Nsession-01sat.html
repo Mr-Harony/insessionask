@@ -88,7 +88,7 @@ body {
   color: var(--primary);
 }
 
-/* ===== Video (Fixed for iOS / Safari) ===== */
+/* ===== Video ===== */
 .video-wrapper {
   position: relative;
   padding-bottom: 56.25%;
@@ -98,8 +98,6 @@ body {
   margin-bottom: 22px;
   border: 1px solid var(--border);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  background: #000; /* خلفية سوداء تمنع المساحة البيضاء الفاضية في الآيفون */
-  -webkit-overflow-scrolling: touch;
 }
 
 .video-wrapper iframe {
@@ -284,12 +282,12 @@ button.loading span::after {
     <div class="toggle" onclick="toggleTheme()">🌙 Dark / Light</div>
   </div>
 
-  <!-- Video Player (Fixed for iOS / Safari) -->
+  <!-- Video Player -->
   <div class="video-wrapper">
     <iframe 
-      src="https://www.youtube.com/embed/VWeFiXSMM2c?playsinline=1&rel=0" 
+      src="https://www.youtube.com/embed/VWeFiXSMM2c" 
       title="YouTube video player" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
       allowfullscreen>
     </iframe>
   </div>
