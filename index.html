@@ -328,7 +328,15 @@ const formatted = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
 answerEl.innerHTML = formatted || "⚠️ Empty response";
 
-
+//  تحديد الاتجاه تلقائياً بناءً على لغة أول حرف في النص
+const firstChar = text.trim().replace(/^[^a-zA-Z\u0600-\u06FF]+/, '')[0];
+if (firstChar && /[\u0600-\u06FF]/.test(firstChar)) {
+  answerEl.setAttribute("dir", "rtl");
+  answerEl.style.textAlign = "right";
+} else {
+  answerEl.setAttribute("dir", "ltr");
+  answerEl.style.textAlign = "left";
+}
   } catch {
     answerEl.innerText = "❌ Connection error";
 } finally {
