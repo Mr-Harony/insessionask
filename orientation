@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ask Mr. Harony</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+/* ===== Colors ===== */
+:root {
+  --bg: #f5f7ff;
+  --card: #ffffff;
+  --text: #111;
+  --muted: #666;
+  --primary: #4f6df5;
+  --answer-bg: #f4f6ff;
+  --border: #1a2b4c; /* أوت لاين كحلي / أزرق غامق في اللايت مود */
+}
+
+body.dark {
+  --bg: #0f1220;
+  --card: #2b2e38;
+  --text: #f1f1f1;
+  --muted: #aaa;
+  --primary: #6a82ff;
+  --answer-bg: #1f2550;
+  --border: #ffffff; /* أوت لاين أبيض في الدارك مود */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 24px;
+  background: radial-gradient(circle at top, var(--bg), #e6ebf5);
+  font-family: "Segoe UI", Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.card {
+  width: min(720px, 100%);
+  padding: 32px;
+  background: var(--card);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.15),
+    0 10px 20px rgba(0,0,0,0.08);
+}
+
+/* ===== Header ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+/* ===== Badge ===== */
+.session-badge {
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.toggle {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--primary);
+}
+
+/* ===== Video ===== */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 22px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ===== Form Row (Username & Password side by side) ===== */
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+/* ===== Form ===== */
+label {
+  font-weight: bold;
+  margin-top: 16px;
+  display: block;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* ===== Button ===== */
+button {
+  position: relative;
+  overflow: hidden;
+  margin-top: 22px;
+  margin-bottom: 30px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f6df5, #6a82ff);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* shine */
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.75),
+    transparent
+  );
+  opacity: 0;
+}
+
+button:hover::after {
+  opacity: 1;
+  animation: sweep 0.8s ease-in-out;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ===== Loading State ===== */
+button.loading {
+  background: linear-gradient(135deg, #9aa0b8, #7d839c);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+button.loading::after {
+  display: none;
+}
+
+/* Spinner */
+button.loading::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: spin 0.8s linear infinite;
+}
+
+/* dots animation */
+@keyframes dots {
+  0%    { content: ""; }
+  5%    { content: "."; }
+  10%   { content: ".."; }
+  15%   { content: "..."; }
+  20%   { content: "...."; }
+  25%   { content: "....."; }
+  30%   { content: "......"; }
+  35%   { content: "......."; }
+  40%   { content: "........"; }
+  45%   { content: "........."; }
+  50%   { content: ".........."; }
+  55%   { content: "..........."; }
+  60%   { content: "............"; }
+  65%   { content: "............."; }
+  70%   { content: ".............."; }
+  75%   { content: "..............."; }
+  80%   { content: "................"; }
+  85%   { content: "................."; }
+  90%   { content: ".................."; }
+  95%   { content: "..................."; }
+  100%  { content: "...................."; }
+}
+
+button.loading span::after {
+  content: "";
+  animation: dots 5.0s infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg) translateY(-50%); }
+}
+
+@keyframes sweep {
+  from { left: -40%; }
+  to { left: 100%; }
+}
+
+/* ===== Answer ===== */
+#answer {
+  background: var(--answer-bg);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+/* ===== Footer ===== */
+.footer {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Ask Mr. Harony</h1>
+      <span class="session-badge">Orientation Recording</span>
+    </div>
+    <div class="toggle" onclick="toggleTheme()">🌙 Dark / Light</div>
+  </div>
+
+  <!-- Video Player -->
+  <div class="video-wrapper">
+    <iframe 
+      src="https://www.youtube.com/embed/K14fCyc2lT8" 
+      title="YouTube video player" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <!-- Credentials Row -->
+  <div class="form-row">
+    <div class="form-group">
+      <label>Username</label>
+      <input id="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input id="password" type="password">
+    </div>
+  </div>
+
+  <label>Part of the lesson</label>
+  <input id="lessonPart" placeholder="e.g. Part 1 or Q 03-b">
+
+  <label>Your Question</label>
+  <textarea id="question"></textarea>
+
+  <button id="sendBtn"><span>Ask Mr. Harony</span></button>
+
+  <div id="answer"></div>
+
+  <div class="footer">
+    Secure academic assistant • Mr. Harony
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/orientation";
+
+const usernameEl   = document.getElementById("username");
+const passwordEl   = document.getElementById("password");
+const lessonPartEl = document.getElementById("lessonPart");
+const questionEl   = document.getElementById("question");
+const answerEl     = document.getElementById("answer");
+const sendBtn      = document.getElementById("sendBtn");
+
+/* Load saved */
+usernameEl.value   = localStorage.getItem("student_username") || "";
+passwordEl.value   = localStorage.getItem("student_password") || "";
+
+/* Theme */
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+}
+
+function toggleTheme() {
+  document.body.classList.toggle("dark");
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+}
+
+/* Send */
+sendBtn.addEventListener("click", async () => {
+  if (sendBtn.disabled) return;
+
+  const u = usernameEl.value.trim();
+  const p = passwordEl.value.trim();
+  const l = lessonPartEl.value.trim();
+  const q = questionEl.value.trim();
+
+  if (!l) {
+  answerEl.innerText = "❌ Please specify the part of the lesson before asking your question.";
+  return;
+}
+
+if (!u || !p || !q) {
+  answerEl.innerText = "❌ Please fill all required fields";
+  return;
+}
+
+  localStorage.setItem("student_username", u);
+  localStorage.setItem("student_password", p);
+  localStorage.setItem("lesson_part", l);
+
+  sendBtn.disabled = true;
+  sendBtn.classList.add("loading");
+  sendBtn.innerHTML = "<span>Waiting for Mr. Harony reply</span>";
+  answerEl.innerText = "⏳ Thinking...";
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: u,
+        password: p,
+        lesson_part: l,
+        question: q
+      })
+    });
+
+const text = await res.text();
+
+const formatted = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+answerEl.innerHTML = formatted || "⚠️ Empty response";
+
+
+  } catch {
+    answerEl.innerText = "❌ Connection error";
+} finally {
+  sendBtn.disabled = false;
+  sendBtn.classList.remove("loading");
+  sendBtn.innerHTML = "<span>Ask Mr. Harony</span>";
+
+  // ✅ مسح Part of the lesson بعد الإرسال
+  lessonPartEl.value = "";
+}
+
+});
+</script>
+
+</body>
+</html>
