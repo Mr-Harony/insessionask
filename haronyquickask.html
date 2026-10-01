@@ -487,7 +487,7 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const maxDim = 1200;
+          const maxDim = 1800;
 
           if (width > maxDim || height > maxDim) {
             if (width > height) {
@@ -504,7 +504,7 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          const base64 = canvas.toDataURL('image/jpeg', 0.7);
+          const base64 = canvas.toDataURL('image/jpeg', 0.8);
           images[slot] = base64;
 
           document.getElementById(`img-${slot}`).src = base64;
