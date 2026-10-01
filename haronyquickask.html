@@ -14,9 +14,9 @@
       --text-muted: #8c93b0;
       --primary: #4f6ef7;
       --primary-hover: #3d5be0;
-      --btn-file: #3d7bf7;
       --danger: #ef4444;
       --box-empty: #232738;
+      --slot-focus: #4f6ef7;
     }
 
     body.light-theme {
@@ -28,16 +28,16 @@
       --text-muted: #6b7280;
       --primary: #3b82f6;
       --primary-hover: #2563eb;
-      --btn-file: #2563eb;
       --danger: #dc2626;
-      --box-empty: #e5e7eb;
+      --box-empty: #f1f5f9;
+      --slot-focus: #3b82f6;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -129,69 +129,60 @@
 
     .slot-card {
       background-color: var(--box-empty);
-      border: 1px dashed var(--border-color);
+      border: 2px dashed var(--border-color);
       border-radius: 10px;
-      padding: 8px;
+      padding: 10px 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 140px;
+      min-height: 145px;
       position: relative;
       text-align: center;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .slot-card:focus {
+      border-color: var(--slot-focus);
+      background-color: rgba(79, 110, 247, 0.08);
+      box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.2);
+    }
+
+    .slot-card.drag-over {
+      border-color: var(--primary);
+      background-color: rgba(79, 110, 247, 0.15);
     }
 
     .slot-card.has-image {
       border-style: solid;
       border-color: var(--border-color);
       background-color: var(--input-bg);
+      cursor: default;
     }
 
     .slot-title {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 6px;
-      font-weight: 600;
+      margin-bottom: 4px;
     }
 
-    .slot-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
+    .slot-instructions {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+      pointer-events: none;
     }
 
-    .slot-btn {
-      width: 100%;
-      padding: 5px 0;
-      font-size: 0.75rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      font-weight: 500;
-    }
-
-    .btn-file {
-      background-color: var(--btn-file);
-      color: #fff;
-    }
-
-    .btn-paste {
-      background-color: var(--border-color);
-      color: var(--text-main);
-    }
-
-    .btn-paste:hover {
-      background-color: #4b5270;
+    .slot-instructions b {
+      color: var(--primary);
     }
 
     .preview-box {
       width: 100%;
-      height: 95px;
+      height: 110px;
       display: none;
       flex-direction: column;
       align-items: center;
@@ -200,7 +191,7 @@
 
     .preview-box img {
       max-width: 100%;
-      max-height: 75px;
+      max-height: 85px;
       border-radius: 6px;
       object-fit: contain;
     }
@@ -211,8 +202,37 @@
       color: var(--danger);
       font-size: 0.75rem;
       cursor: pointer;
-      margin-top: 4px;
+      margin-top: 6px;
       font-weight: 600;
+    }
+
+    /* Custom Right-Click Context Menu */
+    .custom-menu {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+      padding: 5px;
+      min-width: 140px;
+    }
+
+    .custom-menu-item {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 6px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .custom-menu-item:hover {
+      background-color: var(--primary);
+      color: #fff;
     }
 
     /* Submit Button */
@@ -278,48 +298,45 @@
       </div>
     </div>
 
-    <label>Attach Images (Up to 3 photos)</label>
+    <label>Attach Images (Click, Ctrl+V or Right-Click to Paste)</label>
     <div class="slots-container">
       
       <!-- Slot 1 -->
-      <div class="slot-card" id="slot-card-1">
+      <div class="slot-card" id="slot-card-1" tabindex="0" data-slot="1">
         <span class="slot-title">Photo 1</span>
-        <div class="slot-actions" id="actions-1">
-          <input type="file" id="file-1" accept="image/*" style="display:none;">
-          <button type="button" class="slot-btn btn-file" onclick="document.getElementById('file-1').click()">📁 Camera / File</button>
-          <button type="button" class="slot-btn btn-paste" onclick="pasteToSlot(1)">📋 Paste</button>
+        <div class="slot-instructions" id="info-1">
+          Click to browse<br>or <b>Ctrl+V</b><br>or Right-click
         </div>
+        <input type="file" id="file-1" accept="image/*" style="display:none;">
         <div class="preview-box" id="preview-1">
           <img id="img-1" src="" alt="Photo 1">
-          <button type="button" class="btn-remove" onclick="removeSlot(1)">✖ Remove</button>
+          <button type="button" class="btn-remove" onclick="removeSlot(1, event)">✖ Remove</button>
         </div>
       </div>
 
       <!-- Slot 2 -->
-      <div class="slot-card" id="slot-card-2">
+      <div class="slot-card" id="slot-card-2" tabindex="0" data-slot="2">
         <span class="slot-title">Photo 2</span>
-        <div class="slot-actions" id="actions-2">
-          <input type="file" id="file-2" accept="image/*" style="display:none;">
-          <button type="button" class="slot-btn btn-file" onclick="document.getElementById('file-2').click()">📁 Camera / File</button>
-          <button type="button" class="slot-btn btn-paste" onclick="pasteToSlot(2)">📋 Paste</button>
+        <div class="slot-instructions" id="info-2">
+          Click to browse<br>or <b>Ctrl+V</b><br>or Right-click
         </div>
+        <input type="file" id="file-2" accept="image/*" style="display:none;">
         <div class="preview-box" id="preview-2">
           <img id="img-2" src="" alt="Photo 2">
-          <button type="button" class="btn-remove" onclick="removeSlot(2)">✖ Remove</button>
+          <button type="button" class="btn-remove" onclick="removeSlot(2, event)">✖ Remove</button>
         </div>
       </div>
 
       <!-- Slot 3 -->
-      <div class="slot-card" id="slot-card-3">
+      <div class="slot-card" id="slot-card-3" tabindex="0" data-slot="3">
         <span class="slot-title">Photo 3</span>
-        <div class="slot-actions" id="actions-3">
-          <input type="file" id="file-3" accept="image/*" style="display:none;">
-          <button type="button" class="slot-btn btn-file" onclick="document.getElementById('file-3').click()">📁 Camera / File</button>
-          <button type="button" class="slot-btn btn-paste" onclick="pasteToSlot(3)">📋 Paste</button>
+        <div class="slot-instructions" id="info-3">
+          Click to browse<br>or <b>Ctrl+V</b><br>or Right-click
         </div>
+        <input type="file" id="file-3" accept="image/*" style="display:none;">
         <div class="preview-box" id="preview-3">
           <img id="img-3" src="" alt="Photo 3">
-          <button type="button" class="btn-remove" onclick="removeSlot(3)">✖ Remove</button>
+          <button type="button" class="btn-remove" onclick="removeSlot(3, event)">✖ Remove</button>
         </div>
       </div>
 
@@ -337,45 +354,131 @@
     <div class="footer">Secure academic assistant • Mr. Harony</div>
   </div>
 
-  <script>
-    // ضع رابط الـ Webhook الخاص بك هنا
-    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickask";
+  <!-- Custom Context Menu for Right-Click -->
+  <div class="custom-menu" id="customMenu">
+    <div class="custom-menu-item" id="menuPaste">📋 Paste Image</div>
+    <div class="custom-menu-item" id="menuBrowse">📁 Choose File / Camera</div>
+  </div>
 
+  <script>
+    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickask";
     const images = { 1: null, 2: null, 3: null };
+    let activeMenuSlot = null;
 
     // Theme toggle
     document.getElementById('themeBtn').addEventListener('click', () => {
       document.body.classList.toggle('light-theme');
     });
 
-    // Setup file inputs
+    // Setup Slots interactions
     [1, 2, 3].forEach(slot => {
-      document.getElementById(`file-${slot}`).addEventListener('change', function(e) {
+      const card = document.getElementById(`slot-card-${slot}`);
+      const fileInput = document.getElementById(`file-${slot}`);
+
+      // 1. Click to browse (if no image present)
+      card.addEventListener('click', (e) => {
+        if (!images[slot] && !e.target.classList.contains('btn-remove')) {
+          fileInput.click();
+        }
+      });
+
+      // File input change
+      fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
           compressAndSaveImage(e.target.files[0], slot);
         }
       });
+
+      // 2. Direct Paste via Ctrl+V when card is focused
+      card.addEventListener('paste', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handlePasteData(e.clipboardData, slot);
+      });
+
+      // 3. Right-Click Context Menu
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        activeMenuSlot = slot;
+        const menu = document.getElementById('customMenu');
+        menu.style.display = 'block';
+        menu.style.left = `${e.clientX}px`;
+        menu.style.top = `${e.clientY}px`;
+      });
+
+      // 4. Drag & Drop
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        card.classList.add('drag-over');
+      });
+
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drag-over');
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          compressAndSaveImage(e.dataTransfer.files[0], slot);
+        }
+      });
     });
 
-    // Paste function for each specific slot
-    async function pasteToSlot(slot) {
+    // Close context menu on outside click
+    window.addEventListener('click', () => {
+      document.getElementById('customMenu').style.display = 'none';
+    });
+
+    // Context Menu: Paste click
+    document.getElementById('menuPaste').addEventListener('click', async () => {
+      if (!activeMenuSlot) return;
       try {
         const items = await navigator.clipboard.read();
         for (const item of items) {
           const imageType = item.types.find(type => type.startsWith('image/'));
           if (imageType) {
             const blob = await item.getType(imageType);
-            compressAndSaveImage(blob, slot);
+            compressAndSaveImage(blob, activeMenuSlot);
             return;
           }
         }
         alert("No image found in clipboard!");
       } catch (err) {
-        alert("Clipboard permission denied or not supported. Use Camera / File button instead.");
+        alert("Clipboard access denied. Please click the slot and press Ctrl+V directly.");
       }
+    });
+
+    // Context Menu: Browse click
+    document.getElementById('menuBrowse').addEventListener('click', () => {
+      if (activeMenuSlot) {
+        document.getElementById(`file-${activeMenuSlot}`).click();
+      }
+    });
+
+    // Process Paste Data
+    function handlePasteData(clipboardData, slot) {
+      if (!clipboardData || !clipboardData.items) return;
+      for (let i = 0; i < clipboardData.items.length; i++) {
+        if (clipboardData.items[i].type.indexOf('image') !== -1) {
+          const blob = clipboardData.items[i].getAsFile();
+          compressAndSaveImage(blob, slot);
+          return;
+        }
+      }
+      alert("No image found in clipboard!");
     }
 
-    // Compress & set preview
+    // Global Paste Fallback: pastes to first empty slot if outside textarea
+    window.addEventListener('paste', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+      const targetSlot = [1, 2, 3].find(s => !images[s]);
+      if (targetSlot) {
+        handlePasteData(e.clipboardData, targetSlot);
+      }
+    });
+
+    // Compress & Preview
     function compressAndSaveImage(file, slot) {
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -401,13 +504,11 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // تصغير الجودة لضمان سرعة نقل الـ Base64
           const base64 = canvas.toDataURL('image/jpeg', 0.7);
           images[slot] = base64;
 
-          // Update UI
           document.getElementById(`img-${slot}`).src = base64;
-          document.getElementById(`actions-${slot}`).style.display = 'none';
+          document.getElementById(`info-${slot}`).style.display = 'none';
           document.getElementById(`preview-${slot}`).style.display = 'flex';
           document.getElementById(`slot-card-${slot}`).classList.add('has-image');
         };
@@ -417,11 +518,12 @@
     }
 
     // Remove slot image
-    function removeSlot(slot) {
+    function removeSlot(slot, event) {
+      if (event) event.stopPropagation();
       images[slot] = null;
       document.getElementById(`file-${slot}`).value = '';
       document.getElementById(`img-${slot}`).src = '';
-      document.getElementById(`actions-${slot}`).style.display = 'flex';
+      document.getElementById(`info-${slot}`).style.display = 'block';
       document.getElementById(`preview-${slot}`).style.display = 'none';
       document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
     }
