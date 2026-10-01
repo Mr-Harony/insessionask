@@ -304,16 +304,16 @@
       </div>
     </div>
 
-    <label>Attach Images (Click, Ctrl+V or Right-Click to Paste)</label>
+    <label>Snap Photo with Camera or Paste (Ctrl+V)</label>
     <div class="slots-container">
       
       <!-- Slot 1 -->
       <div class="slot-card" id="slot-card-1" tabindex="0" data-slot="1">
         <span class="slot-title">Photo 1</span>
         <div class="slot-instructions" id="info-1">
-          Click to browse<br>or <b>Ctrl+V</b><br>or Right-click
+          📷 <b>Take Photo</b><br>or <b>Ctrl+V</b> to Paste
         </div>
-        <input type="file" id="file-1" accept="image/*" style="display:none;">
+        <input type="file" id="file-1" accept="image/*" capture="environment" style="display:none;">
         <div class="preview-box" id="preview-1">
           <img id="img-1" src="" alt="Photo 1">
           <button type="button" class="btn-remove" onclick="removeSlot(1, event)">✖ Remove</button>
@@ -324,9 +324,9 @@
       <div class="slot-card" id="slot-card-2" tabindex="0" data-slot="2">
         <span class="slot-title">Photo 2</span>
         <div class="slot-instructions" id="info-2">
-          Click to browse<br>or <b>Ctrl+V</b><br>or Right-click
+          📷 <b>Take Photo</b><br>or <b>Ctrl+V</b> to Paste
         </div>
-        <input type="file" id="file-2" accept="image/*" style="display:none;">
+        <input type="file" id="file-2" accept="image/*" capture="environment" style="display:none;">
         <div class="preview-box" id="preview-2">
           <img id="img-2" src="" alt="Photo 2">
           <button type="button" class="btn-remove" onclick="removeSlot(2, event)">✖ Remove</button>
@@ -337,9 +337,9 @@
       <div class="slot-card" id="slot-card-3" tabindex="0" data-slot="3">
         <span class="slot-title">Photo 3</span>
         <div class="slot-instructions" id="info-3">
-          Click to browse<br>or <b>Ctrl+V</b><br>or Right-click
+          📷 <b>Take Photo</b><br>or <b>Ctrl+V</b> to Paste
         </div>
-        <input type="file" id="file-3" accept="image/*" style="display:none;">
+        <input type="file" id="file-3" accept="image/*" capture="environment" style="display:none;">
         <div class="preview-box" id="preview-3">
           <img id="img-3" src="" alt="Photo 3">
           <button type="button" class="btn-remove" onclick="removeSlot(3, event)">✖ Remove</button>
@@ -363,7 +363,7 @@
   <!-- Custom Context Menu for Right-Click -->
   <div class="custom-menu" id="customMenu">
     <div class="custom-menu-item" id="menuPaste">📋 Paste Image</div>
-    <div class="custom-menu-item" id="menuBrowse">📁 Choose File / Camera</div>
+    <div class="custom-menu-item" id="menuCamera">📷 Take Photo</div>
   </div>
 
   <script>
@@ -392,28 +392,28 @@
       const card = document.getElementById(`slot-card-${slot}`);
       const fileInput = document.getElementById(`file-${slot}`);
 
-      // 1. Click to browse (if no image present)
+      // Click opens camera directly (if no image present)
       card.addEventListener('click', (e) => {
         if (!images[slot] && !e.target.classList.contains('btn-remove')) {
           fileInput.click();
         }
       });
 
-      // File input change
+      // Camera capture change
       fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
           compressAndSaveImage(e.target.files[0], slot);
         }
       });
 
-      // 2. Direct Paste via Ctrl+V when card is focused
+      // Direct Paste via Ctrl+V when card is focused
       card.addEventListener('paste', (e) => {
         e.preventDefault();
         e.stopPropagation();
         handlePasteData(e.clipboardData, slot);
       });
 
-      // 3. Right-Click Context Menu
+      // Right-Click Context Menu
       card.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         activeMenuSlot = slot;
@@ -421,24 +421,6 @@
         menu.style.display = 'block';
         menu.style.left = `${e.clientX}px`;
         menu.style.top = `${e.clientY}px`;
-      });
-
-      // 4. Drag & Drop
-      card.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        card.classList.add('drag-over');
-      });
-
-      card.addEventListener('dragleave', () => {
-        card.classList.remove('drag-over');
-      });
-
-      card.addEventListener('drop', (e) => {
-        e.preventDefault();
-        card.classList.remove('drag-over');
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          compressAndSaveImage(e.dataTransfer.files[0], slot);
-        }
       });
     });
 
@@ -466,8 +448,8 @@
       }
     });
 
-    // Context Menu: Browse click
-    document.getElementById('menuBrowse').addEventListener('click', () => {
+    // Context Menu: Camera click
+    document.getElementById('menuCamera').addEventListener('click', () => {
       if (activeMenuSlot) {
         document.getElementById(`file-${activeMenuSlot}`).click();
       }
@@ -552,7 +534,7 @@
       const question = document.getElementById('question').value.trim();
 
       if (!question && !images[1] && !images[2] && !images[3]) {
-        alert("Please enter a question or upload at least one image.");
+        alert("Please enter a question or capture at least one photo.");
         return;
       }
 
