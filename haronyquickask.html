@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ask Mr. Harony - Image & Question Portal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mr Harony Quick Ask</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <style>
 :root {
@@ -31,7 +31,7 @@ body.dark {
 body {
   margin: 0;
   min-height: 100vh;
-  padding: 24px 16px;
+  padding: 16px 12px;
   background: radial-gradient(circle at top, var(--bg), #e6ebf5);
   font-family: "Segoe UI", Arial, sans-serif;
   display: flex;
@@ -41,24 +41,24 @@ body {
 }
 
 .card {
-  width: min(650px, 100%);
-  padding: 30px;
+  width: min(550px, 100%);
+  padding: 22px 18px;
   background: var(--card);
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 20px 45px rgba(0,0,0,0.12);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.12);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .toggle {
@@ -66,11 +66,12 @@ body {
   font-size: 13px;
   font-weight: bold;
   color: var(--primary);
+  user-select: none;
 }
 
 .form-row {
   display: flex;
-  gap: 16px;
+  gap: 10px;
 }
 
 .form-group {
@@ -81,89 +82,116 @@ label {
   font-weight: bold;
   margin-top: 14px;
   display: block;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 input[type="text"], input[type="password"], textarea {
   width: 100%;
-  padding: 11px;
+  padding: 12px;
   margin-top: 6px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 textarea {
-  min-height: 120px;
+  min-height: 100px;
   resize: vertical;
 }
 
-/* Image Upload Slots */
-.image-slots-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+/* Paste & Camera Container */
+.upload-zone {
   margin-top: 8px;
-}
-
-.slot-box {
-  border: 1px dashed var(--border);
-  border-radius: 10px;
-  padding: 12px;
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+  padding: 16px;
   text-align: center;
-  background: rgba(79, 109, 245, 0.03);
+  background: rgba(79, 109, 245, 0.04);
 }
 
-.slot-box input[type="file"] {
+.paste-box {
+  outline: none;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: text;
+  padding: 8px;
+}
+
+.camera-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+#cameraInput {
   display: none;
 }
 
-.upload-btn {
-  display: inline-block;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: bold;
-  color: var(--primary);
-  border: 1px solid var(--primary);
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 6px;
+/* Slots Preview */
+.slots-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.preview-thumb {
+.slot-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.02);
+}
+
+.slot-item img {
   width: 100%;
-  height: 90px;
+  height: 70px;
   object-fit: cover;
   border-radius: 6px;
-  margin-top: 8px;
   display: none;
-  border: 1px solid var(--border);
 }
 
-.remove-btn {
-  display: none;
+.slot-placeholder {
   font-size: 11px;
-  color: #d9534f;
-  cursor: pointer;
-  margin-top: 4px;
-  font-weight: bold;
+  color: var(--muted);
 }
 
-/* Submit Button */
+.remove-tag {
+  color: #d9534f;
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 4px;
+  cursor: pointer;
+  display: none;
+}
+
+/* Submit */
 button#sendBtn {
-  position: relative;
-  overflow: hidden;
-  margin-top: 24px;
-  margin-bottom: 20px;
+  margin-top: 20px;
   width: 100%;
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: linear-gradient(135deg, #4f6df5, #6a82ff);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
 }
@@ -175,17 +203,19 @@ button#sendBtn.loading {
 
 #answer {
   background: var(--answer-bg);
-  padding: 16px;
-  border-radius: 12px;
+  padding: 14px;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  line-height: 1.7;
+  line-height: 1.6;
   white-space: pre-wrap;
+  margin-top: 16px;
   display: none;
+  font-size: 14px;
 }
 
 .footer {
-  margin-top: 18px;
-  font-size: 12px;
+  margin-top: 16px;
+  font-size: 11px;
   color: var(--muted);
   text-align: center;
 }
@@ -196,7 +226,7 @@ button#sendBtn.loading {
 
 <div class="card">
   <div class="header">
-    <h1>Ask Mr. Harony</h1>
+    <h1>Mr Harony Quick Ask</h1>
     <div class="toggle" onclick="toggleTheme()">🌙 Dark / Light</div>
   </div>
 
@@ -204,46 +234,45 @@ button#sendBtn.loading {
   <div class="form-row">
     <div class="form-group">
       <label>Username</label>
-      <input id="username" type="text">
+      <input id="username" type="text" autocomplete="username">
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input id="password" type="password">
+      <input id="password" type="password" autocomplete="current-password">
     </div>
   </div>
 
-  <!-- 3 Image Slots -->
-  <label>Attach Images (Optional)</label>
-  <div class="image-slots-grid">
-    <!-- Slot 1 -->
-    <div class="slot-box">
-      <div style="font-size: 13px; font-weight: bold;">Image 1</div>
-      <label for="imgInput1" class="upload-btn">📷 Add Image 1</label>
-      <input type="file" id="imgInput1" accept="image/*" capture="environment">
-      <img id="thumb1" class="preview-thumb">
-      <div id="remove1" class="remove-btn" onclick="clearSlot(1)">✖ Remove</div>
+  <!-- Add Image Zone (Paste + Camera) -->
+  <label>Attach Images (Up to 3 photos)</label>
+  <div class="upload-zone" id="uploadZone">
+    <div class="paste-box" tabindex="0" id="pasteBox">
+      📋 <strong>Paste image here</strong> (Tap & Paste or Ctrl+V)
     </div>
+    
+    <input type="file" id="cameraInput" accept="image/*" capture="environment">
+    <label for="cameraInput" class="camera-btn">📷 Open Camera</label>
+  </div>
 
-    <!-- Slot 2 -->
-    <div class="slot-box">
-      <div style="font-size: 13px; font-weight: bold;">Image 2</div>
-      <label for="imgInput2" class="upload-btn">📷 Add Image 2</label>
-      <input type="file" id="imgInput2" accept="image/*" capture="environment">
-      <img id="thumb2" class="preview-thumb">
-      <div id="remove2" class="remove-btn" onclick="clearSlot(2)">✖ Remove</div>
+  <!-- 3 Slots Indicators -->
+  <div class="slots-container">
+    <div class="slot-item" id="slot1">
+      <span class="slot-placeholder" id="ph1">Slot 1 (Empty)</span>
+      <img id="thumb1">
+      <span class="remove-tag" id="rm1" onclick="removeSlot(1)">✖ Remove</span>
     </div>
-
-    <!-- Slot 3 -->
-    <div class="slot-box">
-      <div style="font-size: 13px; font-weight: bold;">Image 3</div>
-      <label for="imgInput3" class="upload-btn">📷 Add Image 3</label>
-      <input type="file" id="imgInput3" accept="image/*" capture="environment">
-      <img id="thumb3" class="preview-thumb">
-      <div id="remove3" class="remove-btn" onclick="clearSlot(3)">✖ Remove</div>
+    <div class="slot-item" id="slot2">
+      <span class="slot-placeholder" id="ph2">Slot 2 (Empty)</span>
+      <img id="thumb2">
+      <span class="remove-tag" id="rm2" onclick="removeSlot(2)">✖ Remove</span>
+    </div>
+    <div class="slot-item" id="slot3">
+      <span class="slot-placeholder" id="ph3">Slot 3 (Empty)</span>
+      <img id="thumb3">
+      <span class="remove-tag" id="rm3" onclick="removeSlot(3)">✖ Remove</span>
     </div>
   </div>
 
-  <!-- Text Question -->
+  <!-- Question -->
   <label>What is your question?</label>
   <textarea id="question" placeholder="Type your question or notes here..."></textarea>
 
@@ -257,7 +286,6 @@ button#sendBtn.loading {
 </div>
 
 <script>
-// ضع هنا رابط Webhook الخاص بـ n8n
 const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/wabotqanda";
 
 const usernameEl = document.getElementById("username");
@@ -265,15 +293,15 @@ const passwordEl = document.getElementById("password");
 const questionEl = document.getElementById("question");
 const answerEl   = document.getElementById("answer");
 const sendBtn    = document.getElementById("sendBtn");
+const cameraInput = document.getElementById("cameraInput");
+const pasteBox   = document.getElementById("pasteBox");
 
-// تخزين الصور المضغوطة بصيغة Base64
 let imagesData = {
   image_1: null,
   image_2: null,
   image_3: null
 };
 
-/* تذكر بيانات الدخول والثيم */
 usernameEl.value = localStorage.getItem("student_username") || "";
 passwordEl.value = localStorage.getItem("student_password") || "";
 
@@ -289,12 +317,7 @@ function toggleTheme() {
   );
 }
 
-/**
- * دالة ضغط الصورة أوتوماتيكياً في المتصفح:
- * - تجعل البعد الأقصى (عرض أو ارتفاع) 1280px بحد أقصى (زي واتساب)
- * - تضبط جودة الصورة عند 0.7 (70%)
- * - تحول الناتج إلى JPEG Base64 خفيف وسريع جداً
- */
+// دالة ضغط الصور لتوفير الحجم
 function compressImage(file, maxDimension = 1280, quality = 0.7) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -306,7 +329,6 @@ function compressImage(file, maxDimension = 1280, quality = 0.7) {
         let width = img.width;
         let height = img.height;
 
-        // حساب الأبعاد الجديدة مع الحفاظ على النسبة والتناسب
         if (width > height) {
           if (width > maxDimension) {
             height = Math.round((height * maxDimension) / width);
@@ -326,9 +348,7 @@ function compressImage(file, maxDimension = 1280, quality = 0.7) {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
 
-        // تحويل الكانفاس لصورة مضغوطة JPEG
-        const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
-        resolve(compressedBase64);
+        resolve(canvas.toDataURL("image/jpeg", quality));
       };
       img.onerror = (err) => reject(err);
     };
@@ -336,37 +356,65 @@ function compressImage(file, maxDimension = 1280, quality = 0.7) {
   });
 }
 
-/* ربط رفع الصور مع الضغط الفوري */
-[1, 2, 3].forEach(idx => {
-  const input = document.getElementById(`imgInput${idx}`);
-  const thumb = document.getElementById(`thumb${idx}`);
-  const removeBtn = document.getElementById(`remove${idx}`);
-
-  input.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      thumb.style.display = "block";
-      thumb.src = ""; // إفراغ مؤقت أثناء الضغط
-      try {
-        const compressedDataUrl = await compressImage(file);
-        imagesData[`image_${idx}`] = compressedDataUrl;
-        thumb.src = compressedDataUrl;
-        removeBtn.style.display = "block";
-      } catch (err) {
-        alert("Error processing image. Please try again.");
-      }
+// إيجاد الخانة الفارغة التالية وحفظ الصورة فيها
+async function handleNewImage(file) {
+  let targetSlot = null;
+  for (let i = 1; i <= 3; i++) {
+    if (!imagesData[`image_${i}`]) {
+      targetSlot = i;
+      break;
     }
-  });
-});
+  }
 
-function clearSlot(idx) {
-  imagesData[`image_${idx}`] = null;
-  document.getElementById(`imgInput${idx}`).value = "";
-  document.getElementById(`thumb${idx}`).style.display = "none";
-  document.getElementById(`remove${idx}`).style.display = "none";
+  if (!targetSlot) {
+    alert("You have already added 3 images. Remove one to add another.");
+    return;
+  }
+
+  try {
+    const compressed = await compressImage(file);
+    imagesData[`image_${targetSlot}`] = compressed;
+
+    document.getElementById(`ph${targetSlot}`).style.display = "none";
+    const thumb = document.getElementById(`thumb${targetSlot}`);
+    thumb.src = compressed;
+    thumb.style.display = "block";
+    document.getElementById(`rm${targetSlot}`).style.display = "block";
+  } catch (err) {
+    alert("Error processing image.");
+  }
 }
 
-/* إرسال الطلب */
+// 1. التقاط الصور عبر الكاميرا
+cameraInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    handleNewImage(file);
+    cameraInput.value = "";
+  }
+});
+
+// 2. استقبال الصور عبر Copy / Paste (على الموبايل أو الكمبيوتر)
+window.addEventListener("paste", (e) => {
+  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  for (let index in items) {
+    const item = items[index];
+    if (item.kind === "file" && item.type.includes("image/")) {
+      const blob = item.getAsFile();
+      handleNewImage(blob);
+    }
+  }
+});
+
+function removeSlot(idx) {
+  imagesData[`image_${idx}`] = null;
+  document.getElementById(`thumb${idx}`).style.display = "none";
+  document.getElementById(`thumb${idx}`).src = "";
+  document.getElementById(`rm${idx}`).style.display = "none";
+  document.getElementById(`ph${idx}`).style.display = "block";
+}
+
+// إرسال البيانات
 sendBtn.addEventListener("click", async () => {
   if (sendBtn.disabled) return;
 
