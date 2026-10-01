@@ -265,10 +265,16 @@
       border-radius: 8px;
       border: 1px solid var(--border-color);
       background-color: var(--input-bg);
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.95rem;
+      line-height: 1.6;
       white-space: pre-wrap;
       display: none;
+      word-break: break-word;
+    }
+
+    .response-box b, .response-box strong {
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .footer {
@@ -369,6 +375,17 @@
     document.getElementById('themeBtn').addEventListener('click', () => {
       document.body.classList.toggle('light-theme');
     });
+
+    // Format response to bold
+    function formatMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<b>$1</b>');
+    }
 
     // Setup Slots interactions
     [1, 2, 3].forEach(slot => {
@@ -487,7 +504,7 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const maxDim = 1800;
+          const maxDim = 1920;
 
           if (width > maxDim || height > maxDim) {
             if (width > height) {
@@ -561,7 +578,7 @@
         });
 
         const textResponse = await response.text();
-        box.textContent = textResponse;
+        box.innerHTML = formatMarkdown(textResponse);
       } catch (err) {
         box.textContent = "Error: Could not reach the server. Please try again.";
       } finally {
