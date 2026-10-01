@@ -1,570 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mr Harony Quick Ask</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr Harony Quick Ask</title>
+  <style>
+    :root {
+      --bg-color: #1e2230;
+      --card-bg: #282c3f;
+      --input-bg: #1e2230;
+      --border-color: #3f445e;
+      --text-main: #f0f2f5;
+      --text-muted: #8c93b0;
+      --primary: #4f6ef7;
+      --primary-hover: #3d5be0;
+      --btn-file: #3d7bf7;
+      --danger: #ef4444;
+      --box-empty: #232738;
+    }
 
-<style>
-:root {
-  --bg: #f5f7ff;
-  --card: #ffffff;
-  --text: #111;
-  --muted: #666;
-  --primary: #4f6df5;
-  --answer-bg: #f4f6ff;
-  --border: #1a2b4c;
-}
+    body.light-theme {
+      --bg-color: #f0f2f8;
+      --card-bg: #ffffff;
+      --input-bg: #f8fafc;
+      --border-color: #d1d5db;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --btn-file: #2563eb;
+      --danger: #dc2626;
+      --box-empty: #e5e7eb;
+    }
 
-body.dark {
-  --bg: #0f1220;
-  --card: #2b2e38;
-  --text: #f1f1f1;
-  --muted: #aaa;
-  --primary: #6a82ff;
-  --answer-bg: #1f2550;
-  --border: #ffffff;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
 
-* { box-sizing: border-box; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  padding: 16px 12px;
-  background: radial-gradient(circle at top, var(--bg), #e6ebf5);
-  font-family: "Segoe UI", Arial, sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-}
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 580px;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
 
-.card {
-  width: min(550px, 100%);
-  padding: 22px 18px;
-  background: var(--card);
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
+    .header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
 
-.header h1 {
-  margin: 0;
-  font-size: 20px;
-}
+    .theme-toggle {
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+      font-weight: 600;
+    }
 
-.toggle {
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: bold;
-  color: var(--primary);
-  user-select: none;
-}
+    .form-group {
+      margin-bottom: 16px;
+    }
 
-.form-row {
-  display: flex;
-  gap: 10px;
-}
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
 
-.form-group {
-  flex: 1;
-}
+    .form-row .form-group {
+      flex: 1;
+    }
 
-label {
-  font-weight: bold;
-  margin-top: 14px;
-  display: block;
-  font-size: 13px;
-}
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
 
-input[type="text"], input[type="password"], textarea {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 14px;
-}
+    input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+    }
 
-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+    }
 
-/* Upload Zone */
-.upload-zone {
-  margin-top: 8px;
-  border: 2px dashed var(--primary);
-  border-radius: 12px;
-  padding: 14px;
-  text-align: center;
-  background: rgba(79, 109, 245, 0.04);
-}
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
 
-/* حقل إدخال حقيقي لتفعيل خيار Paste في كليك يمين */
-.paste-textarea {
-  width: 100%;
-  height: 52px;
-  min-height: 52px;
-  border: 1px solid rgba(79, 109, 245, 0.3);
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 13px;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.8);
-  outline: none;
-  resize: none;
-  text-align: center;
-}
+    /* Slots Styling */
+    .slots-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-body.dark .paste-textarea {
-  background: rgba(0, 0, 0, 0.25);
-  color: #fff;
-}
+    .slot-card {
+      background-color: var(--box-empty);
+      border: 1px dashed var(--border-color);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+      position: relative;
+      text-align: center;
+    }
 
-.actions-row {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 10px;
-}
+    .slot-card.has-image {
+      border-style: solid;
+      border-color: var(--border-color);
+      background-color: var(--input-bg);
+    }
 
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: bold;
-  cursor: pointer;
-  border: 1px solid var(--border);
-}
+    .slot-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
 
-.camera-btn {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-}
+    .slot-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
 
-.clip-btn {
-  background: transparent;
-  color: var(--text);
-}
+    .slot-btn {
+      width: 100%;
+      padding: 5px 0;
+      font-size: 0.75rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-weight: 500;
+    }
 
-#cameraInput {
-  display: none;
-}
+    .btn-file {
+      background-color: var(--btn-file);
+      color: #fff;
+    }
 
-/* Slots Preview */
-.slots-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 12px;
-}
+    .btn-paste {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
 
-.slot-item {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px;
-  text-align: center;
-  min-height: 90px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0,0,0,0.02);
-}
+    .btn-paste:hover {
+      background-color: #4b5270;
+    }
 
-.slot-item img {
-  width: 100%;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 6px;
-  display: none;
-}
+    .preview-box {
+      width: 100%;
+      height: 95px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-.slot-placeholder {
-  font-size: 11px;
-  color: var(--muted);
-}
+    .preview-box img {
+      max-width: 100%;
+      max-height: 75px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
 
-.remove-tag {
-  color: #d9534f;
-  font-size: 11px;
-  font-weight: bold;
-  margin-top: 4px;
-  cursor: pointer;
-  display: none;
-}
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 4px;
+      font-weight: 600;
+    }
 
-/* Submit */
-button#sendBtn {
-  margin-top: 20px;
-  width: 100%;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #4f6df5, #6a82ff);
-  color: #fff;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
 
-button#sendBtn.loading {
-  background: linear-gradient(135deg, #9aa0b8, #7d839c);
-  cursor: not-allowed;
-}
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
 
-#answer {
-  background: var(--answer-bg);
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin-top: 16px;
-  display: none;
-  font-size: 14px;
-}
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
-.footer {
-  margin-top: 16px;
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
-}
-</style>
+    /* Output Box */
+    .response-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="card">
-  <div class="header">
-    <h1>Mr Harony Quick Ask</h1>
-    <div class="toggle" onclick="toggleTheme()">🌙 Dark / Light</div>
-  </div>
+  <div class="container">
+    <div class="header">
+      <h2>Mr Harony Quick Ask</h2>
+      <span class="theme-toggle" id="themeBtn">🌙 Dark / Light</span>
+    </div>
 
-  <!-- Credentials -->
-  <div class="form-row">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Try@try.com" value="Try@try.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" value="Abcd@1234">
+      </div>
+    </div>
+
+    <label>Attach Images (Up to 3 photos)</label>
+    <div class="slots-container">
+      
+      <!-- Slot 1 -->
+      <div class="slot-card" id="slot-card-1">
+        <span class="slot-title">Photo 1</span>
+        <div class="slot-actions" id="actions-1">
+          <input type="file" id="file-1" accept="image/*" style="display:none;">
+          <button type="button" class="slot-btn btn-file" onclick="document.getElementById('file-1').click()">📁 Camera / File</button>
+          <button type="button" class="slot-btn btn-paste" onclick="pasteToSlot(1)">📋 Paste</button>
+        </div>
+        <div class="preview-box" id="preview-1">
+          <img id="img-1" src="" alt="Photo 1">
+          <button type="button" class="btn-remove" onclick="removeSlot(1)">✖ Remove</button>
+        </div>
+      </div>
+
+      <!-- Slot 2 -->
+      <div class="slot-card" id="slot-card-2">
+        <span class="slot-title">Photo 2</span>
+        <div class="slot-actions" id="actions-2">
+          <input type="file" id="file-2" accept="image/*" style="display:none;">
+          <button type="button" class="slot-btn btn-file" onclick="document.getElementById('file-2').click()">📁 Camera / File</button>
+          <button type="button" class="slot-btn btn-paste" onclick="pasteToSlot(2)">📋 Paste</button>
+        </div>
+        <div class="preview-box" id="preview-2">
+          <img id="img-2" src="" alt="Photo 2">
+          <button type="button" class="btn-remove" onclick="removeSlot(2)">✖ Remove</button>
+        </div>
+      </div>
+
+      <!-- Slot 3 -->
+      <div class="slot-card" id="slot-card-3">
+        <span class="slot-title">Photo 3</span>
+        <div class="slot-actions" id="actions-3">
+          <input type="file" id="file-3" accept="image/*" style="display:none;">
+          <button type="button" class="slot-btn btn-file" onclick="document.getElementById('file-3').click()">📁 Camera / File</button>
+          <button type="button" class="slot-btn btn-paste" onclick="pasteToSlot(3)">📋 Paste</button>
+        </div>
+        <div class="preview-box" id="preview-3">
+          <img id="img-3" src="" alt="Photo 3">
+          <button type="button" class="btn-remove" onclick="removeSlot(3)">✖ Remove</button>
+        </div>
+      </div>
+
+    </div>
+
     <div class="form-group">
-      <label>Username</label>
-      <input id="username" type="text" autocomplete="username">
+      <label>What is your question?</label>
+      <textarea id="question" placeholder="Write your question here..."></textarea>
     </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input id="password" type="password" autocomplete="current-password">
-    </div>
+
+    <button type="button" class="submit-btn" id="submitBtn">Ask Mr. Harony</button>
+
+    <div class="response-box" id="responseBox"></div>
+
+    <div class="footer">Secure academic assistant • Mr. Harony</div>
   </div>
 
-  <!-- Add Image Zone -->
-  <label>Attach Images (Up to 3 photos)</label>
-  <div class="upload-zone" id="dropZone">
-    <textarea 
-      class="paste-textarea" 
-      id="pasteInput" 
-      placeholder="Right-click here and choose Paste (or Drag & Drop image)"></textarea>
+  <script>
+    // ضع رابط الـ Webhook الخاص بك هنا
+    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickask";
 
-    <div class="actions-row">
-      <button type="button" class="action-btn clip-btn" id="btnClipboardPaste">
-        📋 Paste Clipboard
-      </button>
+    const images = { 1: null, 2: null, 3: null };
 
-      <input type="file" id="cameraInput" accept="image/*" capture="environment">
-      <label for="cameraInput" class="action-btn camera-btn">
-        📷 Camera / File
-      </label>
-    </div>
-  </div>
+    // Theme toggle
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+    });
 
-  <!-- 3 Slots Indicators -->
-  <div class="slots-container">
-    <div class="slot-item" id="slot1">
-      <span class="slot-placeholder" id="ph1">Slot 1 (Empty)</span>
-      <img id="thumb1">
-      <span class="remove-tag" id="rm1" onclick="removeSlot(1)">✖ Remove</span>
-    </div>
-    <div class="slot-item" id="slot2">
-      <span class="slot-placeholder" id="ph2">Slot 2 (Empty)</span>
-      <img id="thumb2">
-      <span class="remove-tag" id="rm2" onclick="removeSlot(2)">✖ Remove</span>
-    </div>
-    <div class="slot-item" id="slot3">
-      <span class="slot-placeholder" id="ph3">Slot 3 (Empty)</span>
-      <img id="thumb3">
-      <span class="remove-tag" id="rm3" onclick="removeSlot(3)">✖ Remove</span>
-    </div>
-  </div>
+    // Setup file inputs
+    [1, 2, 3].forEach(slot => {
+      document.getElementById(`file-${slot}`).addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+          compressAndSaveImage(e.target.files[0], slot);
+        }
+      });
+    });
 
-  <!-- Question -->
-  <label>What is your question?</label>
-  <textarea id="question" placeholder="Type your question or notes here..."></textarea>
-
-  <button id="sendBtn"><span>Ask Mr. Harony</span></button>
-
-  <div id="answer"></div>
-
-  <div class="footer">
-    Secure academic assistant • Mr. Harony
-  </div>
-</div>
-
-<script>
-const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickask";
-
-const usernameEl = document.getElementById("username");
-const passwordEl = document.getElementById("password");
-const questionEl = document.getElementById("question");
-const answerEl   = document.getElementById("answer");
-const sendBtn    = document.getElementById("sendBtn");
-const cameraInput = document.getElementById("cameraInput");
-const pasteInput  = document.getElementById("pasteInput");
-const btnClipboardPaste = document.getElementById("btnClipboardPaste");
-const dropZone   = document.getElementById("dropZone");
-
-let imagesData = {
-  image_1: null,
-  image_2: null,
-  image_3: null
-};
-
-usernameEl.value = localStorage.getItem("student_username") || "";
-passwordEl.value = localStorage.getItem("student_password") || "";
-
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark");
-}
-
-function toggleTheme() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem(
-    "theme",
-    document.body.classList.contains("dark") ? "dark" : "light"
-  );
-}
-
-function compressImage(file, maxDimension = 1280, quality = 0.7) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxDimension) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          }
-        } else {
-          if (height > maxDimension) {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
+    // Paste function for each specific slot
+    async function pasteToSlot(slot) {
+      try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const imageType = item.types.find(type => type.startsWith('image/'));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            compressAndSaveImage(blob, slot);
+            return;
           }
         }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        resolve(canvas.toDataURL("image/jpeg", quality));
-      };
-      img.onerror = (err) => reject(err);
-    };
-    reader.onerror = (err) => reject(err);
-  });
-}
-
-async function handleNewImage(file) {
-  let targetSlot = null;
-  for (let i = 1; i <= 3; i++) {
-    if (!imagesData[`image_${i}`]) {
-      targetSlot = i;
-      break;
-    }
-  }
-
-  if (!targetSlot) {
-    alert("You have already added 3 images. Remove one to add another.");
-    return;
-  }
-
-  try {
-    const compressed = await compressImage(file);
-    imagesData[`image_${targetSlot}`] = compressed;
-
-    document.getElementById(`ph${targetSlot}`).style.display = "none";
-    const thumb = document.getElementById(`thumb${targetSlot}`);
-    thumb.src = compressed;
-    thumb.style.display = "block";
-    document.getElementById(`rm${targetSlot}`).style.display = "block";
-  } catch (err) {
-    alert("Error processing image.");
-  }
-}
-
-// 1. استقبال الـ Paste (Right-Click -> Paste أو Ctrl+V)
-pasteInput.addEventListener("paste", (e) => {
-  const items = (e.clipboardData || window.clipboardData).items;
-  let found = false;
-
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].type.indexOf("image") !== -1) {
-      const blob = items[i].getAsFile();
-      handleNewImage(blob);
-      found = true;
-    }
-  }
-
-  setTimeout(() => {
-    pasteInput.value = "";
-  }, 10);
-
-  if (!found) {
-    alert("No image detected in clipboard.");
-  }
-});
-
-// 2. زر Paste بالماوس مباشرة لقراءة الحافظة
-btnClipboardPaste.addEventListener("click", async () => {
-  try {
-    if (!navigator.clipboard || !navigator.clipboard.read) {
-      alert("Right-click inside the box above and click Paste.");
-      pasteInput.focus();
-      return;
-    }
-
-    const clipboardItems = await navigator.clipboard.read();
-    let found = false;
-
-    for (const item of clipboardItems) {
-      const imageType = item.types.find(type => type.startsWith("image/"));
-      if (imageType) {
-        const blob = await item.getType(imageType);
-        handleNewImage(blob);
-        found = true;
-        break;
+        alert("No image found in clipboard!");
+      } catch (err) {
+        alert("Clipboard permission denied or not supported. Use Camera / File button instead.");
       }
     }
 
-    if (!found) {
-      alert("No image copied in clipboard.");
+    // Compress & set preview
+    function compressAndSaveImage(file, slot) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // تصغير الجودة لضمان سرعة نقل الـ Base64
+          const base64 = canvas.toDataURL('image/jpeg', 0.7);
+          images[slot] = base64;
+
+          // Update UI
+          document.getElementById(`img-${slot}`).src = base64;
+          document.getElementById(`actions-${slot}`).style.display = 'none';
+          document.getElementById(`preview-${slot}`).style.display = 'flex';
+          document.getElementById(`slot-card-${slot}`).classList.add('has-image');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
-  } catch (err) {
-    pasteInput.focus();
-    alert("Please right-click in the text area and choose 'Paste'.");
-  }
-});
 
-// 3. دعم السحب والإفلات من سطح المكتب مباشرة (Drag & Drop)
-dropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-});
-
-dropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-    const file = e.dataTransfer.files[0];
-    if (file.type.startsWith("image/")) {
-      handleNewImage(file);
+    // Remove slot image
+    function removeSlot(slot) {
+      images[slot] = null;
+      document.getElementById(`file-${slot}`).value = '';
+      document.getElementById(`img-${slot}`).src = '';
+      document.getElementById(`actions-${slot}`).style.display = 'flex';
+      document.getElementById(`preview-${slot}`).style.display = 'none';
+      document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
     }
-  }
-});
 
-// 4. الكاميرا واختيار ملف
-cameraInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    handleNewImage(file);
-    cameraInput.value = "";
-  }
-});
+    // Submit handler
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('submitBtn');
+      const box = document.getElementById('responseBox');
+      const question = document.getElementById('question').value.trim();
 
-function removeSlot(idx) {
-  imagesData[`image_${idx}`] = null;
-  document.getElementById(`thumb${idx}`).style.display = "none";
-  document.getElementById(`thumb${idx}`).src = "";
-  document.getElementById(`rm${idx}`).style.display = "none";
-  document.getElementById(`ph${idx}`).style.display = "block";
-}
+      if (!question && !images[1] && !images[2] && !images[3]) {
+        alert("Please enter a question or upload at least one image.");
+        return;
+      }
 
-// الإرسال
-sendBtn.addEventListener("click", async () => {
-  if (sendBtn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = "Analyzing & Solving...";
+      box.style.display = "block";
+      box.textContent = "Connecting to Mr. Harony's assistant...";
 
-  const u = usernameEl.value.trim();
-  const p = passwordEl.value.trim();
-  const q = questionEl.value.trim();
+      const payload = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        question: question,
+        image_1: images[1],
+        image_2: images[2],
+        image_3: images[3]
+      };
 
-  if (!u || !p) {
-    answerEl.style.display = "block";
-    answerEl.innerText = "❌ Please provide Username and Password.";
-    return;
-  }
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-  if (!q && !imagesData.image_1 && !imagesData.image_2 && !imagesData.image_3) {
-    answerEl.style.display = "block";
-    answerEl.innerText = "❌ Please enter a question or attach at least one photo.";
-    return;
-  }
-
-  localStorage.setItem("student_username", u);
-  localStorage.setItem("student_password", p);
-
-  sendBtn.disabled = true;
-  sendBtn.classList.add("loading");
-  sendBtn.innerHTML = "<span>Waiting for Mr. Harony reply...</span>";
-  answerEl.style.display = "block";
-  answerEl.innerText = "⏳ Thinking...";
-
-  const payload = {
-    username: u,
-    password: p,
-    question: q || "",
-    image_1: imagesData.image_1,
-    image_2: imagesData.image_2,
-    image_3: imagesData.image_3
-  };
-
-  try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+        const textResponse = await response.text();
+        box.textContent = textResponse;
+      } catch (err) {
+        box.textContent = "Error: Could not reach the server. Please try again.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Ask Mr. Harony";
+      }
     });
-
-    const text = await res.text();
-    const formatted = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-    answerEl.innerHTML = formatted || "⚠️ Empty response";
-
-  } catch {
-    answerEl.innerText = "❌ Connection error. Please try again.";
-  } finally {
-    sendBtn.disabled = false;
-    sendBtn.classList.remove("loading");
-    sendBtn.innerHTML = "<span>Ask Mr. Harony</span>";
-  }
-});
-</script>
-
+  </script>
 </body>
 </html>
