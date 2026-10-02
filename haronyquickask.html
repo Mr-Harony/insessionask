@@ -300,11 +300,11 @@
     <div class="form-row">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" id="username" placeholder="Try@try.com" value="Try@try.com">
+        <input type="text" id="username" placeholder="Enter your email or username" value="">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" value="Abcd@1234">
+        <input type="password" id="password" placeholder="Enter your password" value="">
       </div>
     </div>
 
@@ -416,10 +416,10 @@
     }
 
     function resetForm() {
-      // 1. مسح السؤال
+      // تفريغ السؤال
       document.getElementById('question').value = '';
 
-      // 2. مسح الصور الثلاث
+      // تفريغ الصور
       [1, 2, 3].forEach(slot => {
         images[slot] = null;
         document.getElementById(`file-${slot}`).value = '';
@@ -429,7 +429,6 @@
         document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
       });
 
-      // 3. إعادة تعطيل الخانات 2 و 3
       updateSlotsState();
     }
 
@@ -580,7 +579,14 @@
     document.getElementById('submitBtn').addEventListener('click', async () => {
       const btn = document.getElementById('submitBtn');
       const box = document.getElementById('responseBox');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
       const question = document.getElementById('question').value.trim();
+
+      if (!username || !password) {
+        alert("Please enter your username and password.");
+        return;
+      }
 
       if (!question && !images[1] && !images[2] && !images[3]) {
         alert("Please enter a question or capture at least one photo.");
@@ -593,8 +599,8 @@
       box.textContent = "Connecting to Mr. Harony's assistant...";
 
       const payload = {
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value,
+        username: username,
+        password: password,
         question: question,
         image_1: images[1],
         image_2: images[2],
@@ -611,7 +617,6 @@
         const textResponse = await response.text();
         box.innerHTML = formatMarkdown(textResponse);
 
-        // تصفير الخانات فور نجاح الاستجابة
         resetForm();
 
       } catch (err) {
