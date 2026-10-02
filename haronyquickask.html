@@ -374,6 +374,14 @@
     const images = { 1: null, 2: null, 3: null };
     let activeMenuSlot = null;
 
+    // استرجاع البيانات المحفوظة محلياً على جهاز الطالب إن وُجدت
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('harony_username');
+      const savedPass = localStorage.getItem('harony_password');
+      if (savedUser) document.getElementById('username').value = savedUser;
+      if (savedPass) document.getElementById('password').value = savedPass;
+    });
+
     document.getElementById('themeBtn').addEventListener('click', () => {
       document.body.classList.toggle('light-theme');
     });
@@ -416,10 +424,10 @@
     }
 
     function resetForm() {
-      // تفريغ السؤال
+      // تفريغ نص السؤال فقط
       document.getElementById('question').value = '';
 
-      // تفريغ الصور
+      // تفريغ الصور الثلاث
       [1, 2, 3].forEach(slot => {
         images[slot] = null;
         document.getElementById(`file-${slot}`).value = '';
@@ -593,6 +601,10 @@
         return;
       }
 
+      // حفظ بيانات الدخول محلياً على جهاز الطالب لتظل موجودة دائماً
+      localStorage.setItem('harony_username', username);
+      localStorage.setItem('harony_password', password);
+
       btn.disabled = true;
       btn.textContent = "Analyzing & Solving...";
       box.style.display = "block";
@@ -617,6 +629,7 @@
         const textResponse = await response.text();
         box.innerHTML = formatMarkdown(textResponse);
 
+        // مسح السؤال والصور فقط، والإبقاء على بيانات الدخول كما هي
         resetForm();
 
       } catch (err) {
