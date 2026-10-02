@@ -163,22 +163,11 @@
       margin-bottom: 6px;
     }
 
-    .btn-cam-direct {
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 6px;
-    }
-
     .slot-instructions {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      line-height: 1.3;
+      line-height: 1.35;
+      pointer-events: none;
     }
 
     .slot-instructions b {
@@ -279,54 +268,6 @@
       color: var(--text-main);
     }
 
-    /* Direct Camera Modal */
-    .cam-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 2000;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
-    }
-
-    .cam-modal video {
-      width: 100%;
-      max-width: 480px;
-      border-radius: 12px;
-      background: #000;
-    }
-
-    .cam-controls {
-      display: flex;
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    .btn-snap {
-      background: #10b981;
-      color: #fff;
-      border: none;
-      padding: 12px 24px;
-      font-size: 1rem;
-      border-radius: 30px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .btn-close-cam {
-      background: var(--danger);
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 30px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
     .footer {
       text-align: center;
       margin-top: 16px;
@@ -354,16 +295,16 @@
       </div>
     </div>
 
-    <label>Camera Direct or Paste (Ctrl+V)</label>
+    <label>Take Photo with Camera or Paste (Ctrl+V)</label>
     <div class="slots-container">
       
       <!-- Slot 1 -->
       <div class="slot-card" id="slot-card-1" tabindex="0" data-slot="1">
         <span class="slot-title">Photo 1</span>
-        <div id="info-1">
-          <button type="button" class="btn-cam-direct" onclick="openDirectCamera(1, event)">📷 Open Camera</button>
-          <div class="slot-instructions">or <b>Ctrl+V</b> to Paste</div>
+        <div class="slot-instructions" id="info-1">
+          📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
         </div>
+        <input type="file" id="file-1" accept="image/*" capture="environment" style="display:none;">
         <div class="preview-box" id="preview-1">
           <img id="img-1" src="" alt="Photo 1">
           <button type="button" class="btn-remove" onclick="removeSlot(1, event)">✖ Remove</button>
@@ -373,10 +314,10 @@
       <!-- Slot 2 -->
       <div class="slot-card" id="slot-card-2" tabindex="0" data-slot="2">
         <span class="slot-title">Photo 2</span>
-        <div id="info-2">
-          <button type="button" class="btn-cam-direct" onclick="openDirectCamera(2, event)">📷 Open Camera</button>
-          <div class="slot-instructions">or <b>Ctrl+V</b> to Paste</div>
+        <div class="slot-instructions" id="info-2">
+          📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
         </div>
+        <input type="file" id="file-2" accept="image/*" capture="environment" style="display:none;">
         <div class="preview-box" id="preview-2">
           <img id="img-2" src="" alt="Photo 2">
           <button type="button" class="btn-remove" onclick="removeSlot(2, event)">✖ Remove</button>
@@ -386,10 +327,10 @@
       <!-- Slot 3 -->
       <div class="slot-card" id="slot-card-3" tabindex="0" data-slot="3">
         <span class="slot-title">Photo 3</span>
-        <div id="info-3">
-          <button type="button" class="btn-cam-direct" onclick="openDirectCamera(3, event)">📷 Open Camera</button>
-          <div class="slot-instructions">or <b>Ctrl+V</b> to Paste</div>
+        <div class="slot-instructions" id="info-3">
+          📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
         </div>
+        <input type="file" id="file-3" accept="image/*" capture="environment" style="display:none;">
         <div class="preview-box" id="preview-3">
           <img id="img-3" src="" alt="Photo 3">
           <button type="button" class="btn-remove" onclick="removeSlot(3, event)">✖ Remove</button>
@@ -410,16 +351,6 @@
     <div class="footer">Secure academic assistant • Mr. Harony</div>
   </div>
 
-  <!-- Camera Live View Modal -->
-  <div class="cam-modal" id="camModal">
-    <video id="camVideo" autoplay playsinline></video>
-    <div class="cam-controls">
-      <button type="button" class="btn-snap" id="snapBtn">📸 Capture</button>
-      <button type="button" class="btn-close-cam" onclick="closeCamera()">✖ Cancel</button>
-    </div>
-  </div>
-
-  <!-- Custom Context Menu for Right-Click -->
   <div class="custom-menu" id="customMenu">
     <div class="custom-menu-item" id="menuPaste">📋 Paste Image</div>
     <div class="custom-menu-item" id="menuCamera">📷 Open Camera</div>
@@ -428,8 +359,6 @@
   <script>
     const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickask";
     const images = { 1: null, 2: null, 3: null };
-    let activeCameraSlot = null;
-    let cameraStream = null;
     let activeMenuSlot = null;
 
     document.getElementById('themeBtn').addEventListener('click', () => {
@@ -446,61 +375,20 @@
         .replace(/\*(.*?)\*/g, '<b>$1</b>');
     }
 
-    // Direct Camera Handling
-    async function openDirectCamera(slot, event) {
-      if (event) event.stopPropagation();
-      activeCameraSlot = slot;
-      const modal = document.getElementById('camModal');
-      const video = document.getElementById('camVideo');
-
-      try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 } },
-          audio: false
-        });
-        video.srcObject = cameraStream;
-        modal.style.display = 'flex';
-      } catch (err) {
-        alert("Camera access denied or unavailable.");
-      }
-    }
-
-    function closeCamera() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-      }
-      document.getElementById('camModal').style.display = 'none';
-      activeCameraSlot = null;
-    }
-
-    document.getElementById('snapBtn').addEventListener('click', () => {
-      if (!activeCameraSlot) return;
-      const video = document.getElementById('camVideo');
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const base64 = canvas.toDataURL('image/jpeg', 0.8);
-      images[activeCameraSlot] = base64;
-
-      document.getElementById(`img-${activeCameraSlot}`).src = base64;
-      document.getElementById(`info-${activeCameraSlot}`).style.display = 'none';
-      document.getElementById(`preview-${activeCameraSlot}`).style.display = 'flex';
-      document.getElementById(`slot-card-${activeCameraSlot}`).classList.add('has-image');
-
-      closeCamera();
-    });
-
-    // Slots events
     [1, 2, 3].forEach(slot => {
       const card = document.getElementById(`slot-card-${slot}`);
+      const fileInput = document.getElementById(`file-${slot}`);
 
+      // Open Native Phone Camera
       card.addEventListener('click', (e) => {
-        if (!images[slot] && !e.target.classList.contains('btn-remove') && !e.target.classList.contains('btn-cam-direct')) {
-          openDirectCamera(slot, e);
+        if (!images[slot] && !e.target.classList.contains('btn-remove')) {
+          fileInput.click();
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          compressAndSaveImage(e.target.files[0], slot);
         }
       });
 
@@ -532,7 +420,7 @@
           const imageType = item.types.find(type => type.startsWith('image/'));
           if (imageType) {
             const blob = await item.getType(imageType);
-            processBlobImage(blob, activeMenuSlot);
+            compressAndSaveImage(blob, activeMenuSlot);
             return;
           }
         }
@@ -544,7 +432,7 @@
 
     document.getElementById('menuCamera').addEventListener('click', () => {
       if (activeMenuSlot) {
-        openDirectCamera(activeMenuSlot);
+        document.getElementById(`file-${activeMenuSlot}`).click();
       }
     });
 
@@ -553,14 +441,22 @@
       for (let i = 0; i < clipboardData.items.length; i++) {
         if (clipboardData.items[i].type.indexOf('image') !== -1) {
           const blob = clipboardData.items[i].getAsFile();
-          processBlobImage(blob, slot);
+          compressAndSaveImage(blob, slot);
           return;
         }
       }
       alert("No image found in clipboard!");
     }
 
-    function processBlobImage(file, slot) {
+    window.addEventListener('paste', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+      const targetSlot = [1, 2, 3].find(s => !images[s]);
+      if (targetSlot) {
+        handlePasteData(e.clipboardData, targetSlot);
+      }
+    });
+
+    function compressAndSaveImage(file, slot) {
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = new Image();
@@ -601,6 +497,7 @@
     function removeSlot(slot, event) {
       if (event) event.stopPropagation();
       images[slot] = null;
+      document.getElementById(`file-${slot}`).value = '';
       document.getElementById(`img-${slot}`).src = '';
       document.getElementById(`info-${slot}`).style.display = 'block';
       document.getElementById(`preview-${slot}`).style.display = 'none';
