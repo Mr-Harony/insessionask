@@ -156,7 +156,6 @@
       cursor: default;
     }
 
-    /* Disabled Slot Style */
     .slot-card.is-disabled {
       opacity: 0.35;
       cursor: not-allowed;
@@ -397,7 +396,6 @@
     }
 
     function updateSlotsState() {
-      // Slot 2 State
       const card2 = document.getElementById('slot-card-2');
       if (images[1]) {
         card2.classList.remove('is-disabled');
@@ -407,7 +405,6 @@
         card2.setAttribute('tabindex', '-1');
       }
 
-      // Slot 3 State
       const card3 = document.getElementById('slot-card-3');
       if (images[2]) {
         card3.classList.remove('is-disabled');
@@ -418,11 +415,28 @@
       }
     }
 
+    function resetForm() {
+      // 1. مسح السؤال
+      document.getElementById('question').value = '';
+
+      // 2. مسح الصور الثلاث
+      [1, 2, 3].forEach(slot => {
+        images[slot] = null;
+        document.getElementById(`file-${slot}`).value = '';
+        document.getElementById(`img-${slot}`).src = '';
+        document.getElementById(`info-${slot}`).style.display = 'block';
+        document.getElementById(`preview-${slot}`).style.display = 'none';
+        document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
+      });
+
+      // 3. إعادة تعطيل الخانات 2 و 3
+      updateSlotsState();
+    }
+
     [1, 2, 3].forEach(slot => {
       const card = document.getElementById(`slot-card-${slot}`);
       const fileInput = document.getElementById(`file-${slot}`);
 
-      // Open Native Phone Camera
       card.addEventListener('click', (e) => {
         if (!isSlotActive(slot)) return;
         if (!images[slot] && !e.target.classList.contains('btn-remove')) {
@@ -496,7 +510,6 @@
       alert("No image found in clipboard!");
     }
 
-    // Global Paste Fallback: pastes to first available and empty active slot
     window.addEventListener('paste', (e) => {
       if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
       const targetSlot = [1, 2, 3].find(s => isSlotActive(s) && !images[s]);
@@ -554,7 +567,6 @@
       document.getElementById(`preview-${slot}`).style.display = 'none';
       document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
 
-      // Cascade remove subsequent slots to maintain sequential order
       if (slot === 1) {
         if (images[2]) removeSlot(2, null);
         if (images[3]) removeSlot(3, null);
@@ -598,6 +610,10 @@
 
         const textResponse = await response.text();
         box.innerHTML = formatMarkdown(textResponse);
+
+        // تصفير الخانات فور نجاح الاستجابة
+        resetForm();
+
       } catch (err) {
         box.textContent = "Error: Could not reach the server. Please try again.";
       } finally {
@@ -606,7 +622,6 @@
       }
     });
 
-    // Initial check
     updateSlotsState();
   </script>
 </body>
