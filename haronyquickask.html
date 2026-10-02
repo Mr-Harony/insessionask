@@ -156,8 +156,22 @@
       cursor: default;
     }
 
+    /* Disabled Slot Style */
+    .slot-card.is-disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      filter: grayscale(1);
+      border-style: dashed;
+    }
+
+    .slot-card.is-disabled:focus {
+      border-color: var(--border-color);
+      box-shadow: none;
+      background-color: var(--box-empty);
+    }
+
     .slot-title {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-muted);
       margin-bottom: 6px;
@@ -300,7 +314,7 @@
       
       <!-- Slot 1 -->
       <div class="slot-card" id="slot-card-1" tabindex="0" data-slot="1">
-        <span class="slot-title">Photo 1</span>
+        <span class="slot-title">Photo 1 (Optional)</span>
         <div class="slot-instructions" id="info-1">
           📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
         </div>
@@ -312,8 +326,8 @@
       </div>
 
       <!-- Slot 2 -->
-      <div class="slot-card" id="slot-card-2" tabindex="0" data-slot="2">
-        <span class="slot-title">Photo 2</span>
+      <div class="slot-card is-disabled" id="slot-card-2" tabindex="-1" data-slot="2">
+        <span class="slot-title">Photo 2 (Optional)</span>
         <div class="slot-instructions" id="info-2">
           📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
         </div>
@@ -325,8 +339,8 @@
       </div>
 
       <!-- Slot 3 -->
-      <div class="slot-card" id="slot-card-3" tabindex="0" data-slot="3">
-        <span class="slot-title">Photo 3</span>
+      <div class="slot-card is-disabled" id="slot-card-3" tabindex="-1" data-slot="3">
+        <span class="slot-title">Photo 3 (Optional)</span>
         <div class="slot-instructions" id="info-3">
           📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
         </div>
@@ -375,30 +389,63 @@
         .replace(/\*(.*?)\*/g, '<b>$1</b>');
     }
 
+    function isSlotActive(slot) {
+      if (slot === 1) return true;
+      if (slot === 2) return images[1] !== null;
+      if (slot === 3) return images[2] !== null;
+      return false;
+    }
+
+    function updateSlotsState() {
+      // Slot 2 State
+      const card2 = document.getElementById('slot-card-2');
+      if (images[1]) {
+        card2.classList.remove('is-disabled');
+        card2.setAttribute('tabindex', '0');
+      } else {
+        card2.classList.add('is-disabled');
+        card2.setAttribute('tabindex', '-1');
+      }
+
+      // Slot 3 State
+      const card3 = document.getElementById('slot-card-3');
+      if (images[2]) {
+        card3.classList.remove('is-disabled');
+        card3.setAttribute('tabindex', '0');
+      } else {
+        card3.classList.add('is-disabled');
+        card3.setAttribute('tabindex', '-1');
+      }
+    }
+
     [1, 2, 3].forEach(slot => {
       const card = document.getElementById(`slot-card-${slot}`);
       const fileInput = document.getElementById(`file-${slot}`);
 
       // Open Native Phone Camera
       card.addEventListener('click', (e) => {
+        if (!isSlotActive(slot)) return;
         if (!images[slot] && !e.target.classList.contains('btn-remove')) {
           fileInput.click();
         }
       });
 
       fileInput.addEventListener('change', (e) => {
+        if (!isSlotActive(slot)) return;
         if (e.target.files && e.target.files[0]) {
           compressAndSaveImage(e.target.files[0], slot);
         }
       });
 
       card.addEventListener('paste', (e) => {
+        if (!isSlotActive(slot)) return;
         e.preventDefault();
         e.stopPropagation();
         handlePasteData(e.clipboardData, slot);
       });
 
       card.addEventListener('contextmenu', (e) => {
+        if (!isSlotActive(slot)) return;
         e.preventDefault();
         activeMenuSlot = slot;
         const menu = document.getElementById('customMenu');
@@ -413,7 +460,7 @@
     });
 
     document.getElementById('menuPaste').addEventListener('click', async () => {
-      if (!activeMenuSlot) return;
+      if (!activeMenuSlot || !isSlotActive(activeMenuSlot)) return;
       try {
         const items = await navigator.clipboard.read();
         for (const item of items) {
@@ -431,12 +478,13 @@
     });
 
     document.getElementById('menuCamera').addEventListener('click', () => {
-      if (activeMenuSlot) {
+      if (activeMenuSlot && isSlotActive(activeMenuSlot)) {
         document.getElementById(`file-${activeMenuSlot}`).click();
       }
     });
 
     function handlePasteData(clipboardData, slot) {
+      if (!isSlotActive(slot)) return;
       if (!clipboardData || !clipboardData.items) return;
       for (let i = 0; i < clipboardData.items.length; i++) {
         if (clipboardData.items[i].type.indexOf('image') !== -1) {
@@ -448,9 +496,10 @@
       alert("No image found in clipboard!");
     }
 
+    // Global Paste Fallback: pastes to first available and empty active slot
     window.addEventListener('paste', (e) => {
       if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-      const targetSlot = [1, 2, 3].find(s => !images[s]);
+      const targetSlot = [1, 2, 3].find(s => isSlotActive(s) && !images[s]);
       if (targetSlot) {
         handlePasteData(e.clipboardData, targetSlot);
       }
@@ -488,6 +537,8 @@
           document.getElementById(`info-${slot}`).style.display = 'none';
           document.getElementById(`preview-${slot}`).style.display = 'flex';
           document.getElementById(`slot-card-${slot}`).classList.add('has-image');
+
+          updateSlotsState();
         };
         img.src = e.target.result;
       };
@@ -502,6 +553,16 @@
       document.getElementById(`info-${slot}`).style.display = 'block';
       document.getElementById(`preview-${slot}`).style.display = 'none';
       document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
+
+      // Cascade remove subsequent slots to maintain sequential order
+      if (slot === 1) {
+        if (images[2]) removeSlot(2, null);
+        if (images[3]) removeSlot(3, null);
+      } else if (slot === 2) {
+        if (images[3]) removeSlot(3, null);
+      }
+
+      updateSlotsState();
     }
 
     document.getElementById('submitBtn').addEventListener('click', async () => {
@@ -544,6 +605,9 @@
         btn.textContent = "Ask Mr. Harony";
       }
     });
+
+    // Initial check
+    updateSlotsState();
   </script>
 </body>
 </html>
