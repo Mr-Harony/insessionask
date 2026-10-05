@@ -135,10 +135,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 145px;
+      min-height: 155px;
       position: relative;
       text-align: center;
-      cursor: pointer;
       outline: none;
       transition: all 0.2s ease;
     }
@@ -153,7 +152,6 @@
       border-style: solid;
       border-color: var(--border-color);
       background-color: var(--input-bg);
-      cursor: default;
     }
 
     .slot-card.is-disabled {
@@ -173,14 +171,41 @@
       font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    .slot-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .slot-btn {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 90%;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .slot-btn:hover {
+      background-color: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
     }
 
     .slot-instructions {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       color: var(--text-muted);
-      line-height: 1.35;
-      pointer-events: none;
+      margin-top: 4px;
+      line-height: 1.2;
     }
 
     .slot-instructions b {
@@ -308,16 +333,19 @@
       </div>
     </div>
 
-    <label>Take Photo with Camera or Paste (Ctrl+V)</label>
+    <label>Attach Photos (Camera, Upload or Paste Ctrl+V)</label>
     <div class="slots-container">
       
       <!-- Slot 1 -->
       <div class="slot-card" id="slot-card-1" tabindex="0" data-slot="1">
         <span class="slot-title">Photo 1 (Optional)</span>
-        <div class="slot-instructions" id="info-1">
-          📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
+        <div class="slot-actions" id="info-1">
+          <button type="button" class="slot-btn" onclick="triggerCamera(1)">📷 Camera</button>
+          <button type="button" class="slot-btn" onclick="triggerFile(1)">📁 Upload</button>
+          <div class="slot-instructions">or <b>Ctrl+V</b></div>
         </div>
-        <input type="file" id="file-1" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="cam-1" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="file-1" accept="image/*" style="display:none;">
         <div class="preview-box" id="preview-1">
           <img id="img-1" src="" alt="Photo 1">
           <button type="button" class="btn-remove" onclick="removeSlot(1, event)">✖ Remove</button>
@@ -327,10 +355,13 @@
       <!-- Slot 2 -->
       <div class="slot-card is-disabled" id="slot-card-2" tabindex="-1" data-slot="2">
         <span class="slot-title">Photo 2 (Optional)</span>
-        <div class="slot-instructions" id="info-2">
-          📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
+        <div class="slot-actions" id="info-2">
+          <button type="button" class="slot-btn" onclick="triggerCamera(2)">📷 Camera</button>
+          <button type="button" class="slot-btn" onclick="triggerFile(2)">📁 Upload</button>
+          <div class="slot-instructions">or <b>Ctrl+V</b></div>
         </div>
-        <input type="file" id="file-2" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="cam-2" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="file-2" accept="image/*" style="display:none;">
         <div class="preview-box" id="preview-2">
           <img id="img-2" src="" alt="Photo 2">
           <button type="button" class="btn-remove" onclick="removeSlot(2, event)">✖ Remove</button>
@@ -340,10 +371,13 @@
       <!-- Slot 3 -->
       <div class="slot-card is-disabled" id="slot-card-3" tabindex="-1" data-slot="3">
         <span class="slot-title">Photo 3 (Optional)</span>
-        <div class="slot-instructions" id="info-3">
-          📷 <b>Open Camera</b><br>or <b>Ctrl+V</b> to Paste
+        <div class="slot-actions" id="info-3">
+          <button type="button" class="slot-btn" onclick="triggerCamera(3)">📷 Camera</button>
+          <button type="button" class="slot-btn" onclick="triggerFile(3)">📁 Upload</button>
+          <div class="slot-instructions">or <b>Ctrl+V</b></div>
         </div>
-        <input type="file" id="file-3" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="cam-3" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="file-3" accept="image/*" style="display:none;">
         <div class="preview-box" id="preview-3">
           <img id="img-3" src="" alt="Photo 3">
           <button type="button" class="btn-remove" onclick="removeSlot(3, event)">✖ Remove</button>
@@ -364,9 +398,11 @@
     <div class="footer">Secure academic assistant • Mr. Harony</div>
   </div>
 
+  <!-- Custom Context Menu for Right-Click -->
   <div class="custom-menu" id="customMenu">
     <div class="custom-menu-item" id="menuPaste">📋 Paste Image</div>
-    <div class="custom-menu-item" id="menuCamera">📷 Open Camera</div>
+    <div class="custom-menu-item" id="menuCamera">📷 Take Photo</div>
+    <div class="custom-menu-item" id="menuUpload">📁 Upload File</div>
   </div>
 
   <script>
@@ -374,7 +410,7 @@
     const images = { 1: null, 2: null, 3: null };
     let activeMenuSlot = null;
 
-    // استرجاع البيانات المحفوظة محلياً على جهاز الطالب إن وُجدت
+    // استرجاع البيانات المحفوظة محلياً على جهاز الطالب
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('harony_username');
       const savedPass = localStorage.getItem('harony_password');
@@ -423,40 +459,44 @@
       }
     }
 
-    function resetForm() {
-      // تفريغ نص السؤال فقط
-      document.getElementById('question').value = '';
+    function triggerCamera(slot) {
+      if (!isSlotActive(slot)) return;
+      document.getElementById(`cam-${slot}`).click();
+    }
 
-      // تفريغ الصور الثلاث
+    function triggerFile(slot) {
+      if (!isSlotActive(slot)) return;
+      document.getElementById(`file-${slot}`).click();
+    }
+
+    function resetForm() {
+      document.getElementById('question').value = '';
       [1, 2, 3].forEach(slot => {
         images[slot] = null;
         document.getElementById(`file-${slot}`).value = '';
+        document.getElementById(`cam-${slot}`).value = '';
         document.getElementById(`img-${slot}`).src = '';
-        document.getElementById(`info-${slot}`).style.display = 'block';
+        document.getElementById(`info-${slot}`).style.display = 'flex';
         document.getElementById(`preview-${slot}`).style.display = 'none';
         document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
       });
-
       updateSlotsState();
     }
 
     [1, 2, 3].forEach(slot => {
       const card = document.getElementById(`slot-card-${slot}`);
       const fileInput = document.getElementById(`file-${slot}`);
+      const camInput = document.getElementById(`cam-${slot}`);
 
-      card.addEventListener('click', (e) => {
-        if (!isSlotActive(slot)) return;
-        if (!images[slot] && !e.target.classList.contains('btn-remove')) {
-          fileInput.click();
-        }
-      });
-
-      fileInput.addEventListener('change', (e) => {
+      const handleFileSelected = (e) => {
         if (!isSlotActive(slot)) return;
         if (e.target.files && e.target.files[0]) {
           compressAndSaveImage(e.target.files[0], slot);
         }
-      });
+      };
+
+      fileInput.addEventListener('change', handleFileSelected);
+      camInput.addEventListener('change', handleFileSelected);
 
       card.addEventListener('paste', (e) => {
         if (!isSlotActive(slot)) return;
@@ -500,7 +540,13 @@
 
     document.getElementById('menuCamera').addEventListener('click', () => {
       if (activeMenuSlot && isSlotActive(activeMenuSlot)) {
-        document.getElementById(`file-${activeMenuSlot}`).click();
+        triggerCamera(activeMenuSlot);
+      }
+    });
+
+    document.getElementById('menuUpload').addEventListener('click', () => {
+      if (activeMenuSlot && isSlotActive(activeMenuSlot)) {
+        triggerFile(activeMenuSlot);
       }
     });
 
@@ -569,8 +615,9 @@
       if (event) event.stopPropagation();
       images[slot] = null;
       document.getElementById(`file-${slot}`).value = '';
+      document.getElementById(`cam-${slot}`).value = '';
       document.getElementById(`img-${slot}`).src = '';
-      document.getElementById(`info-${slot}`).style.display = 'block';
+      document.getElementById(`info-${slot}`).style.display = 'flex';
       document.getElementById(`preview-${slot}`).style.display = 'none';
       document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
 
@@ -597,11 +644,10 @@
       }
 
       if (!question && !images[1] && !images[2] && !images[3]) {
-        alert("Please enter a question or capture at least one photo.");
+        alert("Please enter a question or attach at least one photo.");
         return;
       }
 
-      // حفظ بيانات الدخول محلياً على جهاز الطالب لتظل موجودة دائماً
       localStorage.setItem('harony_username', username);
       localStorage.setItem('harony_password', password);
 
@@ -629,7 +675,6 @@
         const textResponse = await response.text();
         box.innerHTML = formatMarkdown(textResponse);
 
-        // مسح السؤال والصور فقط، والإبقاء على بيانات الدخول كما هي
         resetForm();
 
       } catch (err) {
