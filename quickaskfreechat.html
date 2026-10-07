@@ -358,3 +358,244 @@
   <div class="credentials-bar" id="credentialsBar">
     <input type="email" id="userEmail" placeholder="Email / Username" autocomplete="username" />
     <div class="password-wrapper">
+      <input type="password" id="userPassword" placeholder="Password" autocomplete="current-password" />
+      <button type="button" class="toggle-password-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="Show/Hide Password">
+        👁️
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Feed -->
+  <div class="chat-messages" id="chatMessages">
+    <div class="msg-row bot">
+      <div class="msg-bubble">
+        Welcome to Mr. Harony's IGCSE Physics Assistant ⚛️
+Ask any physics question or problem here, and I will explain it step by step while keeping track of our conversation context.
+        <div class="bubble-meta">
+          <span class="msg-time" id="welcomeTime"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attachment Preview -->
+  <div class="attachment-preview-bar" id="previewBar" style="display: none;"></div>
+
+  <!-- Footer Input -->
+  <div class="chat-footer">
+    <label class="btn-attach" title="Attach photos">
+      📎
+      <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
+    </label>
+
+    <textarea class="footer-input" id="questionInput" rows="1" placeholder="Type a message..."></textarea>
+
+    <button class="btn-send-circle" id="sendBtn" onclick="sendMessage()" title="Send">
+      ➤
+    </button>
+  </div>
+</div>
+
+<script>
+  // رابط الـ Webhook الخاص بك في n8n
+  const N8N_WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickaskfreechat";
+
+  const chatMessages = document.getElementById("chatMessages");
+  const questionInput = document.getElementById("questionInput");
+  const userEmail = document.getElementById("userEmail");
+  const userPassword = document.getElementById("userPassword");
+  const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+  const credentialsBar = document.getElementById("credentialsBar");
+  const accountLabel = document.getElementById("accountLabel");
+  const fileInput = document.getElementById("fileInput");
+  const previewBar = document.getElementById("previewBar");
+  const sendBtn = document.getElementById("sendBtn");
+  const welcomeTime = document.getElementById("welcomeTime");
+
+  let attachedFiles = [];
+
+  welcomeTime.innerText = getCurrentTimeString();
+
+  function initUserSession() {
+    const savedEmail = localStorage.getItem("quickask_email");
+    const savedPass = localStorage.getItem("quickask_password");
+
+    if (savedEmail && savedPass) {
+      userEmail.value = savedEmail;
+      userPassword.value = savedPass;
+      accountLabel.innerText = savedEmail.split("@")[0];
+      credentialsBar.style.display = "none";
+    } else {
+      credentialsBar.style.display = "flex";
+      accountLabel.innerText = "Sign In";
+    }
+  }
+
+  function toggleCredentialsForm() {
+    if (credentialsBar.style.display === "none") {
+      credentialsBar.style.display = "flex";
+      userEmail.focus();
+    } else {
+      credentialsBar.style.display = "none";
+    }
+  }
+
+  function togglePasswordVisibility() {
+    if (userPassword.type === "password") {
+      userPassword.type = "text";
+      togglePasswordBtn.innerText = "🙈";
+    } else {
+      userPassword.type = "password";
+      togglePasswordBtn.innerText = "👁️";
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", initUserSession);
+
+  fileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      if (attachedFiles.length < 3) attachedFiles.push(file);
+    });
+    updatePreviewBar();
+  });
+
+  function updatePreviewBar() {
+    previewBar.innerHTML = "";
+    if (attachedFiles.length === 0) {
+      previewBar.style.display = "none";
+      return;
+    }
+    previewBar.style.display = "flex";
+    attachedFiles.forEach((file, index) => {
+      const chip = document.createElement("div");
+      chip.className = "attached-chip";
+      chip.innerHTML = `<span>📷 ${file.name.substring(0, 14)}...</span><button onclick="removeAttached(${index})">✕</button>`;
+      previewBar.appendChild(chip);
+    });
+  }
+
+  function removeAttached(index) {
+    attachedFiles.splice(index, 1);
+    updatePreviewBar();
+  }
+
+  questionInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  async function sendMessage() {
+    const text = questionInput.value.trim();
+    if (!text && attachedFiles.length === 0) return;
+
+    const email = userEmail.value.trim();
+    const password = userPassword.value.trim();
+
+    if (!email || !password) {
+      alert("Please enter your email and password first.");
+      credentialsBar.style.display = "flex";
+      userEmail.focus();
+      return;
+    }
+
+    localStorage.setItem("quickask_email", email);
+    localStorage.setItem("quickask_password", password);
+    initUserSession();
+
+    appendMessage(text, "user");
+    questionInput.value = "";
+
+    const tempBotId = "msg-" + Date.now();
+    appendMessage("Typing response...", "bot", tempBotId, false);
+
+    sendBtn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append("username", email);
+      formData.append("password", password);
+      formData.append("question", text || "none");
+
+      attachedFiles.forEach((file, i) => {
+        formData.append(`photo_${i + 1}`, file);
+      });
+
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        body: formData
+      });
+
+      const resultText = await response.text();
+
+      updateMessageContent(tempBotId, resultText);
+
+      attachedFiles = [];
+      updatePreviewBar();
+
+    } catch (err) {
+      updateMessageContent(tempBotId, "<span style='color: #ea0038; font-weight: bold;'>Server connection failed. Please check your network and try again.</span>");
+    } finally {
+      sendBtn.disabled = false;
+      questionInput.focus();
+    }
+  }
+
+  function appendMessage(content, role, id = null, showTicks = true) {
+    const row = document.createElement("div");
+    row.className = `msg-row ${role}`;
+    if (id) row.id = id;
+
+    const bubble = document.createElement("div");
+    bubble.className = "msg-bubble";
+
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "bubble-content";
+    contentDiv.innerHTML = content;
+
+    const meta = document.createElement("div");
+    meta.className = "bubble-meta";
+
+    const time = document.createElement("span");
+    time.className = "msg-time";
+    time.innerText = getCurrentTimeString();
+    meta.appendChild(time);
+
+    if (role === "user" && showTicks) {
+      const ticks = document.createElement("span");
+      ticks.className = "ticks";
+      ticks.innerText = " ✓✓";
+      meta.appendChild(ticks);
+    }
+
+    bubble.appendChild(contentDiv);
+    bubble.appendChild(meta);
+    row.appendChild(bubble);
+
+    chatMessages.appendChild(row);
+    scrollToBottom();
+  }
+
+  function updateMessageContent(id, newContent) {
+    const row = document.getElementById(id);
+    if (row) {
+      const contentDiv = row.querySelector(".bubble-content");
+      if (contentDiv) contentDiv.innerHTML = newContent;
+      scrollToBottom();
+    }
+  }
+
+  function getCurrentTimeString() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+</script>
+
+</body>
+</html>
