@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mr Harony - Quick Ask</title>
   <style>
     * {
@@ -10,47 +10,50 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: #0c1317;
-      color: #e9edef;
+      background-color: #eae6df;
+      color: #111b21;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
     }
 
-    /* الحاوية الأساسية للشات */
+    /* الحاوية المتجاوبة (Full Screen على الموبايل وCard على الكمبيوتر) */
     .whatsapp-container {
-      background-color: #111b21;
+      background-color: #efeae2;
       width: 100%;
-      max-width: 520px;
-      height: 100vh;
+      height: 100%;
       display: flex;
       flex-direction: column;
       position: relative;
-      border-left: 1px solid #222d34;
-      border-right: 1px solid #222d34;
     }
 
-    @media (min-width: 540px) {
+    @media (min-width: 600px) {
       .whatsapp-container {
+        max-width: 500px;
         height: 94vh;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        overflow: hidden;
+        border: 1px solid #d1d7db;
       }
     }
 
-    /* الشريط العلوي (WhatsApp Header) */
+    /* الشريط العلوي */
     .chat-header {
-      background-color: #202c33;
-      padding: 10px 16px;
+      background-color: #f0f2f5;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #222d34;
+      border-bottom: 1px solid #e9edef;
+      flex-shrink: 0;
       z-index: 10;
     }
 
@@ -64,68 +67,58 @@
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background-color: #00a884;
+      background-color: #25d366;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: bold;
     }
 
     .header-text h2 {
-      font-size: 0.98rem;
+      font-size: 1rem;
       font-weight: 600;
-      color: #e9edef;
+      color: #111b21;
+      line-height: 1.2;
     }
 
     .header-text p {
-      font-size: 0.75rem;
-      color: #8696a0;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 0.76rem;
+      color: #667781;
     }
 
     .btn-account-pill {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #8696a0;
-      padding: 4px 10px;
-      border-radius: 14px;
-      font-size: 0.72rem;
+      background-color: #ffffff;
+      border: 1px solid #d1d7db;
+      color: #54656f;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 0.75rem;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
 
-    .btn-account-pill:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: #e9edef;
-    }
-
-    /* نافذة أو بار إدخال البيانات المدمج */
+    /* بار إدخال البيانات المدمج */
     .credentials-bar {
-      background-color: #182229;
-      padding: 8px 14px;
+      background-color: #ffffff;
+      padding: 8px 12px;
       display: flex;
       gap: 8px;
-      border-bottom: 1px solid #222d34;
-      align-items: center;
+      border-bottom: 1px solid #e9edef;
+      flex-shrink: 0;
     }
 
     .credentials-bar input {
       flex: 1;
-      background-color: #111b21;
-      border: 1px solid #2a3942;
+      background-color: #f0f2f5;
+      border: 1px solid #d1d7db;
       border-radius: 8px;
-      padding: 6px 10px;
-      color: #e9edef;
-      font-size: 0.8rem;
+      padding: 7px 10px;
+      color: #111b21;
+      font-size: 0.82rem;
       outline: none;
       direction: ltr;
       text-align: left;
@@ -135,24 +128,26 @@
       border-color: #00a884;
     }
 
-    /* منطقة الرسائل والخلفية بنمط واتساب */
+    /* منطقة الرسائل بالنقشة الفاتحة للواتساب */
     .chat-messages {
       flex: 1;
-      background-color: #0b141a;
-      background-image: radial-gradient(#182229 1px, transparent 1px);
-      background-size: 16px 16px;
-      padding: 16px 14px;
+      background-color: #efeae2;
+      background-image: 
+        radial-gradient(#d4cdc2 1px, transparent 1px),
+        radial-gradient(#d4cdc2 1px, #efeae2 1px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      padding: 12px 14px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
 
-    /* فقاعات الرسائل */
     .msg-row {
       display: flex;
       width: 100%;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
 
     .msg-row.user {
@@ -164,28 +159,28 @@
     }
 
     .msg-bubble {
-      max-width: 82%;
-      padding: 7px 10px 6px 10px;
+      max-width: 84%;
+      padding: 7px 10px 5px 10px;
       border-radius: 8px;
-      position: relative;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       line-height: 1.45;
       word-wrap: break-word;
       white-space: pre-wrap;
+      box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
     }
 
-    /* لون فقاعة الطالب (أخضر واتساب) */
+    /* فقاعة رسالة الطالب (أخضر واتساب الفاتح الاصلي) */
     .msg-row.user .msg-bubble {
-      background-color: #005c4b;
-      color: #e9edef;
+      background-color: #d9fdd3;
+      color: #111b21;
       border-top-left-radius: 8px;
       border-top-right-radius: 0px;
     }
 
-    /* لون فقاعة المساعد الأكاديمي */
+    /* فقاعة رسالة المساعد الأكاديمي (أبيض ناصع) */
     .msg-row.bot .msg-bubble {
-      background-color: #202c33;
-      color: #e9edef;
+      background-color: #ffffff;
+      color: #111b21;
       border-top-left-radius: 0px;
       border-top-right-radius: 8px;
     }
@@ -195,84 +190,85 @@
       justify-content: flex-end;
       align-items: center;
       gap: 3px;
-      margin-top: 2px;
-      font-size: 0.68rem;
-      color: #8696a0;
+      margin-top: 3px;
+      font-size: 0.67rem;
+      color: #667781;
       direction: ltr;
     }
 
     .ticks {
-      color: #53bdeb; /* علامتي الصح الزرقاء */
+      color: #53bdeb; /* علامة الصح المزدوجة الزرقاء */
       font-size: 0.72rem;
+      font-weight: bold;
     }
 
-    /* شريط معاينة الصور قبل الإرسال */
+    /* شريط الصور المرفقة */
     .attachment-preview-bar {
-      background-color: #182229;
-      padding: 6px 14px;
+      background-color: #f0f2f5;
+      padding: 6px 12px;
       display: flex;
-      gap: 8px;
-      border-top: 1px solid #222d34;
+      gap: 6px;
+      border-top: 1px solid #e9edef;
       overflow-x: auto;
+      flex-shrink: 0;
     }
 
     .attached-chip {
-      background-color: #202c33;
-      font-size: 0.72rem;
+      background-color: #ffffff;
+      border: 1px solid #d1d7db;
+      font-size: 0.75rem;
       padding: 3px 8px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       gap: 6px;
-      color: #e9edef;
+      color: #111b21;
     }
 
     .attached-chip button {
       background: none;
       border: none;
-      color: #f15c6d;
+      color: #ea0038;
       font-weight: bold;
       cursor: pointer;
     }
 
-    /* شريط الكتابة السفلي (WhatsApp Footer) */
+    /* شريط الإدخال السفلي للواتساب الفاتح */
     .chat-footer {
-      background-color: #202c33;
-      padding: 8px 12px;
+      background-color: #f0f2f5;
+      padding: 8px 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      position: relative;
+      gap: 8px;
+      flex-shrink: 0;
+      border-top: 1px solid #e9edef;
     }
 
     .btn-attach {
       background: none;
       border: none;
-      color: #8696a0;
-      font-size: 1.3rem;
+      color: #54656f;
+      font-size: 1.35rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 4px;
-    }
-
-    .btn-attach:hover {
-      color: #aebac1;
+      padding: 6px;
     }
 
     .footer-input {
       flex: 1;
-      background-color: #2a3942;
+      background-color: #ffffff;
       border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: #d1d7db;
-      font-size: 0.9rem;
+      border-radius: 20px;
+      padding: 10px 16px;
+      color: #111b21;
+      font-size: 0.92rem;
       outline: none;
-      max-height: 100px;
+      max-height: 90px;
       resize: none;
       line-height: 1.35;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
     }
 
     .footer-input::placeholder {
@@ -282,35 +278,34 @@
     .btn-send-circle {
       background-color: #00a884;
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      color: #111b21;
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       flex-shrink: 0;
-      transition: background 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
     }
 
     .btn-send-circle:hover {
-      background-color: #06cf9c;
+      background-color: #029070;
     }
 
     .btn-send-circle:disabled {
-      background-color: #3b4a54;
-      color: #8696a0;
+      background-color: #8696a0;
       cursor: not-allowed;
     }
 
-    /* تخصيص مظهر شريط التمرير */
+    /* تخصيص الـ scrollbar */
     .chat-messages::-webkit-scrollbar {
       width: 5px;
     }
     .chat-messages::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.15);
       border-radius: 3px;
     }
   </style>
@@ -318,7 +313,7 @@
 <body>
 
 <div class="whatsapp-container">
-  <!-- رأس المحادثة -->
+  <!-- Header -->
   <div class="chat-header">
     <div class="header-user-info">
       <div class="avatar">⚛️</div>
@@ -327,21 +322,49 @@
         <p>Cambridge IGCSE Physics • متصل الآن</p>
       </div>
     </div>
-    <div class="header-actions">
+    <div>
       <button class="btn-account-pill" id="accountBtn" onclick="toggleCredentialsForm()" title="إعدادات الحساب">
         👤 <span id="accountLabel">حسابي</span>
       </button>
     </div>
   </div>
 
-  <!-- بيانات الحساب (تظهر تلقائياً لأول مرة أو عند الضغط على تغيير الحساب) -->
+  <!-- Credentials -->
   <div class="credentials-bar" id="credentialsBar">
     <input type="email" id="userEmail" placeholder="البريد الإلكتروني (Username)" autocomplete="username" />
     <input type="password" id="userPassword" placeholder="كلمة المرور (Password)" autocomplete="current-password" />
   </div>
 
-  <!-- صندوق رسائل الشات -->
+  <!-- Messages Feed -->
   <div class="chat-messages" id="chatMessages">
-    <!-- الرسالة الترحيبية الأولى بنمط فقاعة المساعد -->
     <div class="msg-row bot">
       <div class="msg-bubble">
+        أهلاً بك يا بطل في المساعد الأكاديمي لمادة الفيزياء ⚛️
+اكتب استفسارك أو مسألتك هنا وسأشرحها لك خطوة بخطوة مع تذكر محادثاتنا.
+        <div class="bubble-meta">
+          <span class="msg-time" id="welcomeTime"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attachment Preview -->
+  <div class="attachment-preview-bar" id="previewBar" style="display: none;"></div>
+
+  <!-- Footer Input -->
+  <div class="chat-footer">
+    <label class="btn-attach" title="إرفاق صور">
+      📎
+      <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
+    </label>
+
+    <textarea class="footer-input" id="questionInput" rows="1" placeholder="اكتب رسالة..."></textarea>
+
+    <button class="btn-send-circle" id="sendBtn" onclick="sendMessage()" title="إرسال">
+      ➤
+    </button>
+  </div>
+</div>
+
+<script>
+  // است
