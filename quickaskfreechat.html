@@ -24,7 +24,7 @@
       overflow: hidden;
     }
 
-    /* الحاوية المتجاوبة (Full Screen على الموبايل وCard على الكمبيوتر) */
+    /* الحاوية المتجاوبة للواتساب */
     .whatsapp-container {
       background-color: #efeae2;
       width: 100%;
@@ -112,7 +112,6 @@
     }
 
     .credentials-bar input {
-      flex: 1;
       background-color: #f0f2f5;
       border: 1px solid #d1d7db;
       border-radius: 8px;
@@ -128,7 +127,39 @@
       border-color: #00a884;
     }
 
-    /* منطقة الرسائل بالنقشة الفاتحة للواتساب */
+    #userEmail {
+      flex: 1.2;
+    }
+
+    /* حقل الباسوورد وزر العين */
+    .password-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 32px;
+    }
+
+    .toggle-password-btn {
+      position: absolute;
+      right: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: #54656f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      user-select: none;
+    }
+
+    /* منطقة الرسائل الفاتحة بنمط الواتساب */
     .chat-messages {
       flex: 1;
       background-color: #efeae2;
@@ -169,7 +200,7 @@
       box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
     }
 
-    /* فقاعة رسالة الطالب (أخضر واتساب الفاتح الاصلي) */
+    /* فقاعة رسالة الطالب */
     .msg-row.user .msg-bubble {
       background-color: #d9fdd3;
       color: #111b21;
@@ -177,7 +208,7 @@
       border-top-right-radius: 0px;
     }
 
-    /* فقاعة رسالة المساعد الأكاديمي (أبيض ناصع) */
+    /* فقاعة رسالة المساعد */
     .msg-row.bot .msg-bubble {
       background-color: #ffffff;
       color: #111b21;
@@ -197,12 +228,12 @@
     }
 
     .ticks {
-      color: #53bdeb; /* علامة الصح المزدوجة الزرقاء */
+      color: #53bdeb;
       font-size: 0.72rem;
       font-weight: bold;
     }
 
-    /* شريط الصور المرفقة */
+    /* شريط معاينة الصور المرفقة */
     .attachment-preview-bar {
       background-color: #f0f2f5;
       padding: 6px 12px;
@@ -233,7 +264,7 @@
       cursor: pointer;
     }
 
-    /* شريط الإدخال السفلي للواتساب الفاتح */
+    /* شريط الكتابة السفلي */
     .chat-footer {
       background-color: #f0f2f5;
       padding: 8px 10px;
@@ -300,7 +331,7 @@
       cursor: not-allowed;
     }
 
-    /* تخصيص الـ scrollbar */
+    /* Scrollbar */
     .chat-messages::-webkit-scrollbar {
       width: 5px;
     }
@@ -332,7 +363,12 @@
   <!-- Credentials -->
   <div class="credentials-bar" id="credentialsBar">
     <input type="email" id="userEmail" placeholder="البريد الإلكتروني (Username)" autocomplete="username" />
-    <input type="password" id="userPassword" placeholder="كلمة المرور (Password)" autocomplete="current-password" />
+    <div class="password-wrapper">
+      <input type="password" id="userPassword" placeholder="كلمة المرور (Password)" autocomplete="current-password" />
+      <button type="button" class="toggle-password-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="إظهار / إخفاء كلمة المرور">
+        👁️
+      </button>
+    </div>
   </div>
 
   <!-- Messages Feed -->
@@ -367,4 +403,206 @@
 </div>
 
 <script>
-  // است
+  // ضع رابط الـ Webhook الخاص بك في n8n هنا
+  const N8N_WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/quick-ask";
+
+  const chatMessages = document.getElementById("chatMessages");
+  const questionInput = document.getElementById("questionInput");
+  const userEmail = document.getElementById("userEmail");
+  const userPassword = document.getElementById("userPassword");
+  const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+  const credentialsBar = document.getElementById("credentialsBar");
+  const accountLabel = document.getElementById("accountLabel");
+  const fileInput = document.getElementById("fileInput");
+  const previewBar = document.getElementById("previewBar");
+  const sendBtn = document.getElementById("sendBtn");
+  const welcomeTime = document.getElementById("welcomeTime");
+
+  let attachedFiles = [];
+
+  welcomeTime.innerText = getCurrentTimeString();
+
+  function initUserSession() {
+    const savedEmail = localStorage.getItem("quickask_email");
+    const savedPass = localStorage.getItem("quickask_password");
+
+    if (savedEmail && savedPass) {
+      userEmail.value = savedEmail;
+      userPassword.value = savedPass;
+      accountLabel.innerText = savedEmail.split("@")[0];
+      credentialsBar.style.display = "none";
+    } else {
+      credentialsBar.style.display = "flex";
+      accountLabel.innerText = "تسجيل الدخول";
+    }
+  }
+
+  function toggleCredentialsForm() {
+    if (credentialsBar.style.display === "none") {
+      credentialsBar.style.display = "flex";
+      userEmail.focus();
+    } else {
+      credentialsBar.style.display = "none";
+    }
+  }
+
+  // تبديل إظهار / إخفاء كلمة المرور
+  function togglePasswordVisibility() {
+    if (userPassword.type === "password") {
+      userPassword.type = "text";
+      togglePasswordBtn.innerText = "🙈";
+    } else {
+      userPassword.type = "password";
+      togglePasswordBtn.innerText = "👁️";
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", initUserSession);
+
+  fileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      if (attachedFiles.length < 3) attachedFiles.push(file);
+    });
+    updatePreviewBar();
+  });
+
+  function updatePreviewBar() {
+    previewBar.innerHTML = "";
+    if (attachedFiles.length === 0) {
+      previewBar.style.display = "none";
+      return;
+    }
+    previewBar.style.display = "flex";
+    attachedFiles.forEach((file, index) => {
+      const chip = document.createElement("div");
+      chip.className = "attached-chip";
+      chip.innerHTML = `<span>📷 ${file.name.substring(0, 14)}...</span><button onclick="removeAttached(${index})">✕</button>`;
+      previewBar.appendChild(chip);
+    });
+  }
+
+  function removeAttached(index) {
+    attachedFiles.splice(index, 1);
+    updatePreviewBar();
+  }
+
+  questionInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  async function sendMessage() {
+    const text = questionInput.value.trim();
+    if (!text && attachedFiles.length === 0) return;
+
+    const email = userEmail.value.trim();
+    const password = userPassword.value.trim();
+
+    if (!email || !password) {
+      alert("برجاء إدخال البريد الإلكتروني وكلمة المرور أولاً.");
+      credentialsBar.style.display = "flex";
+      userEmail.focus();
+      return;
+    }
+
+    localStorage.setItem("quickask_email", email);
+    localStorage.setItem("quickask_password", password);
+    initUserSession();
+
+    appendMessage(text, "user");
+    questionInput.value = "";
+
+    const tempBotId = "msg-" + Date.now();
+    appendMessage("جاري كتابة الرد...", "bot", tempBotId, false);
+
+    sendBtn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append("username", email);
+      formData.append("password", password);
+      formData.append("question", text || "none");
+
+      attachedFiles.forEach((file, i) => {
+        formData.append(`photo_${i + 1}`, file);
+      });
+
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        body: formData
+      });
+
+      const resultText = await response.text();
+
+      updateMessageContent(tempBotId, resultText);
+
+      attachedFiles = [];
+      updatePreviewBar();
+
+    } catch (err) {
+      updateMessageContent(tempBotId, "<span style='color: #ea0038; font-weight: bold;'>تعذر الاتصال بالخادم، تأكد من اتصال الإنترنت ثم حاول ثانية.</span>");
+    } finally {
+      sendBtn.disabled = false;
+      questionInput.focus();
+    }
+  }
+
+  function appendMessage(content, role, id = null, showTicks = true) {
+    const row = document.createElement("div");
+    row.className = `msg-row ${role}`;
+    if (id) row.id = id;
+
+    const bubble = document.createElement("div");
+    bubble.className = "msg-bubble";
+
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "bubble-content";
+    contentDiv.innerHTML = content;
+
+    const meta = document.createElement("div");
+    meta.className = "bubble-meta";
+
+    const time = document.createElement("span");
+    time.className = "msg-time";
+    time.innerText = getCurrentTimeString();
+    meta.appendChild(time);
+
+    if (role === "user" && showTicks) {
+      const ticks = document.createElement("span");
+      ticks.className = "ticks";
+      ticks.innerText = " ✓✓";
+      meta.appendChild(ticks);
+    }
+
+    bubble.appendChild(contentDiv);
+    bubble.appendChild(meta);
+    row.appendChild(bubble);
+
+    chatMessages.appendChild(row);
+    scrollToBottom();
+  }
+
+  function updateMessageContent(id, newContent) {
+    const row = document.getElementById(id);
+    if (row) {
+      const contentDiv = row.querySelector(".bubble-content");
+      if (contentDiv) contentDiv.innerHTML = newContent;
+      scrollToBottom();
+    }
+  }
+
+  function getCurrentTimeString() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+</script>
+
+</body>
+</html>
