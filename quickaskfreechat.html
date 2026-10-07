@@ -60,13 +60,14 @@
       color: #94a3b8;
     }
 
-    /* Login / Account Bar */
+    /* Login Area */
     .user-bar {
       padding: 10px 16px;
       background-color: #0f172a;
       border-bottom: 1px solid #334155;
       display: flex;
       gap: 10px;
+      align-items: center;
     }
 
     .user-bar input {
@@ -84,6 +85,38 @@
 
     .user-bar input:focus {
       border-color: #4f46e5;
+    }
+
+    /* Logged In Info Bar */
+    .user-logged-in-bar {
+      padding: 8px 16px;
+      background-color: #0f172a;
+      border-bottom: 1px solid #334155;
+      display: none; /* تظهر فقط بعد الحفظ */
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+
+    .user-logged-in-bar span b {
+      color: #38bdf8;
+      direction: ltr;
+      display: inline-block;
+    }
+
+    .btn-edit-account {
+      background: none;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .btn-edit-account:hover {
+      background-color: #334155;
     }
 
     /* Messages Area */
@@ -138,14 +171,6 @@
       color: #64748b;
       margin-top: 4px;
       padding: 0 4px;
-    }
-
-    /* Attached image preview inside bubble */
-    .bubble img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      display: block;
     }
 
     /* Input & Action Area */
@@ -261,24 +286,28 @@
     <span>Cambridge IGCSE Physics</span>
   </div>
 
-  <!-- Credentials -->
-  <div class="user-bar">
-    <input type="email" id="userEmail" placeholder="Username (email)" value="Try@try.com" />
-    <input type="password" id="userPassword" placeholder="Password" value="12345678" />
+  <!-- Form الإدخال في أول مرة -->
+  <div class="user-bar" id="credentialsForm">
+    <input type="email" id="userEmail" placeholder="Username (email)" autocomplete="username" />
+    <input type="password" id="userPassword" placeholder="Password" autocomplete="current-password" />
+  </div>
+
+  <!-- الشريط الذي يظهر بعد حفظ البيانات -->
+  <div class="user-logged-in-bar" id="loggedInBar">
+    <span>مسجل باسم: <b id="displayEmail"></b></span>
+    <button class="btn-edit-account" onclick="editAccount()">تغيير الحساب</button>
   </div>
 
   <!-- Chat History / Messages -->
   <div class="chat-messages" id="chatMessages">
-    <!-- Initial welcome message -->
     <div class="message bot">
-      <div class="bubble">أهلاً بك 👋 اكتب سؤالك العلمي في فيزياء IGCSE، وسأجيبك فوراً مع تذكر تفاصيل محادثتنا الحالية.</div>
+      <div class="bubble">أهلاً بك 👋 اكتب سؤالك العلمي في فيزياء IGCSE، وسأجيبك فوراً مع تذكر سياق محادثاتنا.</div>
       <span class="message-time">النظام</span>
     </div>
   </div>
 
   <!-- Input Area -->
   <div class="chat-input-area">
-    <!-- Attached Images Names -->
     <div class="image-preview-bar" id="imagePreviewBar" style="display: none;"></div>
 
     <div class="input-row">
@@ -294,20 +323,50 @@
 </div>
 
 <script>
-  // الرابط الخاص بنود Webhook في n8n (استبدله برابط الـ Production Webhook الخاص بك)
-  const N8N_WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickaskfreechat";
+  // رابط الـ Webhook الخاص بك في n8n
+  const N8N_WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/quick-ask";
 
   const chatMessages = document.getElementById("chatMessages");
   const questionInput = document.getElementById("questionInput");
   const userEmail = document.getElementById("userEmail");
   const userPassword = document.getElementById("userPassword");
+  const credentialsForm = document.getElementById("credentialsForm");
+  const loggedInBar = document.getElementById("loggedInBar");
+  const displayEmail = document.getElementById("displayEmail");
   const fileInput = document.getElementById("fileInput");
   const imagePreviewBar = document.getElementById("imagePreviewBar");
   const sendBtn = document.getElementById("sendBtn");
 
   let attachedFiles = [];
 
-  // التعامل مع اختيار الصور
+  // فحص هل الطالب أدخل بياناته مسبقاً في هذا المتصفح؟
+  function initUserSession() {
+    const savedEmail = localStorage.getItem("quickask_email");
+    const savedPassword = localStorage.getItem("quickask_password");
+
+    if (savedEmail && savedPassword) {
+      userEmail.value = savedEmail;
+      userPassword.value = savedPassword;
+      displayEmail.innerText = savedEmail;
+      credentialsForm.style.display = "none";
+      loggedInBar.style.display = "flex";
+    } else {
+      credentialsForm.style.display = "flex";
+      loggedInBar.style.display = "none";
+    }
+  }
+
+  // السماح للطالب بتغيير الحساب لو رغب في ذلك
+  function editAccount() {
+    credentialsForm.style.display = "flex";
+    loggedInBar.style.display = "none";
+    userEmail.focus();
+  }
+
+  // تشغيل الفحص فور تحميل الصفحة
+  window.addEventListener("DOMContentLoaded", initUserSession);
+
+  // إرفاق الصور
   fileInput.addEventListener("change", (e) => {
     const files = Array.from(e.target.files);
     files.forEach(file => {
@@ -338,7 +397,7 @@
     updateImagePreview();
   }
 
-  // دعم الإرسال بزر Enter (مع Shift+Enter لسطر جديد)
+  // دعم Enter للإرسال و Shift+Enter للسطر الجديد
   questionInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -353,23 +412,29 @@
     const email = userEmail.value.trim();
     const password = userPassword.value.trim();
 
-    if (!email) {
-      alert("برجاء إدخال البريد الإلكتروني أولاً.");
+    if (!email || !password) {
+      alert("برجاء إدخال البريد الإلكتروني وكلمة المرور أولاً.");
+      credentialsForm.style.display = "flex";
+      userEmail.focus();
       return;
     }
+
+    // حفظ البيانات في المتصفح حتى لا يطلبها ثانية
+    localStorage.setItem("quickask_email", email);
+    localStorage.setItem("quickask_password", password);
+    initUserSession();
 
     // 1. إضافة فقاعة المستخدم في الشات
     appendMessage(text, "user");
     questionInput.value = "";
 
-    // 2. إضافة فقاعة تحميل مؤقتة للمساعد
+    // 2. إضافة فقاعة تحميل مؤقتة
     const tempBotMsgId = "loading-" + Date.now();
     appendMessage("جاري التفكير وتحليل السؤال...", "bot", tempBotMsgId);
 
     sendBtn.disabled = true;
 
     try {
-      // إرسال البيانات كـ FormData لدعم الصور والنصوص معاً
       const formData = new FormData();
       formData.append("username", email);
       formData.append("password", password);
@@ -386,10 +451,9 @@
 
       const resultText = await response.text();
 
-      // 3. استبدال فقاعة التحميل بالإجابة القادمة من n8n
+      // 3. عرض النتيجة
       updateBotMessage(tempBotMsgId, resultText);
 
-      // مسح الصور المرفقة بعد الإرسال الناجح
       attachedFiles = [];
       updateImagePreview();
 
@@ -408,7 +472,6 @@
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    // استخدام innerHTML حتى تظهر التنسيقات (مثل الخط العريض والأحمر) القادمة من n8n
     bubble.innerHTML = content;
 
     const time = document.createElement("span");
