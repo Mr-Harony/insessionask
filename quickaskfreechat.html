@@ -38,7 +38,7 @@
       .whatsapp-container {
         max-width: 500px;
         height: 94vh;
-        border-radius: 14px;
+        border-radius: 16px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
         overflow: hidden;
         border: 1px solid #d1d7db;
@@ -101,7 +101,7 @@
       gap: 5px;
     }
 
-    /* Credentials */
+    /* Credentials Bar */
     .credentials-bar {
       background-color: #ffffff;
       padding: 8px 12px;
@@ -157,7 +157,7 @@
       user-select: none;
     }
 
-    /* Feed */
+    /* Chat Area */
     .chat-messages {
       flex: 1;
       background-color: #efeae2;
@@ -228,7 +228,7 @@
       font-weight: bold;
     }
 
-    /* Attachments */
+    /* Attachment Preview Bar */
     .attachment-preview-bar {
       background-color: #f0f2f5;
       padding: 6px 12px;
@@ -259,73 +259,106 @@
       cursor: pointer;
     }
 
-    /* Footer */
-    .chat-footer {
-      background-color: #f0f2f5;
-      padding: 8px 10px;
+    /* ================================================= */
+    /* Exact WhatsApp Mobile Input Bar Design */
+    /* ================================================= */
+    .wa-chat-footer {
+      padding: 6px 8px 10px 8px;
       display: flex;
-      align-items: center;
-      gap: 8px;
+      align-items: flex-end;
+      gap: 6px;
+      background: transparent;
       flex-shrink: 0;
-      border-top: 1px solid #e9edef;
     }
 
-    .btn-attach {
+    /* White Pill Capsule */
+    .wa-input-pill {
+      flex: 1;
+      background-color: #ffffff;
+      border-radius: 25px;
+      padding: 4px 8px 4px 12px;
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      box-shadow: 0 1px 2px rgba(11, 20, 26, 0.12);
+      gap: 6px;
+    }
+
+    .wa-pill-btn {
       background: none;
       border: none;
-      color: #54656f;
-      font-size: 1.35rem;
-      cursor: pointer;
+      color: #667781;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 6px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: color 0.15s;
     }
 
-    .footer-input {
-      flex: 1;
-      background-color: #ffffff;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 16px;
+    .wa-pill-btn:hover {
       color: #111b21;
-      font-size: 0.92rem;
+    }
+
+    .wa-pill-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .wa-textarea {
+      flex: 1;
+      border: none;
       outline: none;
-      max-height: 90px;
+      font-size: 1rem;
+      color: #111b21;
+      background: transparent;
       resize: none;
+      max-height: 100px;
       line-height: 1.35;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+      padding: 8px 2px;
+      caret-color: #00a884;
     }
 
-    .footer-input::placeholder {
-      color: #8696a0;
+    .wa-textarea::placeholder {
+      color: #667781;
     }
 
-    .btn-send-circle {
+    /* Circular Green Action Button */
+    .wa-action-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
       background-color: #00a884;
       border: none;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 1.15rem;
       flex-shrink: 0;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s ease, background-color 0.15s ease;
     }
 
-    .btn-send-circle:hover {
-      background-color: #029070;
+    .wa-action-circle:active {
+      transform: scale(0.95);
     }
 
-    .btn-send-circle:disabled {
-      background-color: #8696a0;
+    .wa-action-circle svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .wa-action-circle:disabled {
+      background-color: #aebac1;
       cursor: not-allowed;
     }
 
+    /* Scrollbar */
     .chat-messages::-webkit-scrollbar {
       width: 5px;
     }
@@ -381,24 +414,52 @@ Ask any physics question or problem here, and I will explain it step by step whi
   <!-- Attachment Preview -->
   <div class="attachment-preview-bar" id="previewBar" style="display: none;"></div>
 
-  <!-- Footer Input -->
-  <div class="chat-footer">
-    <label class="btn-attach" title="Attach photos">
-      📎
-      <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
-    </label>
+  <!-- WhatsApp Pill-Shaped Input & Round Action Button -->
+  <div class="wa-chat-footer">
+    <div class="wa-input-pill">
+      <!-- Emoji / Sticker Face Icon -->
+      <button type="button" class="wa-pill-btn" title="Emoji">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21.71.33 1.47.33 2.26 0 4.41-3.59 8-8 8zm-3.5-9c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm7 0c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 3c.78 1.57 2.41 2.5 4.5 2.5s3.72-.93 4.5-2.5h-9z"/>
+        </svg>
+      </button>
 
-    <textarea class="footer-input" id="questionInput" rows="1" placeholder="Type a message..."></textarea>
+      <!-- Text Input Area -->
+      <textarea class="wa-textarea" id="questionInput" rows="1" placeholder="Message"></textarea>
 
-    <button class="btn-send-circle" id="sendBtn" onclick="sendMessage()" title="Send">
-      ➤
+      <!-- Paperclip / Attach Icon -->
+      <label class="wa-pill-btn" title="Attach Document / Photo">
+        <svg viewBox="0 0 24 24">
+          <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5V6H9v9.5a3 3 0 0 0 6 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+        </svg>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
+      </label>
+
+      <!-- Camera Icon -->
+      <label class="wa-pill-btn" title="Camera / Capture">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
+          <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+        </svg>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" />
+      </label>
+    </div>
+
+    <!-- Green Circular Button: Switches from Mic to Send Plane Icon when text is entered -->
+    <button class="wa-action-circle" id="actionBtn" onclick="handleActionButton()" title="Send">
+      <svg id="micIcon" viewBox="0 0 24 24">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+      </svg>
+      <svg id="sendIcon" viewBox="0 0 24 24" style="display: none; transform: rotate(-25deg); margin-left: 2px;">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+      </svg>
     </button>
   </div>
 </div>
 
 <script>
-  // رابط الـ Webhook الخاص بك في n8n
-  const N8N_WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickaskfreechat";
+  // Replace with your actual n8n Production Webhook URL
+  const N8N_WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/quick-ask";
 
   const chatMessages = document.getElementById("chatMessages");
   const questionInput = document.getElementById("questionInput");
@@ -408,8 +469,11 @@ Ask any physics question or problem here, and I will explain it step by step whi
   const credentialsBar = document.getElementById("credentialsBar");
   const accountLabel = document.getElementById("accountLabel");
   const fileInput = document.getElementById("fileInput");
+  const cameraInput = document.getElementById("cameraInput");
   const previewBar = document.getElementById("previewBar");
-  const sendBtn = document.getElementById("sendBtn");
+  const actionBtn = document.getElementById("actionBtn");
+  const micIcon = document.getElementById("micIcon");
+  const sendIcon = document.getElementById("sendIcon");
   const welcomeTime = document.getElementById("welcomeTime");
 
   let attachedFiles = [];
@@ -452,12 +516,44 @@ Ask any physics question or problem here, and I will explain it step by step whi
 
   window.addEventListener("DOMContentLoaded", initUserSession);
 
-  fileInput.addEventListener("change", (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      if (attachedFiles.length < 3) attachedFiles.push(file);
+  // Toggle between Mic and Send Plane Icon
+  questionInput.addEventListener("input", () => {
+    updateButtonIcon();
+    // Auto-grow height
+    questionInput.style.height = "auto";
+    questionInput.style.height = Math.min(questionInput.scrollHeight, 100) + "px";
+  });
+
+  function updateButtonIcon() {
+    const hasContent = questionInput.value.trim().length > 0 || attachedFiles.length > 0;
+    if (hasContent) {
+      micIcon.style.display = "none";
+      sendIcon.style.display = "block";
+    } else {
+      micIcon.style.display = "block";
+      sendIcon.style.display = "none";
+    }
+  }
+
+  function handleActionButton() {
+    const hasContent = questionInput.value.trim().length > 0 || attachedFiles.length > 0;
+    if (hasContent) {
+      sendMessage();
+    } else {
+      questionInput.focus();
+    }
+  }
+
+  // Handle files & Camera
+  [fileInput, cameraInput].forEach(elem => {
+    elem.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        if (attachedFiles.length < 3) attachedFiles.push(file);
+      });
+      updatePreviewBar();
+      updateButtonIcon();
     });
-    updatePreviewBar();
   });
 
   function updatePreviewBar() {
@@ -478,6 +574,7 @@ Ask any physics question or problem here, and I will explain it step by step whi
   function removeAttached(index) {
     attachedFiles.splice(index, 1);
     updatePreviewBar();
+    updateButtonIcon();
   }
 
   questionInput.addEventListener("keydown", (e) => {
@@ -507,11 +604,13 @@ Ask any physics question or problem here, and I will explain it step by step whi
 
     appendMessage(text, "user");
     questionInput.value = "";
+    questionInput.style.height = "auto";
+    updateButtonIcon();
 
     const tempBotId = "msg-" + Date.now();
     appendMessage("Typing response...", "bot", tempBotId, false);
 
-    sendBtn.disabled = true;
+    actionBtn.disabled = true;
 
     try {
       const formData = new FormData();
@@ -538,7 +637,8 @@ Ask any physics question or problem here, and I will explain it step by step whi
     } catch (err) {
       updateMessageContent(tempBotId, "<span style='color: #ea0038; font-weight: bold;'>Server connection failed. Please check your network and try again.</span>");
     } finally {
-      sendBtn.disabled = false;
+      actionBtn.disabled = false;
+      updateButtonIcon();
       questionInput.focus();
     }
   }
