@@ -24,7 +24,7 @@
       overflow: hidden;
     }
 
-    /* Responsive WhatsApp Container */
+    /* Container */
     .whatsapp-container {
       background-color: #efeae2;
       width: 100%;
@@ -101,7 +101,7 @@
       gap: 5px;
     }
 
-    /* Credentials Bar */
+    /* Credentials */
     .credentials-bar {
       background-color: #ffffff;
       padding: 8px 12px;
@@ -130,7 +130,6 @@
       flex: 1.2;
     }
 
-    /* Password Input with Eye Icon */
     .password-wrapper {
       position: relative;
       flex: 1;
@@ -158,7 +157,7 @@
       user-select: none;
     }
 
-    /* Chat Messages Feed */
+    /* Feed */
     .chat-messages {
       flex: 1;
       background-color: #efeae2;
@@ -199,7 +198,6 @@
       box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
     }
 
-    /* Student Bubble */
     .msg-row.user .msg-bubble {
       background-color: #d9fdd3;
       color: #111b21;
@@ -207,7 +205,6 @@
       border-top-left-radius: 8px;
     }
 
-    /* Assistant Bubble */
     .msg-row.bot .msg-bubble {
       background-color: #ffffff;
       color: #111b21;
@@ -231,7 +228,7 @@
       font-weight: bold;
     }
 
-    /* Attachment Preview Bar */
+    /* Attachments */
     .attachment-preview-bar {
       background-color: #f0f2f5;
       padding: 6px 12px;
@@ -262,7 +259,7 @@
       cursor: pointer;
     }
 
-    /* Bottom Input Footer */
+    /* Footer */
     .chat-footer {
       background-color: #f0f2f5;
       padding: 8px 10px;
@@ -294,3 +291,70 @@
       color: #111b21;
       font-size: 0.92rem;
       outline: none;
+      max-height: 90px;
+      resize: none;
+      line-height: 1.35;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    }
+
+    .footer-input::placeholder {
+      color: #8696a0;
+    }
+
+    .btn-send-circle {
+      background-color: #00a884;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-send-circle:hover {
+      background-color: #029070;
+    }
+
+    .btn-send-circle:disabled {
+      background-color: #8696a0;
+      cursor: not-allowed;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 5px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="whatsapp-container">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-user-info">
+      <div class="avatar">⚛️</div>
+      <div class="header-text">
+        <h2>Mr Harony Assistant</h2>
+        <p>Cambridge IGCSE Physics • Online</p>
+      </div>
+    </div>
+    <div>
+      <button class="btn-account-pill" id="accountBtn" onclick="toggleCredentialsForm()" title="Account Settings">
+        👤 <span id="accountLabel">Account</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Credentials -->
+  <div class="credentials-bar" id="credentialsBar">
+    <input type="email" id="userEmail" placeholder="Email / Username" autocomplete="username" />
+    <div class="password-wrapper">
