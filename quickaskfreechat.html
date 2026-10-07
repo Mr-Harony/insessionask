@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -24,7 +24,7 @@
       overflow: hidden;
     }
 
-    /* الحاوية المتجاوبة للواتساب */
+    /* Responsive WhatsApp Container */
     .whatsapp-container {
       background-color: #efeae2;
       width: 100%;
@@ -45,7 +45,7 @@
       }
     }
 
-    /* الشريط العلوي */
+    /* Header */
     .chat-header {
       background-color: #f0f2f5;
       padding: 10px 14px;
@@ -101,7 +101,7 @@
       gap: 5px;
     }
 
-    /* بار إدخال البيانات المدمج */
+    /* Credentials Bar */
     .credentials-bar {
       background-color: #ffffff;
       padding: 8px 12px;
@@ -119,7 +119,6 @@
       color: #111b21;
       font-size: 0.82rem;
       outline: none;
-      direction: ltr;
       text-align: left;
     }
 
@@ -131,7 +130,7 @@
       flex: 1.2;
     }
 
-    /* حقل الباسوورد وزر العين */
+    /* Password Input with Eye Icon */
     .password-wrapper {
       position: relative;
       flex: 1;
@@ -159,7 +158,7 @@
       user-select: none;
     }
 
-    /* منطقة الرسائل الفاتحة بنمط الواتساب */
+    /* Chat Messages Feed */
     .chat-messages {
       flex: 1;
       background-color: #efeae2;
@@ -200,15 +199,15 @@
       box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
     }
 
-    /* فقاعة رسالة الطالب */
+    /* Student Bubble */
     .msg-row.user .msg-bubble {
       background-color: #d9fdd3;
       color: #111b21;
-      border-top-left-radius: 8px;
       border-top-right-radius: 0px;
+      border-top-left-radius: 8px;
     }
 
-    /* فقاعة رسالة المساعد */
+    /* Assistant Bubble */
     .msg-row.bot .msg-bubble {
       background-color: #ffffff;
       color: #111b21;
@@ -224,7 +223,6 @@
       margin-top: 3px;
       font-size: 0.67rem;
       color: #667781;
-      direction: ltr;
     }
 
     .ticks {
@@ -233,7 +231,7 @@
       font-weight: bold;
     }
 
-    /* شريط معاينة الصور المرفقة */
+    /* Attachment Preview Bar */
     .attachment-preview-bar {
       background-color: #f0f2f5;
       padding: 6px 12px;
@@ -264,7 +262,7 @@
       cursor: pointer;
     }
 
-    /* شريط الكتابة السفلي */
+    /* Bottom Input Footer */
     .chat-footer {
       background-color: #f0f2f5;
       padding: 8px 10px;
@@ -296,313 +294,3 @@
       color: #111b21;
       font-size: 0.92rem;
       outline: none;
-      max-height: 90px;
-      resize: none;
-      line-height: 1.35;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-    }
-
-    .footer-input::placeholder {
-      color: #8696a0;
-    }
-
-    .btn-send-circle {
-      background-color: #00a884;
-      border: none;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-    }
-
-    .btn-send-circle:hover {
-      background-color: #029070;
-    }
-
-    .btn-send-circle:disabled {
-      background-color: #8696a0;
-      cursor: not-allowed;
-    }
-
-    /* Scrollbar */
-    .chat-messages::-webkit-scrollbar {
-      width: 5px;
-    }
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 3px;
-    }
-  </style>
-</head>
-<body>
-
-<div class="whatsapp-container">
-  <!-- Header -->
-  <div class="chat-header">
-    <div class="header-user-info">
-      <div class="avatar">⚛️</div>
-      <div class="header-text">
-        <h2>Mr Harony Assistant</h2>
-        <p>Cambridge IGCSE Physics • متصل الآن</p>
-      </div>
-    </div>
-    <div>
-      <button class="btn-account-pill" id="accountBtn" onclick="toggleCredentialsForm()" title="إعدادات الحساب">
-        👤 <span id="accountLabel">حسابي</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Credentials -->
-  <div class="credentials-bar" id="credentialsBar">
-    <input type="email" id="userEmail" placeholder="البريد الإلكتروني (Username)" autocomplete="username" />
-    <div class="password-wrapper">
-      <input type="password" id="userPassword" placeholder="كلمة المرور (Password)" autocomplete="current-password" />
-      <button type="button" class="toggle-password-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="إظهار / إخفاء كلمة المرور">
-        👁️
-      </button>
-    </div>
-  </div>
-
-  <!-- Messages Feed -->
-  <div class="chat-messages" id="chatMessages">
-    <div class="msg-row bot">
-      <div class="msg-bubble">
-        أهلاً بك يا بطل في المساعد الأكاديمي لمادة الفيزياء ⚛️
-اكتب استفسارك أو مسألتك هنا وسأشرحها لك خطوة بخطوة مع تذكر محادثاتنا.
-        <div class="bubble-meta">
-          <span class="msg-time" id="welcomeTime"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Attachment Preview -->
-  <div class="attachment-preview-bar" id="previewBar" style="display: none;"></div>
-
-  <!-- Footer Input -->
-  <div class="chat-footer">
-    <label class="btn-attach" title="إرفاق صور">
-      📎
-      <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
-    </label>
-
-    <textarea class="footer-input" id="questionInput" rows="1" placeholder="اكتب رسالة..."></textarea>
-
-    <button class="btn-send-circle" id="sendBtn" onclick="sendMessage()" title="إرسال">
-      ➤
-    </button>
-  </div>
-</div>
-
-<script>
-  // ضع رابط الـ Webhook الخاص بك في n8n هنا
-  const N8N_WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/quick-ask";
-
-  const chatMessages = document.getElementById("chatMessages");
-  const questionInput = document.getElementById("questionInput");
-  const userEmail = document.getElementById("userEmail");
-  const userPassword = document.getElementById("userPassword");
-  const togglePasswordBtn = document.getElementById("togglePasswordBtn");
-  const credentialsBar = document.getElementById("credentialsBar");
-  const accountLabel = document.getElementById("accountLabel");
-  const fileInput = document.getElementById("fileInput");
-  const previewBar = document.getElementById("previewBar");
-  const sendBtn = document.getElementById("sendBtn");
-  const welcomeTime = document.getElementById("welcomeTime");
-
-  let attachedFiles = [];
-
-  welcomeTime.innerText = getCurrentTimeString();
-
-  function initUserSession() {
-    const savedEmail = localStorage.getItem("quickask_email");
-    const savedPass = localStorage.getItem("quickask_password");
-
-    if (savedEmail && savedPass) {
-      userEmail.value = savedEmail;
-      userPassword.value = savedPass;
-      accountLabel.innerText = savedEmail.split("@")[0];
-      credentialsBar.style.display = "none";
-    } else {
-      credentialsBar.style.display = "flex";
-      accountLabel.innerText = "تسجيل الدخول";
-    }
-  }
-
-  function toggleCredentialsForm() {
-    if (credentialsBar.style.display === "none") {
-      credentialsBar.style.display = "flex";
-      userEmail.focus();
-    } else {
-      credentialsBar.style.display = "none";
-    }
-  }
-
-  // تبديل إظهار / إخفاء كلمة المرور
-  function togglePasswordVisibility() {
-    if (userPassword.type === "password") {
-      userPassword.type = "text";
-      togglePasswordBtn.innerText = "🙈";
-    } else {
-      userPassword.type = "password";
-      togglePasswordBtn.innerText = "👁️";
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", initUserSession);
-
-  fileInput.addEventListener("change", (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      if (attachedFiles.length < 3) attachedFiles.push(file);
-    });
-    updatePreviewBar();
-  });
-
-  function updatePreviewBar() {
-    previewBar.innerHTML = "";
-    if (attachedFiles.length === 0) {
-      previewBar.style.display = "none";
-      return;
-    }
-    previewBar.style.display = "flex";
-    attachedFiles.forEach((file, index) => {
-      const chip = document.createElement("div");
-      chip.className = "attached-chip";
-      chip.innerHTML = `<span>📷 ${file.name.substring(0, 14)}...</span><button onclick="removeAttached(${index})">✕</button>`;
-      previewBar.appendChild(chip);
-    });
-  }
-
-  function removeAttached(index) {
-    attachedFiles.splice(index, 1);
-    updatePreviewBar();
-  }
-
-  questionInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  async function sendMessage() {
-    const text = questionInput.value.trim();
-    if (!text && attachedFiles.length === 0) return;
-
-    const email = userEmail.value.trim();
-    const password = userPassword.value.trim();
-
-    if (!email || !password) {
-      alert("برجاء إدخال البريد الإلكتروني وكلمة المرور أولاً.");
-      credentialsBar.style.display = "flex";
-      userEmail.focus();
-      return;
-    }
-
-    localStorage.setItem("quickask_email", email);
-    localStorage.setItem("quickask_password", password);
-    initUserSession();
-
-    appendMessage(text, "user");
-    questionInput.value = "";
-
-    const tempBotId = "msg-" + Date.now();
-    appendMessage("جاري كتابة الرد...", "bot", tempBotId, false);
-
-    sendBtn.disabled = true;
-
-    try {
-      const formData = new FormData();
-      formData.append("username", email);
-      formData.append("password", password);
-      formData.append("question", text || "none");
-
-      attachedFiles.forEach((file, i) => {
-        formData.append(`photo_${i + 1}`, file);
-      });
-
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: "POST",
-        body: formData
-      });
-
-      const resultText = await response.text();
-
-      updateMessageContent(tempBotId, resultText);
-
-      attachedFiles = [];
-      updatePreviewBar();
-
-    } catch (err) {
-      updateMessageContent(tempBotId, "<span style='color: #ea0038; font-weight: bold;'>تعذر الاتصال بالخادم، تأكد من اتصال الإنترنت ثم حاول ثانية.</span>");
-    } finally {
-      sendBtn.disabled = false;
-      questionInput.focus();
-    }
-  }
-
-  function appendMessage(content, role, id = null, showTicks = true) {
-    const row = document.createElement("div");
-    row.className = `msg-row ${role}`;
-    if (id) row.id = id;
-
-    const bubble = document.createElement("div");
-    bubble.className = "msg-bubble";
-
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "bubble-content";
-    contentDiv.innerHTML = content;
-
-    const meta = document.createElement("div");
-    meta.className = "bubble-meta";
-
-    const time = document.createElement("span");
-    time.className = "msg-time";
-    time.innerText = getCurrentTimeString();
-    meta.appendChild(time);
-
-    if (role === "user" && showTicks) {
-      const ticks = document.createElement("span");
-      ticks.className = "ticks";
-      ticks.innerText = " ✓✓";
-      meta.appendChild(ticks);
-    }
-
-    bubble.appendChild(contentDiv);
-    bubble.appendChild(meta);
-    row.appendChild(bubble);
-
-    chatMessages.appendChild(row);
-    scrollToBottom();
-  }
-
-  function updateMessageContent(id, newContent) {
-    const row = document.getElementById(id);
-    if (row) {
-      const contentDiv = row.querySelector(".bubble-content");
-      if (contentDiv) contentDiv.innerHTML = newContent;
-      scrollToBottom();
-    }
-  }
-
-  function getCurrentTimeString() {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  function scrollToBottom() {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-</script>
-
-</body>
-</html>
