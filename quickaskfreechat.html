@@ -3,502 +3,345 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mr Harony Quick Ask - Chat</title>
+  <title>Mr Harony - Quick Ask</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: #0f172a;
-      color: #f8fafc;
+      background-color: #0c1317;
+      color: #e9edef;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 16px;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .chat-card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
+    /* الحاوية الأساسية للشات */
+    .whatsapp-container {
+      background-color: #111b21;
       width: 100%;
-      max-width: 600px;
+      max-width: 520px;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 90vh;
-      max-height: 850px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      position: relative;
+      border-left: 1px solid #222d34;
+      border-right: 1px solid #222d34;
     }
 
-    /* Header */
+    @media (min-width: 540px) {
+      .whatsapp-container {
+        height: 94vh;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    /* الشريط العلوي (WhatsApp Header) */
     .chat-header {
-      padding: 16px 20px;
-      background-color: #1a2234;
-      border-bottom: 1px solid #334155;
+      background-color: #202c33;
+      padding: 10px 16px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #222d34;
+      z-index: 10;
     }
 
-    .chat-header h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #f1f5f9;
+    .header-user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background-color: #00a884;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .header-text h2 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #e9edef;
+    }
+
+    .header-text p {
+      font-size: 0.75rem;
+      color: #8696a0;
+    }
+
+    .header-actions {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .chat-header span {
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
-
-    /* Login Area */
-    .user-bar {
-      padding: 10px 16px;
-      background-color: #0f172a;
-      border-bottom: 1px solid #334155;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .user-bar input {
-      flex: 1;
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background-color: #1e293b;
-      color: #fff;
-      outline: none;
-      text-align: left;
-      direction: ltr;
-    }
-
-    .user-bar input:focus {
-      border-color: #4f46e5;
-    }
-
-    /* Logged In Info Bar */
-    .user-logged-in-bar {
-      padding: 8px 16px;
-      background-color: #0f172a;
-      border-bottom: 1px solid #334155;
-      display: none; /* تظهر فقط بعد الحفظ */
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.82rem;
-      color: #94a3b8;
-    }
-
-    .user-logged-in-bar span b {
-      color: #38bdf8;
-      direction: ltr;
-      display: inline-block;
-    }
-
-    .btn-edit-account {
-      background: none;
-      border: 1px solid #475569;
-      color: #cbd5e1;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
+    .btn-account-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #8696a0;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .btn-edit-account:hover {
-      background-color: #334155;
+    .btn-account-pill:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #e9edef;
     }
 
-    /* Messages Area */
+    /* نافذة أو بار إدخال البيانات المدمج */
+    .credentials-bar {
+      background-color: #182229;
+      padding: 8px 14px;
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid #222d34;
+      align-items: center;
+    }
+
+    .credentials-bar input {
+      flex: 1;
+      background-color: #111b21;
+      border: 1px solid #2a3942;
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: #e9edef;
+      font-size: 0.8rem;
+      outline: none;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .credentials-bar input:focus {
+      border-color: #00a884;
+    }
+
+    /* منطقة الرسائل والخلفية بنمط واتساب */
     .chat-messages {
       flex: 1;
-      padding: 16px;
+      background-color: #0b141a;
+      background-image: radial-gradient(#182229 1px, transparent 1px);
+      background-size: 16px 16px;
+      padding: 16px 14px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-    }
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      max-width: 82%;
-    }
-
-    .message.user {
-      align-self: flex-start;
-      align-items: flex-start;
-    }
-
-    .message.bot {
-      align-self: flex-end;
-      align-items: flex-end;
-    }
-
-    .bubble {
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 0.92rem;
-      line-height: 1.6;
-      word-break: break-word;
-      white-space: pre-wrap;
-    }
-
-    .message.user .bubble {
-      background-color: #3b82f6;
-      color: #ffffff;
-      border-bottom-right-radius: 2px;
-    }
-
-    .message.bot .bubble {
-      background-color: #334155;
-      color: #f8fafc;
-      border-bottom-left-radius: 2px;
-    }
-
-    .message-time {
-      font-size: 0.7rem;
-      color: #64748b;
-      margin-top: 4px;
-      padding: 0 4px;
-    }
-
-    /* Input & Action Area */
-    .chat-input-area {
-      padding: 14px 16px;
-      background-color: #1a2234;
-      border-top: 1px solid #334155;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .image-preview-bar {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-
-    .image-tag {
-      background-color: #334155;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
       gap: 6px;
     }
 
-    .image-tag button {
+    /* فقاعات الرسائل */
+    .msg-row {
+      display: flex;
+      width: 100%;
+      margin-bottom: 2px;
+    }
+
+    .msg-row.user {
+      justify-content: flex-end;
+    }
+
+    .msg-row.bot {
+      justify-content: flex-start;
+    }
+
+    .msg-bubble {
+      max-width: 82%;
+      padding: 7px 10px 6px 10px;
+      border-radius: 8px;
+      position: relative;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* لون فقاعة الطالب (أخضر واتساب) */
+    .msg-row.user .msg-bubble {
+      background-color: #005c4b;
+      color: #e9edef;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 0px;
+    }
+
+    /* لون فقاعة المساعد الأكاديمي */
+    .msg-row.bot .msg-bubble {
+      background-color: #202c33;
+      color: #e9edef;
+      border-top-left-radius: 0px;
+      border-top-right-radius: 8px;
+    }
+
+    .bubble-meta {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+      font-size: 0.68rem;
+      color: #8696a0;
+      direction: ltr;
+    }
+
+    .ticks {
+      color: #53bdeb; /* علامتي الصح الزرقاء */
+      font-size: 0.72rem;
+    }
+
+    /* شريط معاينة الصور قبل الإرسال */
+    .attachment-preview-bar {
+      background-color: #182229;
+      padding: 6px 14px;
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid #222d34;
+      overflow-x: auto;
+    }
+
+    .attached-chip {
+      background-color: #202c33;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #e9edef;
+    }
+
+    .attached-chip button {
       background: none;
       border: none;
-      color: #ef4444;
-      cursor: pointer;
+      color: #f15c6d;
       font-weight: bold;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
-    textarea {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #334155;
-      background-color: #0f172a;
-      color: #fff;
-      resize: none;
-      height: 48px;
-      font-size: 0.9rem;
-      outline: none;
-      line-height: 1.4;
-    }
-
-    textarea:focus {
-      border-color: #4f46e5;
-    }
-
-    .btn-icon {
-      background-color: #334155;
-      border: 1px solid #475569;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 10px;
       cursor: pointer;
-      font-size: 0.9rem;
+    }
+
+    /* شريط الكتابة السفلي (WhatsApp Footer) */
+    .chat-footer {
+      background-color: #202c33;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .btn-attach {
+      background: none;
+      border: none;
+      color: #8696a0;
+      font-size: 1.3rem;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 48px;
+      padding: 4px;
     }
 
-    .btn-send {
-      background-color: #4f46e5;
+    .btn-attach:hover {
+      color: #aebac1;
+    }
+
+    .footer-input {
+      flex: 1;
+      background-color: #2a3942;
       border: none;
-      color: #fff;
-      padding: 0 20px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      height: 48px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #d1d7db;
       font-size: 0.9rem;
+      outline: none;
+      max-height: 100px;
+      resize: none;
+      line-height: 1.35;
     }
 
-    .btn-send:hover {
-      background-color: #4338ca;
+    .footer-input::placeholder {
+      color: #8696a0;
     }
 
-    .btn-send:disabled {
-      background-color: #475569;
+    .btn-send-circle {
+      background-color: #00a884;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: #111b21;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+
+    .btn-send-circle:hover {
+      background-color: #06cf9c;
+    }
+
+    .btn-send-circle:disabled {
+      background-color: #3b4a54;
+      color: #8696a0;
       cursor: not-allowed;
     }
 
-    /* Scrollbar styling */
+    /* تخصيص مظهر شريط التمرير */
     .chat-messages::-webkit-scrollbar {
-      width: 6px;
+      width: 5px;
     }
     .chat-messages::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
     }
   </style>
 </head>
 <body>
 
-<div class="chat-card">
-  <!-- Header -->
+<div class="whatsapp-container">
+  <!-- رأس المحادثة -->
   <div class="chat-header">
-    <h1>Mr Harony Quick Ask ⚛️</h1>
-    <span>Cambridge IGCSE Physics</span>
+    <div class="header-user-info">
+      <div class="avatar">⚛️</div>
+      <div class="header-text">
+        <h2>Mr Harony Assistant</h2>
+        <p>Cambridge IGCSE Physics • متصل الآن</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-account-pill" id="accountBtn" onclick="toggleCredentialsForm()" title="إعدادات الحساب">
+        👤 <span id="accountLabel">حسابي</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Form الإدخال في أول مرة -->
-  <div class="user-bar" id="credentialsForm">
-    <input type="email" id="userEmail" placeholder="Username (email)" autocomplete="username" />
-    <input type="password" id="userPassword" placeholder="Password" autocomplete="current-password" />
+  <!-- بيانات الحساب (تظهر تلقائياً لأول مرة أو عند الضغط على تغيير الحساب) -->
+  <div class="credentials-bar" id="credentialsBar">
+    <input type="email" id="userEmail" placeholder="البريد الإلكتروني (Username)" autocomplete="username" />
+    <input type="password" id="userPassword" placeholder="كلمة المرور (Password)" autocomplete="current-password" />
   </div>
 
-  <!-- الشريط الذي يظهر بعد حفظ البيانات -->
-  <div class="user-logged-in-bar" id="loggedInBar">
-    <span>مسجل باسم: <b id="displayEmail"></b></span>
-    <button class="btn-edit-account" onclick="editAccount()">تغيير الحساب</button>
-  </div>
-
-  <!-- Chat History / Messages -->
+  <!-- صندوق رسائل الشات -->
   <div class="chat-messages" id="chatMessages">
-    <div class="message bot">
-      <div class="bubble">أهلاً بك 👋 اكتب سؤالك العلمي في فيزياء IGCSE، وسأجيبك فوراً مع تذكر سياق محادثاتنا.</div>
-      <span class="message-time">النظام</span>
-    </div>
-  </div>
-
-  <!-- Input Area -->
-  <div class="chat-input-area">
-    <div class="image-preview-bar" id="imagePreviewBar" style="display: none;"></div>
-
-    <div class="input-row">
-      <label class="btn-icon" title="إرفاق صورة">
-        📷
-        <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple />
-      </label>
-      
-      <textarea id="questionInput" placeholder="اكتب سؤالك هنا..."></textarea>
-      <button class="btn-send" id="sendBtn" onclick="sendMessage()">إرسال</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // رابط الـ Webhook الخاص بك في n8n
-  const N8N_WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/quick-ask";
-
-  const chatMessages = document.getElementById("chatMessages");
-  const questionInput = document.getElementById("questionInput");
-  const userEmail = document.getElementById("userEmail");
-  const userPassword = document.getElementById("userPassword");
-  const credentialsForm = document.getElementById("credentialsForm");
-  const loggedInBar = document.getElementById("loggedInBar");
-  const displayEmail = document.getElementById("displayEmail");
-  const fileInput = document.getElementById("fileInput");
-  const imagePreviewBar = document.getElementById("imagePreviewBar");
-  const sendBtn = document.getElementById("sendBtn");
-
-  let attachedFiles = [];
-
-  // فحص هل الطالب أدخل بياناته مسبقاً في هذا المتصفح؟
-  function initUserSession() {
-    const savedEmail = localStorage.getItem("quickask_email");
-    const savedPassword = localStorage.getItem("quickask_password");
-
-    if (savedEmail && savedPassword) {
-      userEmail.value = savedEmail;
-      userPassword.value = savedPassword;
-      displayEmail.innerText = savedEmail;
-      credentialsForm.style.display = "none";
-      loggedInBar.style.display = "flex";
-    } else {
-      credentialsForm.style.display = "flex";
-      loggedInBar.style.display = "none";
-    }
-  }
-
-  // السماح للطالب بتغيير الحساب لو رغب في ذلك
-  function editAccount() {
-    credentialsForm.style.display = "flex";
-    loggedInBar.style.display = "none";
-    userEmail.focus();
-  }
-
-  // تشغيل الفحص فور تحميل الصفحة
-  window.addEventListener("DOMContentLoaded", initUserSession);
-
-  // إرفاق الصور
-  fileInput.addEventListener("change", (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      if (attachedFiles.length < 3) {
-        attachedFiles.push(file);
-      }
-    });
-    updateImagePreview();
-  });
-
-  function updateImagePreview() {
-    imagePreviewBar.innerHTML = "";
-    if (attachedFiles.length === 0) {
-      imagePreviewBar.style.display = "none";
-      return;
-    }
-    imagePreviewBar.style.display = "flex";
-    attachedFiles.forEach((file, index) => {
-      const tag = document.createElement("div");
-      tag.className = "image-tag";
-      tag.innerHTML = `<span>${file.name.substring(0, 15)}...</span><button onclick="removeFile(${index})">✕</button>`;
-      imagePreviewBar.appendChild(tag);
-    });
-  }
-
-  function removeFile(index) {
-    attachedFiles.splice(index, 1);
-    updateImagePreview();
-  }
-
-  // دعم Enter للإرسال و Shift+Enter للسطر الجديد
-  questionInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  async function sendMessage() {
-    const text = questionInput.value.trim();
-    if (!text && attachedFiles.length === 0) return;
-
-    const email = userEmail.value.trim();
-    const password = userPassword.value.trim();
-
-    if (!email || !password) {
-      alert("برجاء إدخال البريد الإلكتروني وكلمة المرور أولاً.");
-      credentialsForm.style.display = "flex";
-      userEmail.focus();
-      return;
-    }
-
-    // حفظ البيانات في المتصفح حتى لا يطلبها ثانية
-    localStorage.setItem("quickask_email", email);
-    localStorage.setItem("quickask_password", password);
-    initUserSession();
-
-    // 1. إضافة فقاعة المستخدم في الشات
-    appendMessage(text, "user");
-    questionInput.value = "";
-
-    // 2. إضافة فقاعة تحميل مؤقتة
-    const tempBotMsgId = "loading-" + Date.now();
-    appendMessage("جاري التفكير وتحليل السؤال...", "bot", tempBotMsgId);
-
-    sendBtn.disabled = true;
-
-    try {
-      const formData = new FormData();
-      formData.append("username", email);
-      formData.append("password", password);
-      formData.append("question", text || "none");
-
-      attachedFiles.forEach((file, i) => {
-        formData.append(`photo_${i + 1}`, file);
-      });
-
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: "POST",
-        body: formData
-      });
-
-      const resultText = await response.text();
-
-      // 3. عرض النتيجة
-      updateBotMessage(tempBotMsgId, resultText);
-
-      attachedFiles = [];
-      updateImagePreview();
-
-    } catch (error) {
-      updateBotMessage(tempBotMsgId, "<span style='color: #ef4444; font-weight: bold;'>حدث خطأ في الاتصال بالخادم. برجاء المحاولة لاحقاً.</span>");
-    } finally {
-      sendBtn.disabled = false;
-      questionInput.focus();
-    }
-  }
-
-  function appendMessage(content, sender, id = null) {
-    const msgDiv = document.createElement("div");
-    msgDiv.className = `message ${sender}`;
-    if (id) msgDiv.id = id;
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.innerHTML = content;
-
-    const time = document.createElement("span");
-    time.className = "message-time";
-    const now = new Date();
-    time.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    msgDiv.appendChild(bubble);
-    msgDiv.appendChild(time);
-    chatMessages.appendChild(msgDiv);
-
-    scrollToBottom();
-  }
-
-  function updateBotMessage(id, newContent) {
-    const msgDiv = document.getElementById(id);
-    if (msgDiv) {
-      const bubble = msgDiv.querySelector(".bubble");
-      bubble.innerHTML = newContent;
-      scrollToBottom();
-    }
-  }
-
-  function scrollToBottom() {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-</script>
-
-</body>
-</html>
+    <!-- الرسالة الترحيبية الأولى بنمط فقاعة المساعد -->
+    <div class="msg-row bot">
+      <div class="msg-bubble">
