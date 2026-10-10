@@ -173,18 +173,20 @@
       cursor: pointer;
     }
 
+    /* إطار أفتح وأوضح للأقسام */
     .report-section {
       background-color: var(--section-bg);
-      border: 1px solid var(--border-color);
+      border: 1.5px solid #4f587a;
       border-radius: 12px;
       padding: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
     .section-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: #facc15;
+      color: #f59e0b;
       letter-spacing: 0.5px;
       margin-bottom: 10px;
     }
@@ -227,7 +229,7 @@
 
     .session-box {
       background-color: var(--input-bg);
-      border: 1px solid var(--border-color);
+      border: 1px solid #434b68;
       border-radius: 10px;
       padding: 12px;
       margin-bottom: 10px;
@@ -357,7 +359,6 @@
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
 
-    // استرجاع البيانات المحفوظة تلقائياً فور فتح الصفحة
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('harony_parent_user');
       const savedPass = localStorage.getItem('harony_parent_pass');
@@ -365,7 +366,6 @@
       if (savedPass) passwordInput.value = savedPass;
     });
 
-    // الحفظ التلقائي لحظة بلحظة أثناء الكتابة
     usernameInput.addEventListener('input', () => {
       localStorage.setItem('harony_parent_user', usernameInput.value.trim());
     });
