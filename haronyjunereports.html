@@ -146,7 +146,6 @@
       line-height: 1.4;
     }
 
-    /* Container التقرير بالكامل */
     .report-card {
       display: none;
       margin-top: 20px;
@@ -174,7 +173,6 @@
       cursor: pointer;
     }
 
-    /* أقسام التقرير (Sections) */
     .report-section {
       background-color: var(--section-bg);
       border: 1px solid var(--border-color);
@@ -189,42 +187,79 @@
       color: var(--primary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    .metric-row {
       display: flex;
-      align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    .section-body {
-      font-size: 0.92rem;
-      color: var(--text-main);
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-break: break-word;
+    .metric-row:last-child {
+      border-bottom: none;
     }
 
-    /* كارت الحضور والمشاركة للحصص الثلاث */
-    .sessions-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 6px;
+    .metric-label {
+      color: var(--text-muted);
     }
 
-    .session-item {
+    .metric-val {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .exam-link-btn {
+      display: inline-block;
+      margin-top: 8px;
+      background-color: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: #34d399;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      width: 100%;
+    }
+
+    .session-box {
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 0.88rem;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 0.86rem;
     }
 
-    .session-item-label {
+    .session-box:last-child {
+      margin-bottom: 0;
+    }
+
+    .session-name {
       font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .session-meta {
       color: var(--text-muted);
-      font-size: 0.78rem;
-      display: block;
-      margin-bottom: 2px;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .part-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      background-color: rgba(0,0,0,0.2);
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      margin-top: 6px;
     }
 
     .footer {
@@ -232,37 +267,6 @@
       margin-top: 18px;
       font-size: 0.72rem;
       color: var(--text-muted);
-    }
-
-    @media print {
-      body {
-        background-color: #fff;
-        color: #000;
-        padding: 0;
-      }
-      .container {
-        border: none;
-        box-shadow: none;
-        max-width: 100%;
-        padding: 0;
-      }
-      .form-group, .form-row, .submit-btn, .footer, .btn-print, .header p {
-        display: none !important;
-      }
-      .report-card {
-        display: block !important;
-      }
-      .report-section {
-        background-color: #fff !important;
-        border: 1px solid #ccc !important;
-        color: #000 !important;
-        break-inside: avoid;
-      }
-      .section-body, .session-item {
-        color: #000 !important;
-        background-color: #f9f9f9 !important;
-        border-color: #ddd !important;
-      }
     }
   </style>
 </head>
@@ -309,44 +313,36 @@
       <!-- 1. Student Information -->
       <div class="report-section">
         <div class="section-title">👤 Student Information</div>
-        <div class="section-body" id="secStudentInfo"></div>
+        <div class="metric-row"><span class="metric-label">Name</span><span class="metric-val" id="rName">-</span></div>
+        <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
       </div>
 
-      <!-- 2. Saturday Exam -->
+      <!-- 2. Exam 7 -->
       <div class="report-section">
-        <div class="section-title">📝 Saturday Exam</div>
-        <div class="section-body" id="secSaturdayExam"></div>
+        <div class="section-title" id="rExam1Title">📝 Exam 7 (U1 L2 Forces)</div>
+        <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
+        <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
+        <a href="#" target="_blank" class="exam-link-btn" id="rExam1Link" style="display:none;">📄 View Corrected Exam Paper</a>
       </div>
 
-      <!-- 3. Monday Exam -->
+      <!-- 3. Exam 8 MCQ -->
       <div class="report-section">
-        <div class="section-title">📝 Monday Exam</div>
-        <div class="section-body" id="secMondayExam"></div>
+        <div class="section-title" id="rExam2Title">📝 Exam 8 MCQ (U1 L2 Forces)</div>
+        <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
+        <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam2Grade">-</span></div>
       </div>
 
-      <!-- 4. Friday Homework -->
+      <!-- 4. Homework -->
       <div class="report-section">
-        <div class="section-title">📚 Friday Homework</div>
-        <div class="section-body" id="secFridayHw"></div>
+        <div class="section-title" id="rHwTitle">📚 Weekly Homework</div>
+        <div class="metric-row"><span class="metric-label">Status</span><span class="metric-val" id="rHwStatus1">-</span></div>
+        <div class="metric-row" id="rHwRow2"><span class="metric-label">Note</span><span class="metric-val" id="rHwStatus2">-</span></div>
       </div>
 
-      <!-- 5. Attendance & Participation (3 Sessions) -->
+      <!-- 5. Attendance & Participation -->
       <div class="report-section">
         <div class="section-title">📅 Attendance & Participation</div>
-        <div class="sessions-grid">
-          <div class="session-item">
-            <span class="session-item-label">SESSION 1</span>
-            <div id="secSession1">-</div>
-          </div>
-          <div class="session-item">
-            <span class="session-item-label">SESSION 2</span>
-            <div id="secSession2">-</div>
-          </div>
-          <div class="session-item">
-            <span class="session-item-label">SESSION 3</span>
-            <div id="secSession3">-</div>
-          </div>
-        </div>
+        <div id="sessionsContainer"></div>
       </div>
 
     </div>
@@ -364,21 +360,10 @@
       if (savedPass) document.getElementById('password').value = savedPass;
     });
 
-    function formatMarkdown(text) {
-      if (!text) return 'N/A';
-      return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/\*(.*?)\*/g, '<b>$1</b>');
-    }
-
     document.getElementById('fetchBtn').addEventListener('click', async () => {
       const btn = document.getElementById('fetchBtn');
       const errorMsg = document.getElementById('errorMsg');
       const reportCard = document.getElementById('reportCard');
-      const reportTitle = document.getElementById('reportTitle');
 
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -399,53 +384,87 @@
       btn.disabled = true;
       btn.textContent = "Loading Report...";
 
-      const payload = {
-        username: username,
-        password: password,
-        week: selectedWeek
-      };
-
       try {
         const response = await fetch(WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ username, password, week: selectedWeek })
         });
 
         const data = await response.json();
 
         if (response.ok && data.success) {
-          reportTitle.textContent = `${selectedWeek} Report`;
+          document.getElementById('reportTitle').textContent = `${selectedWeek} Report`;
 
-          // 1. Student Information
-          let infoText = "";
-          if (typeof data.student_info === 'object' && data.student_info !== null) {
-            infoText = `**Name:** ${data.student_info.name || ''}`;
-            if (data.student_info.group) infoText += `  |  **Group:** ${data.student_info.group}`;
-          } else {
-            infoText = data.student_info || data.student_name || '';
+          // 1. Info
+          document.getElementById('rName').textContent = data.student_info.name || '-';
+          document.getElementById('rCode').textContent = data.student_info.code || '-';
+
+          // 2. Exam 1
+          if (data.exam1) {
+            document.getElementById('rExam1Title').textContent = `📝 ${data.exam1.title || 'Exam 7'}`;
+            document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
+            document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
+            const linkBtn = document.getElementById('rExam1Link');
+            if (data.exam1.link && data.exam1.link.startsWith('http')) {
+              linkBtn.href = data.exam1.link;
+              linkBtn.style.display = 'block';
+            } else {
+              linkBtn.style.display = 'none';
+            }
           }
-          document.getElementById('secStudentInfo').innerHTML = formatMarkdown(infoText);
 
-          // 2. Saturday Exam
-          document.getElementById('secSaturdayExam').innerHTML = formatMarkdown(data.saturday_exam);
-
-          // 3. Monday Exam
-          document.getElementById('secMondayExam').innerHTML = formatMarkdown(data.monday_exam);
-
-          // 4. Friday Homework
-          document.getElementById('secFridayHw').innerHTML = formatMarkdown(data.friday_homework);
-
-          // 5. Attendance & Participation (3 Sessions)
-          if (data.attendance && typeof data.attendance === 'object') {
-            document.getElementById('secSession1').innerHTML = formatMarkdown(data.attendance.session_1);
-            document.getElementById('secSession2').innerHTML = formatMarkdown(data.attendance.session_2);
-            document.getElementById('secSession3').innerHTML = formatMarkdown(data.attendance.session_3);
-          } else {
-            document.getElementById('secSession1').innerHTML = formatMarkdown(data.attendance_session_1 || data.attendance);
-            document.getElementById('secSession2').innerHTML = formatMarkdown(data.attendance_session_2 || '-');
-            document.getElementById('secSession3').innerHTML = formatMarkdown(data.attendance_session_3 || '-');
+          // 3. Exam 2
+          if (data.exam2) {
+            document.getElementById('rExam2Title').textContent = `📝 ${data.exam2.title || 'Exam 8'}`;
+            document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
+            document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
           }
+
+          // 4. Homework
+          if (data.homework) {
+            document.getElementById('rHwTitle').textContent = `📚 ${data.homework.title || 'Homework'}`;
+            document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
+            if (data.homework.status2) {
+              document.getElementById('rHwStatus2').textContent = data.homework.status2;
+              document.getElementById('rHwRow2').style.display = 'flex';
+            } else {
+              document.getElementById('rHwRow2').style.display = 'none';
+            }
+          }
+
+          // 5. Attendance & Participation
+          const sessionsContainer = document.getElementById('sessionsContainer');
+          sessionsContainer.innerHTML = '';
+
+          const att = data.attendance || {};
+          const sessionKeys = ['session_1', 'session_2', 'session_3'];
+
+          sessionKeys.forEach((key, index) => {
+            const s = att[key];
+            if (!s) return;
+
+            let html = `
+              <div class="session-box">
+                <div class="session-name">${s.title || ('Session ' + (index + 1))}</div>
+                <div class="session-meta">⏱️ Attended: <b>${s.duration || '-'}</b></div>
+                ${s.notes ? `<div class="session-meta">📌 Notes: ${s.notes}</div>` : ''}
+            `;
+
+            if (s.participation) {
+              html += `
+                <div class="part-grid">
+                  <div>Answered: <b>${s.participation.answered}/${s.participation.total}</b></div>
+                  <div>Score: <b>${s.participation.percentage}</b></div>
+                  <div>✅ Correct: <b>${s.participation.correct}</b></div>
+                  <div>❌ Wrong: <b>${s.participation.wrong}</b></div>
+                </div>
+              `;
+            }
+
+            html += `</div>`;
+            sessionsContainer.innerHTML += html;
+          });
 
           reportCard.style.display = 'block';
         } else {
