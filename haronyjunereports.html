@@ -1,4 +1,14 @@
-:root {
+إليك كود ملف `haronyjunereports.html` كاملاً بعد تكبير الخطوط وتنسيق الأبعاد لتناسب قراءة واضحة ومريحة:
+
+```html
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mr. Harony | Weekly Reports</title>
+  <style>
+    :root {
       --bg-color: #1a1d29;
       --card-bg: #242838;
       --input-bg: #1a1d29;
@@ -262,3 +272,232 @@
       font-size: 0.85rem;
       color: var(--text-muted);
     }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h2>Mr. Harony | Weekly Reports</h2>
+      <p>Cambridge IGCSE Physics</p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Username / Email" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Select Week</label>
+      <select id="weekSelect">
+        <option value="Week 5" selected>Week 5</option>
+        <option value="Week 4">Week 4</option>
+        <option value="Week 3">Week 3</option>
+        <option value="Week 2">Week 2</option>
+        <option value="Week 1">Week 1</option>
+      </select>
+    </div>
+
+    <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="report-card" id="reportCard">
+      <div class="report-top-bar">
+        <h3 id="reportTitle">Weekly Report</h3>
+        <button type="button" class="btn-print" onclick="window.print()">🖨️ Print</button>
+      </div>
+
+      <!-- 1. Student Information -->
+      <div class="report-section">
+        <div class="section-title">👤 Student Information</div>
+        <div class="metric-row"><span class="metric-label">Name</span><span class="metric-val" id="rName">-</span></div>
+        <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
+      </div>
+
+      <!-- 2. Exam 7 -->
+      <div class="report-section">
+        <div class="section-title" id="rExam1Title">📝 Saturday Exam</div>
+        <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
+        <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
+        <a href="#" target="_blank" class="exam-link-btn" id="rExam1Link" style="display:none;">📄 View Corrected Exam Paper</a>
+      </div>
+
+      <!-- 3. Exam 8 MCQ -->
+      <div class="report-section">
+        <div class="section-title" id="rExam2Title">📝 Monday Exam</div>
+        <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
+        <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam2Grade">-</span></div>
+      </div>
+
+      <!-- 4. Homework -->
+      <div class="report-section">
+        <div class="section-title" id="rHwTitle">📚 Weekly Homework</div>
+        <div class="metric-row"><span class="metric-label">Status</span><span class="metric-val" id="rHwStatus1">-</span></div>
+        <div class="metric-row" id="rHwRow2"><span class="metric-label">Note</span><span class="metric-val" id="rHwStatus2">-</span></div>
+      </div>
+
+      <!-- 5. Attendance & Participation -->
+      <div class="report-section">
+        <div class="section-title">📅 Attendance & Participation</div>
+        <div id="sessionsContainer"></div>
+      </div>
+
+    </div>
+
+    <div class="footer">Cambridge IGCSE Physics • Mr. Harony</div>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/studentjunereports";
+
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    // استرجاع البيانات المحفوظة تلقائياً فور فتح الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('harony_parent_user');
+      const savedPass = localStorage.getItem('harony_parent_pass');
+      if (savedUser) usernameInput.value = savedUser;
+      if (savedPass) passwordInput.value = savedPass;
+    });
+
+    // الحفظ التلقائي لحظة بلحظة أثناء الكتابة
+    usernameInput.addEventListener('input', () => {
+      localStorage.setItem('harony_parent_user', usernameInput.value.trim());
+    });
+
+    passwordInput.addEventListener('input', () => {
+      localStorage.setItem('harony_parent_pass', passwordInput.value.trim());
+    });
+
+    document.getElementById('fetchBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('fetchBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      const reportCard = document.getElementById('reportCard');
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      const selectedWeek = document.getElementById('weekSelect').value;
+
+      errorMsg.style.display = 'none';
+      reportCard.style.display = 'none';
+
+      if (!password) {
+        errorMsg.textContent = "Please enter your password.";
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      localStorage.setItem('harony_parent_user', username);
+      localStorage.setItem('harony_parent_pass', password);
+
+      btn.disabled = true;
+      btn.textContent = "Loading Report...";
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, week: selectedWeek })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          document.getElementById('reportTitle').textContent = `${selectedWeek} Report`;
+
+          // 1. Info
+          document.getElementById('rName').textContent = data.student_info.name || '-';
+          document.getElementById('rCode').textContent = data.student_info.code || '-';
+
+          // 2. Exam 1
+          if (data.exam1) {
+            document.getElementById('rExam1Title').textContent = `📝 ${data.exam1.title || 'Saturday Exam'}`;
+            document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
+            document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
+            const linkBtn = document.getElementById('rExam1Link');
+            if (data.exam1.link && data.exam1.link.startsWith('http')) {
+              linkBtn.href = data.exam1.link;
+              linkBtn.style.display = 'block';
+            } else {
+              linkBtn.style.display = 'none';
+            }
+          }
+
+          // 3. Exam 2
+          if (data.exam2) {
+            document.getElementById('rExam2Title').textContent = `📝 ${data.exam2.title || 'Monday Exam'}`;
+            document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
+            document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
+          }
+
+          // 4. Homework
+          if (data.homework) {
+            document.getElementById('rHwTitle').textContent = `📚 ${data.homework.title || 'Homework'}`;
+            document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
+            if (data.homework.status2) {
+              document.getElementById('rHwStatus2').textContent = data.homework.status2;
+              document.getElementById('rHwRow2').style.display = 'flex';
+            } else {
+              document.getElementById('rHwRow2').style.display = 'none';
+            }
+          }
+
+          // 5. Attendance & Participation
+          const sessionsContainer = document.getElementById('sessionsContainer');
+          sessionsContainer.innerHTML = '';
+
+          const att = data.attendance || {};
+          const sessionKeys = ['session_1', 'session_2', 'session_3'];
+
+          sessionKeys.forEach((key, index) => {
+            const s = att[key];
+            if (!s) return;
+
+            let html = `
+              <div class="session-box">
+                <div class="session-name">${s.title || ('Session ' + (index + 1))}</div>
+                <div class="session-meta">⏱️ Attended: <b>${s.duration || '-'}</b></div>
+                ${s.timing_notes ? `<div class="session-meta">📌 Notes: ${s.timing_notes}</div>` : ''}
+            `;
+
+            if (s.participation) {
+              html += `
+                <div class="part-grid">
+                  <div>Answered: <b>${s.participation.answered}/${s.participation.total}</b></div>
+                  <div>Score: <b>${s.participation.percentage}</b></div>
+                  <div>✅ Correct: <b>${s.participation.correct}</b></div>
+                  <div>❌ Wrong: <b>${s.participation.wrong}</b></div>
+                </div>
+              `;
+            }
+
+            html += `</div>`;
+            sessionsContainer.innerHTML += html;
+          });
+
+          reportCard.style.display = 'block';
+        } else {
+          errorMsg.textContent = data.message || "Invalid credentials or no report found for this week.";
+          errorMsg.style.display = 'block';
+        }
+      } catch (err) {
+        errorMsg.textContent = "Unable to connect to the server. Please try again later.";
+        errorMsg.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "View Report";
+      }
+    });
+  </script>
+</body>
+</html>
+
+```
