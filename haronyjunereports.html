@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تقرير متابعة الطالب - Mr. Harony</title>
+  <title>Student Progress Report - Mr. Harony</title>
   <style>
     :root {
       --bg-color: #1e2230;
@@ -22,7 +22,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", Tahoma, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -218,39 +218,39 @@
 
   <div class="container">
     <div class="header">
-      <h2>بوابة متابعة الطالب 📊</h2>
+      <h2>Student Progress Portal 📊</h2>
       <p>Physics with Mr. Harony</p>
     </div>
 
     <div class="form-group">
-      <label>اسم المستخدم (Username / Email)</label>
-      <input type="text" id="username" placeholder="أدخل اسم المستخدم أو الإيميل">
+      <label>Username / Email</label>
+      <input type="text" id="username" placeholder="Enter username or email">
     </div>
 
     <div class="form-group">
-      <label>كلمة المرور (Password)</label>
-      <input type="password" id="password" placeholder="أدخل كلمة المرور">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password">
     </div>
 
     <div class="form-group">
-      <label>اختر الأسبوع</label>
+      <label>Select Week</label>
       <select id="weekSelect">
-        <option value="Week 5" selected>الأسبوع الخامس (Week 5)</option>
-        <option value="Week 4">الأسبوع الرابع (Week 4)</option>
-        <option value="Week 3">الأسبوع الثالث (Week 3)</option>
-        <option value="Week 2">الأسبوع الثاني (Week 2)</option>
-        <option value="Week 1">الأسبوع الأول (Week 1)</option>
+        <option value="Week 5" selected>Week 5</option>
+        <option value="Week 4">Week 4</option>
+        <option value="Week 3">Week 3</option>
+        <option value="Week 2">Week 2</option>
+        <option value="Week 1">Week 1</option>
       </select>
     </div>
 
-    <button type="button" class="submit-btn" id="fetchBtn">عرض التقرير</button>
+    <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
 
     <div class="error-msg" id="errorMsg"></div>
 
     <div class="report-card" id="reportCard">
       <div class="report-header">
-        <h3 id="reportTitle">تقرير الطالب</h3>
-        <button type="button" class="btn-print" onclick="window.print()">🖨️ طباعة</button>
+        <h3 id="reportTitle">Student Report</h3>
+        <button type="button" class="btn-print" onclick="window.print()">🖨️ Print</button>
       </div>
       <div class="report-content" id="reportContent"></div>
     </div>
@@ -293,7 +293,7 @@
       reportCard.style.display = 'none';
 
       if (!username || !password) {
-        errorMsg.textContent = "يرجى إدخال اسم المستخدم وكلمة المرور أولاً.";
+        errorMsg.textContent = "Please enter your username and password.";
         errorMsg.style.display = 'block';
         return;
       }
@@ -302,7 +302,7 @@
       localStorage.setItem('harony_parent_pass', password);
 
       btn.disabled = true;
-      btn.textContent = "جاري جلب التقرير...";
+      btn.textContent = "Loading Report...";
 
       const payload = {
         username: username,
@@ -320,19 +320,19 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
-          reportTitle.textContent = `تقرير الطالب: ${data.student_name || ''} - ${selectedWeek}`;
+          reportTitle.textContent = `Progress Report: ${data.student_name || ''} - ${selectedWeek}`;
           reportContent.innerHTML = formatMarkdown(data.report_text);
           reportCard.style.display = 'block';
         } else {
-          errorMsg.textContent = data.message || "بيانات الدخول غير صحيحة أو لا يوجد تقرير متاح لهذا الأسبوع.";
+          errorMsg.textContent = data.message || "Invalid credentials or no report found for this week.";
           errorMsg.style.display = 'block';
         }
       } catch (err) {
-        errorMsg.textContent = "تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى لاحقاً.";
+        errorMsg.textContent = "Unable to connect to the server. Please try again later.";
         errorMsg.style.display = 'block';
       } finally {
         btn.disabled = false;
-        btn.textContent = "عرض التقرير";
+        btn.textContent = "View Report";
       }
     });
   </script>
