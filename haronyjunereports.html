@@ -17,6 +17,12 @@
       --success: #10b981;
       --danger: #ef4444;
       --section-bg: #1f2333;
+
+      /* ألوان الأقسام المخصصة */
+      --color-info: #60a5fa;     /* سماوي لبيانات الطالب */
+      --color-exam: #fbbf24;     /* ذهبي للامتحانات */
+      --color-hw: #c084fc;       /* بنفسجي للواجبات */
+      --color-att: #34d399;      /* أخضر للحضور والمشاركة */
     }
 
     * {
@@ -159,8 +165,9 @@
     }
 
     .report-top-bar h3 {
-      font-size: 1.25rem;
-      color: var(--primary);
+      font-size: 1.35rem;
+      color: #38bdf8;
+      font-weight: 700;
     }
 
     .btn-print {
@@ -181,19 +188,23 @@
       margin-bottom: 12px;
     }
 
+    /* عناوين الأقسام وتنسيقها الملون */
     .section-title {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       margin-bottom: 10px;
     }
+
+    .title-info { color: var(--color-info); }
+    .title-exam { color: var(--color-exam); }
+    .title-hw   { color: var(--color-hw); }
+    .title-att  { color: var(--color-att); }
 
     .metric-row {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
+      padding: 7px 0;
       font-size: 1.05rem;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
@@ -213,11 +224,11 @@
 
     .exam-link-btn {
       display: inline-block;
-      margin-top: 10px;
-      background-color: rgba(16, 185, 129, 0.2);
+      margin-top: 12px;
+      background-color: rgba(16, 185, 129, 0.15);
       border: 1px solid var(--success);
       color: #34d399;
-      padding: 10px 14px;
+      padding: 11px 14px;
       border-radius: 8px;
       text-decoration: none;
       font-size: 1rem;
@@ -231,7 +242,7 @@
       border: 1px solid var(--border-color);
       border-radius: 10px;
       padding: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 0.98rem;
     }
 
@@ -248,18 +259,18 @@
 
     .session-meta {
       color: var(--text-muted);
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       margin-bottom: 8px;
     }
 
     .part-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
+      gap: 8px;
       background-color: rgba(0,0,0,0.25);
-      padding: 8px 10px;
+      padding: 9px 12px;
       border-radius: 8px;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       margin-top: 8px;
     }
 
@@ -313,36 +324,36 @@
 
       <!-- 1. Student Information -->
       <div class="report-section">
-        <div class="section-title">👤 Student Information</div>
+        <div class="section-title title-info">👤 STUDENT INFORMATION</div>
         <div class="metric-row"><span class="metric-label">Name</span><span class="metric-val" id="rName">-</span></div>
         <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
       </div>
 
-      <!-- 2. Exam 7 -->
+      <!-- 2. Saturday Exam -->
       <div class="report-section">
-        <div class="section-title" id="rExam1Title">📝 Saturday Exam</div>
+        <div class="section-title title-exam" id="rExam1Title">📝 Saturday Exam</div>
         <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
         <a href="#" target="_blank" class="exam-link-btn" id="rExam1Link" style="display:none;">📄 View Corrected Exam Paper</a>
       </div>
 
-      <!-- 3. Exam 8 MCQ -->
+      <!-- 3. Monday Exam (MCQ) -->
       <div class="report-section">
-        <div class="section-title" id="rExam2Title">📝 Monday Exam</div>
+        <div class="section-title title-exam" id="rExam2Title">📝 Monday Exam</div>
         <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam2Grade">-</span></div>
       </div>
 
-      <!-- 4. Homework -->
+      <!-- 4. Weekly Homework -->
       <div class="report-section">
-        <div class="section-title" id="rHwTitle">📚 Weekly Homework</div>
+        <div class="section-title title-hw" id="rHwTitle">📚 Weekly Homework</div>
         <div class="metric-row"><span class="metric-label">Status</span><span class="metric-val" id="rHwStatus1">-</span></div>
         <div class="metric-row" id="rHwRow2"><span class="metric-label">Note</span><span class="metric-val" id="rHwStatus2">-</span></div>
       </div>
 
       <!-- 5. Attendance & Participation -->
       <div class="report-section">
-        <div class="section-title">📅 Attendance & Participation</div>
+        <div class="section-title title-att">📅 ATTENDANCE & PARTICIPATION</div>
         <div id="sessionsContainer"></div>
       </div>
 
@@ -365,7 +376,7 @@
       if (savedPass) passwordInput.value = savedPass;
     });
 
-    // الحفظ التلقائي لحظة بلحظة أثناء الكتابة
+    // الحفظ التلقائي أثناء الكتابة
     usernameInput.addEventListener('input', () => {
       localStorage.setItem('harony_parent_user', usernameInput.value.trim());
     });
@@ -416,7 +427,7 @@
 
           // 2. Exam 1
           if (data.exam1) {
-            document.getElementById('rExam1Title').textContent = `📝 ${data.exam1.title || 'Saturday Exam'}`;
+            document.getElementById('rExam1Title').innerHTML = `📝 ${data.exam1.title || 'Saturday Exam'}`;
             document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
             document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
             const linkBtn = document.getElementById('rExam1Link');
@@ -430,14 +441,14 @@
 
           // 3. Exam 2
           if (data.exam2) {
-            document.getElementById('rExam2Title').textContent = `📝 ${data.exam2.title || 'Monday Exam'}`;
+            document.getElementById('rExam2Title').innerHTML = `📝 ${data.exam2.title || 'Monday Exam'}`;
             document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
             document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
           }
 
           // 4. Homework
           if (data.homework) {
-            document.getElementById('rHwTitle').textContent = `📚 ${data.homework.title || 'Homework'}`;
+            document.getElementById('rHwTitle').innerHTML = `📚 ${data.homework.title || 'Weekly Homework'}`;
             document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
             if (data.homework.status2) {
               document.getElementById('rHwStatus2').textContent = data.homework.status2;
