@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Student Progress Report - Mr. Harony</title>
+  <title>Mr. Harony | Weekly Reports</title>
   <style>
     :root {
       --bg-color: #1a1d29;
@@ -16,6 +16,7 @@
       --primary-hover: #3d5be0;
       --success: #10b981;
       --danger: #ef4444;
+      --section-bg: #1f2333;
     }
 
     * {
@@ -92,7 +93,7 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       color: var(--text-main);
-      font-size: 16px; /* يمنع الزووم التلقائي في متصفحات الموبايل */
+      font-size: 16px;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -145,30 +146,22 @@
       line-height: 1.4;
     }
 
+    /* Container التقرير بالكامل */
     .report-card {
       display: none;
       margin-top: 20px;
-      padding: 16px;
-      border-radius: 10px;
-      background-color: var(--input-bg);
-      border: 1px solid var(--border-color);
-      line-height: 1.6;
     }
 
-    .report-header {
+    .report-top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 8px;
       margin-bottom: 12px;
-      gap: 8px;
     }
 
-    .report-header h3 {
-      font-size: 1.05rem;
+    .report-top-bar h3 {
+      font-size: 1.1rem;
       color: var(--primary);
-      word-break: break-word;
     }
 
     .btn-print {
@@ -179,22 +172,59 @@
       border-radius: 6px;
       font-size: 0.78rem;
       cursor: pointer;
-      white-space: nowrap;
     }
 
-    .btn-print:hover {
-      color: var(--text-main);
-      border-color: var(--primary);
+    /* أقسام التقرير (Sections) */
+    .report-section {
+      background-color: var(--section-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
     }
 
-    .report-content {
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-body {
       font-size: 0.92rem;
+      color: var(--text-main);
+      line-height: 1.5;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .report-content b {
-      color: #fff;
+    /* كارت الحضور والمشاركة للحصص الثلاث */
+    .sessions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .session-item {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.88rem;
+    }
+
+    .session-item-label {
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      display: block;
+      margin-bottom: 2px;
     }
 
     .footer {
@@ -221,16 +251,17 @@
       }
       .report-card {
         display: block !important;
-        border: none;
-        background-color: #fff;
-        color: #000;
-        padding: 0;
       }
-      .report-header h3 {
-        color: #000;
+      .report-section {
+        background-color: #fff !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        break-inside: avoid;
       }
-      .report-content b {
-        color: #000;
+      .section-body, .session-item {
+        color: #000 !important;
+        background-color: #f9f9f9 !important;
+        border-color: #ddd !important;
       }
     }
   </style>
@@ -239,8 +270,8 @@
 
   <div class="container">
     <div class="header">
-      <h2>Student Progress Portal 📊</h2>
-      <p>Physics with Mr. Harony</p>
+      <h2>Mr. Harony | Weekly Reports</h2>
+      <p>Cambridge IGCSE Physics</p>
     </div>
 
     <div class="form-row">
@@ -270,11 +301,54 @@
     <div class="error-msg" id="errorMsg"></div>
 
     <div class="report-card" id="reportCard">
-      <div class="report-header">
-        <h3 id="reportTitle">Student Report</h3>
+      <div class="report-top-bar">
+        <h3 id="reportTitle">Weekly Report</h3>
         <button type="button" class="btn-print" onclick="window.print()">🖨️ Print</button>
       </div>
-      <div class="report-content" id="reportContent"></div>
+
+      <!-- 1. Student Information -->
+      <div class="report-section">
+        <div class="section-title">👤 Student Information</div>
+        <div class="section-body" id="secStudentInfo"></div>
+      </div>
+
+      <!-- 2. Saturday Exam -->
+      <div class="report-section">
+        <div class="section-title">📝 Saturday Exam</div>
+        <div class="section-body" id="secSaturdayExam"></div>
+      </div>
+
+      <!-- 3. Monday Exam -->
+      <div class="report-section">
+        <div class="section-title">📝 Monday Exam</div>
+        <div class="section-body" id="secMondayExam"></div>
+      </div>
+
+      <!-- 4. Friday Homework -->
+      <div class="report-section">
+        <div class="section-title">📚 Friday Homework</div>
+        <div class="section-body" id="secFridayHw"></div>
+      </div>
+
+      <!-- 5. Attendance & Participation (3 Sessions) -->
+      <div class="report-section">
+        <div class="section-title">📅 Attendance & Participation</div>
+        <div class="sessions-grid">
+          <div class="session-item">
+            <span class="session-item-label">SESSION 1</span>
+            <div id="secSession1">-</div>
+          </div>
+          <div class="session-item">
+            <span class="session-item-label">SESSION 2</span>
+            <div id="secSession2">-</div>
+          </div>
+          <div class="session-item">
+            <span class="session-item-label">SESSION 3</span>
+            <div id="secSession3">-</div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="footer">Cambridge IGCSE Physics • Mr. Harony</div>
@@ -291,8 +365,8 @@
     });
 
     function formatMarkdown(text) {
-      if (!text) return '';
-      return text
+      if (!text) return 'N/A';
+      return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -304,7 +378,6 @@
       const btn = document.getElementById('fetchBtn');
       const errorMsg = document.getElementById('errorMsg');
       const reportCard = document.getElementById('reportCard');
-      const reportContent = document.getElementById('reportContent');
       const reportTitle = document.getElementById('reportTitle');
 
       const username = document.getElementById('username').value.trim();
@@ -342,8 +415,38 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
-          reportTitle.textContent = `Progress: ${data.student_name || ''} (${selectedWeek})`;
-          reportContent.innerHTML = formatMarkdown(data.report_text);
+          reportTitle.textContent = `${selectedWeek} Report`;
+
+          // 1. Student Information
+          let infoText = "";
+          if (typeof data.student_info === 'object' && data.student_info !== null) {
+            infoText = `**Name:** ${data.student_info.name || ''}`;
+            if (data.student_info.group) infoText += `  |  **Group:** ${data.student_info.group}`;
+          } else {
+            infoText = data.student_info || data.student_name || '';
+          }
+          document.getElementById('secStudentInfo').innerHTML = formatMarkdown(infoText);
+
+          // 2. Saturday Exam
+          document.getElementById('secSaturdayExam').innerHTML = formatMarkdown(data.saturday_exam);
+
+          // 3. Monday Exam
+          document.getElementById('secMondayExam').innerHTML = formatMarkdown(data.monday_exam);
+
+          // 4. Friday Homework
+          document.getElementById('secFridayHw').innerHTML = formatMarkdown(data.friday_homework);
+
+          // 5. Attendance & Participation (3 Sessions)
+          if (data.attendance && typeof data.attendance === 'object') {
+            document.getElementById('secSession1').innerHTML = formatMarkdown(data.attendance.session_1);
+            document.getElementById('secSession2').innerHTML = formatMarkdown(data.attendance.session_2);
+            document.getElementById('secSession3').innerHTML = formatMarkdown(data.attendance.session_3);
+          } else {
+            document.getElementById('secSession1').innerHTML = formatMarkdown(data.attendance_session_1 || data.attendance);
+            document.getElementById('secSession2').innerHTML = formatMarkdown(data.attendance_session_2 || '-');
+            document.getElementById('secSession3').innerHTML = formatMarkdown(data.attendance_session_3 || '-');
+          }
+
           reportCard.style.display = 'block';
         } else {
           errorMsg.textContent = data.message || "Invalid credentials or no report found for this week.";
