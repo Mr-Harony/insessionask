@@ -2,14 +2,14 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Student Progress Report - Mr. Harony</title>
   <style>
     :root {
-      --bg-color: #1e2230;
-      --card-bg: #282c3f;
-      --input-bg: #1e2230;
-      --border-color: #3f445e;
+      --bg-color: #1a1d29;
+      --card-bg: #242838;
+      --input-bg: #1a1d29;
+      --border-color: #383e56;
       --text-main: #f0f2f5;
       --text-muted: #8c93b0;
       --primary: #4f6ef7;
@@ -23,6 +23,7 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -30,66 +31,68 @@
       color: var(--text-main);
       display: flex;
       justify-content: center;
-      padding: 20px;
+      padding: 16px 12px;
       min-height: 100vh;
     }
 
     .container {
       background-color: var(--card-bg);
       width: 100%;
-      max-width: 580px;
-      border-radius: 16px;
-      padding: 24px;
+      max-width: 520px;
+      border-radius: 14px;
+      padding: 20px 16px;
       border: 1px solid var(--border-color);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      height: fit-content;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .header h2 {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .header p {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
     }
 
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
-    /* صف لعرض الخانات بجانب بعضها */
     .form-row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
     }
 
     .form-row .form-group {
       flex: 1;
+      min-width: 0;
     }
 
     label {
       display: block;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
       font-weight: 600;
+      color: var(--text-muted);
     }
 
     input[type="text"], input[type="password"], select {
       width: 100%;
-      padding: 11px 14px;
+      padding: 12px 10px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       color: var(--text-main);
-      font-size: 0.95rem;
+      font-size: 16px; /* يمنع الزووم التلقائي في متصفحات الموبايل */
       outline: none;
       transition: border-color 0.2s;
     }
@@ -107,13 +110,17 @@
       background-color: var(--primary);
       color: #fff;
       border: none;
-      padding: 12px;
+      padding: 13px;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.2s;
+      margin-top: 6px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
     }
 
     .submit-btn:hover {
@@ -127,21 +134,22 @@
 
     .error-msg {
       display: none;
-      margin-top: 16px;
+      margin-top: 14px;
       padding: 12px;
       border-radius: 8px;
       background-color: rgba(239, 68, 68, 0.15);
       border: 1px solid var(--danger);
       color: #fca5a5;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       text-align: center;
+      line-height: 1.4;
     }
 
     .report-card {
       display: none;
-      margin-top: 24px;
-      padding: 20px;
-      border-radius: 12px;
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 10px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
       line-height: 1.6;
@@ -152,23 +160,26 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 10px;
-      margin-bottom: 14px;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      gap: 8px;
     }
 
     .report-header h3 {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       color: var(--primary);
+      word-break: break-word;
     }
 
     .btn-print {
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .btn-print:hover {
@@ -177,7 +188,7 @@
     }
 
     .report-content {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -188,8 +199,8 @@
 
     .footer {
       text-align: center;
-      margin-top: 20px;
-      font-size: 0.75rem;
+      margin-top: 18px;
+      font-size: 0.72rem;
       color: var(--text-muted);
     }
 
@@ -232,15 +243,14 @@
       <p>Physics with Mr. Harony</p>
     </div>
 
-    <!-- خانتا Username و Password بجوار بعضهما -->
     <div class="form-row">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" id="username" placeholder="Enter username or email">
+        <input type="text" id="username" placeholder="Username / Email" autocomplete="username">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" placeholder="Enter password">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
       </div>
     </div>
 
@@ -332,7 +342,7 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
-          reportTitle.textContent = `Progress Report: ${data.student_name || ''} - ${selectedWeek}`;
+          reportTitle.textContent = `Progress: ${data.student_name || ''} (${selectedWeek})`;
           reportContent.innerHTML = formatMarkdown(data.report_text);
           reportCard.style.display = 'block';
         } else {
