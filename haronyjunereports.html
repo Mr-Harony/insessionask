@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mr. Harony | Weekly Reports</title>
-  <style>
-    :root {
+:root {
       --bg-color: #1a1d29;
       --card-bg: #242838;
       --input-bg: #1a1d29;
       --border-color: #383e56;
       --text-main: #f0f2f5;
-      --text-muted: #8c93b0;
+      --text-muted: #a0a7c2;
       --primary: #4f6ef7;
       --primary-hover: #3d5be0;
       --success: #10b981;
@@ -32,45 +25,45 @@
       color: var(--text-main);
       display: flex;
       justify-content: center;
-      padding: 16px 12px;
+      padding: 20px 14px;
       min-height: 100vh;
     }
 
     .container {
       background-color: var(--card-bg);
       width: 100%;
-      max-width: 520px;
-      border-radius: 14px;
-      padding: 20px 16px;
+      max-width: 560px;
+      border-radius: 16px;
+      padding: 24px 20px;
       border: 1px solid var(--border-color);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
       height: fit-content;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .header h2 {
-      font-size: 1.3rem;
+      font-size: 1.55rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .header p {
-      font-size: 0.82rem;
+      font-size: 1rem;
       color: var(--text-muted);
     }
 
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .form-row {
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     .form-row .form-group {
@@ -80,20 +73,20 @@
 
     label {
       display: block;
-      font-size: 0.8rem;
-      margin-bottom: 5px;
+      font-size: 0.95rem;
+      margin-bottom: 7px;
       font-weight: 600;
       color: var(--text-muted);
     }
 
     input[type="text"], input[type="password"], select {
       width: 100%;
-      padding: 12px 10px;
+      padding: 14px 12px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 9px;
       color: var(--text-main);
-      font-size: 16px;
+      font-size: 1.05rem;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -111,12 +104,12 @@
       background-color: var(--primary);
       color: #fff;
       border: none;
-      padding: 13px;
-      border-radius: 8px;
-      font-size: 0.98rem;
+      padding: 15px;
+      border-radius: 9px;
+      font-size: 1.15rem;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 6px;
+      margin-top: 8px;
       transition: background 0.2s, transform 0.1s;
     }
 
@@ -135,31 +128,31 @@
 
     .error-msg {
       display: none;
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 8px;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 9px;
       background-color: rgba(239, 68, 68, 0.15);
       border: 1px solid var(--danger);
       color: #fca5a5;
-      font-size: 0.85rem;
+      font-size: 1rem;
       text-align: center;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     .report-card {
       display: none;
-      margin-top: 20px;
+      margin-top: 24px;
     }
 
     .report-top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .report-top-bar h3 {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       color: var(--primary);
     }
 
@@ -167,35 +160,35 @@
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.78rem;
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-size: 0.9rem;
       cursor: pointer;
     }
 
     .report-section {
       background-color: var(--section-bg);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 10px;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
     }
 
     .section-title {
-      font-size: 0.85rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--primary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .metric-row {
       display: flex;
       justify-content: space-between;
-      padding: 4px 0;
-      font-size: 0.9rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 6px 0;
+      font-size: 1.05rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
     .metric-row:last-child {
@@ -213,14 +206,14 @@
 
     .exam-link-btn {
       display: inline-block;
-      margin-top: 8px;
+      margin-top: 10px;
       background-color: rgba(16, 185, 129, 0.2);
       border: 1px solid var(--success);
       color: #34d399;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 10px 14px;
+      border-radius: 8px;
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 1rem;
       font-weight: 600;
       text-align: center;
       width: 100%;
@@ -229,10 +222,10 @@
     .session-box {
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 8px;
-      font-size: 0.86rem;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 0.98rem;
     }
 
     .session-box:last-child {
@@ -242,256 +235,30 @@
     .session-name {
       font-weight: 700;
       color: #fff;
-      margin-bottom: 4px;
+      font-size: 1.05rem;
+      margin-bottom: 5px;
     }
 
     .session-meta {
       color: var(--text-muted);
-      font-size: 0.8rem;
-      margin-bottom: 6px;
+      font-size: 0.92rem;
+      margin-bottom: 8px;
     }
 
     .part-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 4px;
-      background-color: rgba(0,0,0,0.2);
-      padding: 6px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      margin-top: 6px;
+      gap: 6px;
+      background-color: rgba(0,0,0,0.25);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      margin-top: 8px;
     }
 
     .footer {
       text-align: center;
-      margin-top: 18px;
-      font-size: 0.72rem;
+      margin-top: 22px;
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <div class="header">
-      <h2>Mr. Harony | Weekly Reports</h2>
-      <p>Cambridge IGCSE Physics</p>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="username" placeholder="Username / Email" autocomplete="username">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Select Week</label>
-      <select id="weekSelect">
-        <option value="Week 5" selected>Week 5</option>
-        <option value="Week 4">Week 4</option>
-        <option value="Week 3">Week 3</option>
-        <option value="Week 2">Week 2</option>
-        <option value="Week 1">Week 1</option>
-      </select>
-    </div>
-
-    <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
-
-    <div class="error-msg" id="errorMsg"></div>
-
-    <div class="report-card" id="reportCard">
-      <div class="report-top-bar">
-        <h3 id="reportTitle">Weekly Report</h3>
-        <button type="button" class="btn-print" onclick="window.print()">🖨️ Print</button>
-      </div>
-
-      <!-- 1. Student Information -->
-      <div class="report-section">
-        <div class="section-title">👤 Student Information</div>
-        <div class="metric-row"><span class="metric-label">Name</span><span class="metric-val" id="rName">-</span></div>
-        <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
-      </div>
-
-      <!-- 2. Exam 7 -->
-      <div class="report-section">
-        <div class="section-title" id="rExam1Title">📝 Saturday Exam</div>
-        <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
-        <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
-        <a href="#" target="_blank" class="exam-link-btn" id="rExam1Link" style="display:none;">📄 View Corrected Exam Paper</a>
-      </div>
-
-      <!-- 3. Exam 8 MCQ -->
-      <div class="report-section">
-        <div class="section-title" id="rExam2Title">📝 Monday Exam</div>
-        <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
-        <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam2Grade">-</span></div>
-      </div>
-
-      <!-- 4. Homework -->
-      <div class="report-section">
-        <div class="section-title" id="rHwTitle">📚 Weekly Homework</div>
-        <div class="metric-row"><span class="metric-label">Status</span><span class="metric-val" id="rHwStatus1">-</span></div>
-        <div class="metric-row" id="rHwRow2"><span class="metric-label">Note</span><span class="metric-val" id="rHwStatus2">-</span></div>
-      </div>
-
-      <!-- 5. Attendance & Participation -->
-      <div class="report-section">
-        <div class="section-title">📅 Attendance & Participation</div>
-        <div id="sessionsContainer"></div>
-      </div>
-
-    </div>
-
-    <div class="footer">Cambridge IGCSE Physics • Mr. Harony</div>
-  </div>
-
-  <script>
-    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/studentjunereports";
-
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-
-    // استرجاع البيانات المحفوظة تلقائياً فور فتح الصفحة
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('harony_parent_user');
-      const savedPass = localStorage.getItem('harony_parent_pass');
-      if (savedUser) usernameInput.value = savedUser;
-      if (savedPass) passwordInput.value = savedPass;
-    });
-
-    // الحفظ التلقائي لحظة بلحظة أثناء الكتابة
-    usernameInput.addEventListener('input', () => {
-      localStorage.setItem('harony_parent_user', usernameInput.value.trim());
-    });
-
-    passwordInput.addEventListener('input', () => {
-      localStorage.setItem('harony_parent_pass', passwordInput.value.trim());
-    });
-
-    document.getElementById('fetchBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('fetchBtn');
-      const errorMsg = document.getElementById('errorMsg');
-      const reportCard = document.getElementById('reportCard');
-
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      const selectedWeek = document.getElementById('weekSelect').value;
-
-      errorMsg.style.display = 'none';
-      reportCard.style.display = 'none';
-
-      if (!password) {
-        errorMsg.textContent = "Please enter your password.";
-        errorMsg.style.display = 'block';
-        return;
-      }
-
-      localStorage.setItem('harony_parent_user', username);
-      localStorage.setItem('harony_parent_pass', password);
-
-      btn.disabled = true;
-      btn.textContent = "Loading Report...";
-
-      try {
-        const response = await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password, week: selectedWeek })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          document.getElementById('reportTitle').textContent = `${selectedWeek} Report`;
-
-          // 1. Info
-          document.getElementById('rName').textContent = data.student_info.name || '-';
-          document.getElementById('rCode').textContent = data.student_info.code || '-';
-
-          // 2. Exam 1
-          if (data.exam1) {
-            document.getElementById('rExam1Title').textContent = `📝 ${data.exam1.title || 'Saturday Exam'}`;
-            document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
-            document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
-            const linkBtn = document.getElementById('rExam1Link');
-            if (data.exam1.link && data.exam1.link.startsWith('http')) {
-              linkBtn.href = data.exam1.link;
-              linkBtn.style.display = 'block';
-            } else {
-              linkBtn.style.display = 'none';
-            }
-          }
-
-          // 3. Exam 2
-          if (data.exam2) {
-            document.getElementById('rExam2Title').textContent = `📝 ${data.exam2.title || 'Monday Exam'}`;
-            document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
-            document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
-          }
-
-          // 4. Homework
-          if (data.homework) {
-            document.getElementById('rHwTitle').textContent = `📚 ${data.homework.title || 'Homework'}`;
-            document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
-            if (data.homework.status2) {
-              document.getElementById('rHwStatus2').textContent = data.homework.status2;
-              document.getElementById('rHwRow2').style.display = 'flex';
-            } else {
-              document.getElementById('rHwRow2').style.display = 'none';
-            }
-          }
-
-          // 5. Attendance & Participation
-          const sessionsContainer = document.getElementById('sessionsContainer');
-          sessionsContainer.innerHTML = '';
-
-          const att = data.attendance || {};
-          const sessionKeys = ['session_1', 'session_2', 'session_3'];
-
-          sessionKeys.forEach((key, index) => {
-            const s = att[key];
-            if (!s) return;
-
-            let html = `
-              <div class="session-box">
-                <div class="session-name">${s.title || ('Session ' + (index + 1))}</div>
-                <div class="session-meta">⏱️ Attended: <b>${s.duration || '-'}</b></div>
-                ${s.timing_notes ? `<div class="session-meta">📌 Notes: ${s.timing_notes}</div>` : ''}
-            `;
-
-            if (s.participation) {
-              html += `
-                <div class="part-grid">
-                  <div>Answered: <b>${s.participation.answered}/${s.participation.total}</b></div>
-                  <div>Score: <b>${s.participation.percentage}</b></div>
-                  <div>✅ Correct: <b>${s.participation.correct}</b></div>
-                  <div>❌ Wrong: <b>${s.participation.wrong}</b></div>
-                </div>
-              `;
-            }
-
-            html += `</div>`;
-            sessionsContainer.innerHTML += html;
-          });
-
-          reportCard.style.display = 'block';
-        } else {
-          errorMsg.textContent = data.message || "Invalid credentials or no report found for this week.";
-          errorMsg.style.display = 'block';
-        }
-      } catch (err) {
-        errorMsg.textContent = "Unable to connect to the server. Please try again later.";
-        errorMsg.style.display = 'block';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "View Report";
-      }
-    });
-  </script>
-</body>
-</html>
