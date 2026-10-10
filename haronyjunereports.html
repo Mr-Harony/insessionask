@@ -319,7 +319,7 @@
 
       <!-- 2. Exam 7 -->
       <div class="report-section">
-        <div class="section-title" id="rExam1Title">📝 Exam 7 (U1 L2 Forces)</div>
+        <div class="section-title" id="rExam1Title">📝 Saturday Exam</div>
         <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
         <a href="#" target="_blank" class="exam-link-btn" id="rExam1Link" style="display:none;">📄 View Corrected Exam Paper</a>
@@ -327,7 +327,7 @@
 
       <!-- 3. Exam 8 MCQ -->
       <div class="report-section">
-        <div class="section-title" id="rExam2Title">📝 Exam 8 MCQ (U1 L2 Forces)</div>
+        <div class="section-title" id="rExam2Title">📝 Monday Exam</div>
         <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam2Grade">-</span></div>
       </div>
@@ -353,11 +353,24 @@
   <script>
     const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/student-report";
 
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    // استرجاع البيانات المحفوظة تلقائياً فور فتح الصفحة
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('harony_parent_user');
       const savedPass = localStorage.getItem('harony_parent_pass');
-      if (savedUser) document.getElementById('username').value = savedUser;
-      if (savedPass) document.getElementById('password').value = savedPass;
+      if (savedUser) usernameInput.value = savedUser;
+      if (savedPass) passwordInput.value = savedPass;
+    });
+
+    // الحفظ التلقائي لحظة بلحظة أثناء الكتابة
+    usernameInput.addEventListener('input', () => {
+      localStorage.setItem('harony_parent_user', usernameInput.value.trim());
+    });
+
+    passwordInput.addEventListener('input', () => {
+      localStorage.setItem('harony_parent_pass', passwordInput.value.trim());
     });
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
@@ -365,15 +378,15 @@
       const errorMsg = document.getElementById('errorMsg');
       const reportCard = document.getElementById('reportCard');
 
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
       const selectedWeek = document.getElementById('weekSelect').value;
 
       errorMsg.style.display = 'none';
       reportCard.style.display = 'none';
 
-      if (!username || !password) {
-        errorMsg.textContent = "Please enter your username and password.";
+      if (!password) {
+        errorMsg.textContent = "Please enter your password.";
         errorMsg.style.display = 'block';
         return;
       }
@@ -402,7 +415,7 @@
 
           // 2. Exam 1
           if (data.exam1) {
-            document.getElementById('rExam1Title').textContent = `📝 ${data.exam1.title || 'Exam 7'}`;
+            document.getElementById('rExam1Title').textContent = `📝 ${data.exam1.title || 'Saturday Exam'}`;
             document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
             document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
             const linkBtn = document.getElementById('rExam1Link');
@@ -416,7 +429,7 @@
 
           // 3. Exam 2
           if (data.exam2) {
-            document.getElementById('rExam2Title').textContent = `📝 ${data.exam2.title || 'Exam 8'}`;
+            document.getElementById('rExam2Title').textContent = `📝 ${data.exam2.title || 'Monday Exam'}`;
             document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
             document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
           }
@@ -448,7 +461,7 @@
               <div class="session-box">
                 <div class="session-name">${s.title || ('Session ' + (index + 1))}</div>
                 <div class="session-meta">⏱️ Attended: <b>${s.duration || '-'}</b></div>
-                ${s.notes ? `<div class="session-meta">📌 Notes: ${s.notes}</div>` : ''}
+                ${s.timing_notes ? `<div class="session-meta">📌 Notes: ${s.timing_notes}</div>` : ''}
             `;
 
             if (s.participation) {
