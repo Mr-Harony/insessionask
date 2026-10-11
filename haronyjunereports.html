@@ -50,7 +50,7 @@
 
     .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .header h2 {
@@ -63,36 +63,6 @@
     .header p {
       font-size: 1rem;
       color: var(--text-muted);
-    }
-
-    /* أزرار التبديل بين الطالب وولي الأمر */
-    .role-toggle {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 18px;
-      background-color: var(--input-bg);
-      padding: 5px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-    }
-
-    .role-btn {
-      flex: 1;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.98rem;
-      font-weight: 600;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .role-btn.active {
-      background-color: var(--primary);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(79, 110, 247, 0.35);
     }
 
     .form-group {
@@ -201,7 +171,6 @@
       cursor: pointer;
     }
 
-    /* إطار واضح ومحدد للأقسام */
     .report-section {
       background-color: var(--section-bg);
       border: 1.5px solid #4f587a;
@@ -211,7 +180,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    /* لون أصفر هادئ ومريح للعناوين */
     .section-title {
       font-size: 1.05rem;
       font-weight: 700;
@@ -310,24 +278,18 @@
       <p>Cambridge IGCSE Physics</p>
     </div>
 
-    <!-- مفتاح تحديد نوع المستعلم -->
-    <div class="role-toggle">
-      <button type="button" class="role-btn active" id="btnRoleStudent" onclick="switchRole('student')">👨‍🎓 Student</button>
-      <button type="button" class="role-btn" id="btnRoleParent" onclick="switchRole('parent')">👨‍👩‍👧 Parent</button>
-    </div>
-
     <div class="form-row">
       <div class="form-group">
-        <label id="phoneLabel">Student Phone</label>
-        <input type="text" id="phoneInput" placeholder="Enter Phone Number" autocomplete="tel">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Username / Code" autocomplete="username">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
       </div>
     </div>
 
-    <!-- قائمة اختيار الابن (تظهر تلقائياً إذا كان لولي الأمر أكثر من ابن) -->
+    <!-- تظهر تلقائياً فقط إذا كان لولي الأمر أكثر من ابن -->
     <div class="form-group" id="studentSelectWrapper" style="display: none;">
       <label style="color: var(--accent-yellow);">Select Student / اختر الابن</label>
       <select id="studentSelect">
@@ -399,41 +361,22 @@
   <script>
     const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/studentjunereports";
 
-    let activeRole = 'student';
-    const phoneInput = document.getElementById('phoneInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const phoneLabel = document.getElementById('phoneLabel');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
     const studentSelectWrapper = document.getElementById('studentSelectWrapper');
     const studentSelect = document.getElementById('studentSelect');
     const msgBox = document.getElementById('msgBox');
     const reportCard = document.getElementById('reportCard');
 
-    function switchRole(role) {
-      activeRole = role;
-      document.getElementById('btnRoleStudent').classList.toggle('active', role === 'student');
-      document.getElementById('btnRoleParent').classList.toggle('active', role === 'parent');
-      phoneLabel.textContent = role === 'student' ? 'Student Phone' : 'Parent Phone';
-      
-      // إخفاء القائمة المنسدلة والتقرير عند تغيير الدور
-      studentSelectWrapper.style.display = 'none';
-      studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
-      reportCard.style.display = 'none';
-      msgBox.style.display = 'none';
-      localStorage.setItem('harony_saved_role', role);
-    }
-
-    // استرجاع المدخلات المحفوظة
     window.addEventListener('DOMContentLoaded', () => {
-      const savedRole = localStorage.getItem('harony_saved_role') || 'student';
-      switchRole(savedRole);
-      const savedPhone = localStorage.getItem('harony_saved_phone');
+      const savedUser = localStorage.getItem('harony_saved_user');
       const savedPass = localStorage.getItem('harony_saved_pass');
-      if (savedPhone) phoneInput.value = savedPhone;
+      if (savedUser) usernameInput.value = savedUser;
       if (savedPass) passwordInput.value = savedPass;
     });
 
-    phoneInput.addEventListener('input', () => {
-      localStorage.setItem('harony_saved_phone', phoneInput.value.trim());
+    usernameInput.addEventListener('input', () => {
+      localStorage.setItem('harony_saved_user', usernameInput.value.trim());
       studentSelectWrapper.style.display = 'none';
     });
 
@@ -442,7 +385,7 @@
       studentSelectWrapper.style.display = 'none';
     });
 
-    // جلب التقرير مباشرة عند اختيار اسم الابن
+    // عند اختيار اسم الطالب من القائمة يتم فتح التقرير فوراً
     studentSelect.addEventListener('change', () => {
       if (studentSelect.value) {
         document.getElementById('fetchBtn').click();
@@ -465,7 +408,7 @@
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
       const btn = document.getElementById('fetchBtn');
-      const phone = phoneInput.value.trim();
+      const username = usernameInput.value.trim();
       const password = passwordInput.value.trim();
       const week = document.getElementById('weekSelect').value;
       const selectedStudentCode = studentSelect.value || null;
@@ -473,12 +416,12 @@
       msgBox.style.display = 'none';
       reportCard.style.display = 'none';
 
-      if (!phone || !password) {
-        showNotice("Please enter both phone number and password.");
+      if (!password) {
+        showNotice("Please enter your password.");
         return;
       }
 
-      localStorage.setItem('harony_saved_phone', phone);
+      localStorage.setItem('harony_saved_user', username);
       localStorage.setItem('harony_saved_pass', password);
 
       btn.disabled = true;
@@ -489,17 +432,16 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            phone: phone,
+            username: username,
             password: password,
             week: week,
-            role: activeRole,
             selected_student_code: selectedStudentCode
           })
         });
 
         const data = await response.json();
 
-        // 1. حالة ولي أمر مسجل له أكثر من طالب
+        // حالة اكتشاف ولي أمر لديه أكثر من طالب
         if (response.ok && data.multiple_students) {
           studentSelect.innerHTML = '<option value="">-- Choose Student / اختر الابن --</option>';
           data.students.forEach(st => {
@@ -513,7 +455,7 @@
           return;
         }
 
-        // 2. حالة نجاح جلب التقرير
+        // حالة عرض التقرير
         if (response.ok && data.success) {
           document.getElementById('reportTitle').textContent = `${week} Report`;
 
