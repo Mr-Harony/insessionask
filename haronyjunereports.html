@@ -17,6 +17,7 @@
       --success: #10b981;
       --danger: #ef4444;
       --section-bg: #1f2333;
+      --accent-yellow: #f59e0b;
     }
 
     * {
@@ -49,7 +50,7 @@
 
     .header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .header h2 {
@@ -62,6 +63,36 @@
     .header p {
       font-size: 1rem;
       color: var(--text-muted);
+    }
+
+    /* أزرار التبديل بين الطالب وولي الأمر */
+    .role-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      background-color: var(--input-bg);
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .role-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .role-btn.active {
+      background-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(79, 110, 247, 0.35);
     }
 
     .form-group {
@@ -138,9 +169,6 @@
       margin-top: 16px;
       padding: 14px;
       border-radius: 9px;
-      background-color: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--danger);
-      color: #fca5a5;
       font-size: 1rem;
       text-align: center;
       line-height: 1.5;
@@ -173,7 +201,7 @@
       cursor: pointer;
     }
 
-    /* إطار أفتح وأوضح للأقسام */
+    /* إطار واضح ومحدد للأقسام */
     .report-section {
       background-color: var(--section-bg);
       border: 1.5px solid #4f587a;
@@ -183,10 +211,11 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
+    /* لون أصفر هادئ ومريح للعناوين */
     .section-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: #f59e0b;
+      color: var(--accent-yellow);
       letter-spacing: 0.5px;
       margin-bottom: 10px;
     }
@@ -281,15 +310,29 @@
       <p>Cambridge IGCSE Physics</p>
     </div>
 
+    <!-- مفتاح تحديد نوع المستعلم -->
+    <div class="role-toggle">
+      <button type="button" class="role-btn active" id="btnRoleStudent" onclick="switchRole('student')">👨‍🎓 Student</button>
+      <button type="button" class="role-btn" id="btnRoleParent" onclick="switchRole('parent')">👨‍👩‍👧 Parent</button>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="username" placeholder="Username / Email" autocomplete="username">
+        <label id="phoneLabel">Student Phone</label>
+        <input type="text" id="phoneInput" placeholder="Enter Phone Number" autocomplete="tel">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
       </div>
+    </div>
+
+    <!-- قائمة اختيار الابن (تظهر تلقائياً إذا كان لولي الأمر أكثر من ابن) -->
+    <div class="form-group" id="studentSelectWrapper" style="display: none;">
+      <label style="color: var(--accent-yellow);">Select Student / اختر الابن</label>
+      <select id="studentSelect">
+        <option value="">-- Choose Student --</option>
+      </select>
     </div>
 
     <div class="form-group">
@@ -305,7 +348,7 @@
 
     <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
 
-    <div class="error-msg" id="errorMsg"></div>
+    <div class="error-msg" id="msgBox"></div>
 
     <div class="report-card" id="reportCard">
       <div class="report-top-bar">
@@ -315,7 +358,7 @@
 
       <!-- 1. Student Information -->
       <div class="report-section">
-        <div class="section-title">👤 STUDENT INFORMATION</div>
+        <div class="section-title">👤 STUDENT INFO</div>
         <div class="metric-row"><span class="metric-label">Name</span><span class="metric-val" id="rName">-</span></div>
         <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
       </div>
@@ -356,44 +399,87 @@
   <script>
     const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/studentjunereports";
 
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
+    let activeRole = 'student';
+    const phoneInput = document.getElementById('phoneInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const phoneLabel = document.getElementById('phoneLabel');
+    const studentSelectWrapper = document.getElementById('studentSelectWrapper');
+    const studentSelect = document.getElementById('studentSelect');
+    const msgBox = document.getElementById('msgBox');
+    const reportCard = document.getElementById('reportCard');
 
+    function switchRole(role) {
+      activeRole = role;
+      document.getElementById('btnRoleStudent').classList.toggle('active', role === 'student');
+      document.getElementById('btnRoleParent').classList.toggle('active', role === 'parent');
+      phoneLabel.textContent = role === 'student' ? 'Student Phone' : 'Parent Phone';
+      
+      // إخفاء القائمة المنسدلة والتقرير عند تغيير الدور
+      studentSelectWrapper.style.display = 'none';
+      studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+      reportCard.style.display = 'none';
+      msgBox.style.display = 'none';
+      localStorage.setItem('harony_saved_role', role);
+    }
+
+    // استرجاع المدخلات المحفوظة
     window.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('harony_parent_user');
-      const savedPass = localStorage.getItem('harony_parent_pass');
-      if (savedUser) usernameInput.value = savedUser;
+      const savedRole = localStorage.getItem('harony_saved_role') || 'student';
+      switchRole(savedRole);
+      const savedPhone = localStorage.getItem('harony_saved_phone');
+      const savedPass = localStorage.getItem('harony_saved_pass');
+      if (savedPhone) phoneInput.value = savedPhone;
       if (savedPass) passwordInput.value = savedPass;
     });
 
-    usernameInput.addEventListener('input', () => {
-      localStorage.setItem('harony_parent_user', usernameInput.value.trim());
+    phoneInput.addEventListener('input', () => {
+      localStorage.setItem('harony_saved_phone', phoneInput.value.trim());
+      studentSelectWrapper.style.display = 'none';
     });
 
     passwordInput.addEventListener('input', () => {
-      localStorage.setItem('harony_parent_pass', passwordInput.value.trim());
+      localStorage.setItem('harony_saved_pass', passwordInput.value.trim());
+      studentSelectWrapper.style.display = 'none';
     });
+
+    // جلب التقرير مباشرة عند اختيار اسم الابن
+    studentSelect.addEventListener('change', () => {
+      if (studentSelect.value) {
+        document.getElementById('fetchBtn').click();
+      }
+    });
+
+    function showNotice(text, isWarning = false) {
+      msgBox.style.display = 'block';
+      msgBox.textContent = text;
+      if (isWarning) {
+        msgBox.style.backgroundColor = 'rgba(245, 158, 11, 0.15)';
+        msgBox.style.border = '1px solid #f59e0b';
+        msgBox.style.color = '#fde68a';
+      } else {
+        msgBox.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+        msgBox.style.border = '1px solid var(--danger)';
+        msgBox.style.color = '#fca5a5';
+      }
+    }
 
     document.getElementById('fetchBtn').addEventListener('click', async () => {
       const btn = document.getElementById('fetchBtn');
-      const errorMsg = document.getElementById('errorMsg');
-      const reportCard = document.getElementById('reportCard');
-
-      const username = usernameInput.value.trim();
+      const phone = phoneInput.value.trim();
       const password = passwordInput.value.trim();
-      const selectedWeek = document.getElementById('weekSelect').value;
+      const week = document.getElementById('weekSelect').value;
+      const selectedStudentCode = studentSelect.value || null;
 
-      errorMsg.style.display = 'none';
+      msgBox.style.display = 'none';
       reportCard.style.display = 'none';
 
-      if (!password) {
-        errorMsg.textContent = "Please enter your password.";
-        errorMsg.style.display = 'block';
+      if (!phone || !password) {
+        showNotice("Please enter both phone number and password.");
         return;
       }
 
-      localStorage.setItem('harony_parent_user', username);
-      localStorage.setItem('harony_parent_pass', password);
+      localStorage.setItem('harony_saved_phone', phone);
+      localStorage.setItem('harony_saved_pass', password);
 
       btn.disabled = true;
       btn.textContent = "Loading Report...";
@@ -402,19 +488,40 @@
         const response = await fetch(WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password, week: selectedWeek })
+          body: JSON.stringify({
+            phone: phone,
+            password: password,
+            week: week,
+            role: activeRole,
+            selected_student_code: selectedStudentCode
+          })
         });
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
-          document.getElementById('reportTitle').textContent = `${selectedWeek} Report`;
+        // 1. حالة ولي أمر مسجل له أكثر من طالب
+        if (response.ok && data.multiple_students) {
+          studentSelect.innerHTML = '<option value="">-- Choose Student / اختر الابن --</option>';
+          data.students.forEach(st => {
+            const opt = document.createElement('option');
+            opt.value = st.code;
+            opt.textContent = `${st.name} (${st.code})`;
+            studentSelect.appendChild(opt);
+          });
+          studentSelectWrapper.style.display = 'block';
+          showNotice("More than one student found. Please select which student to view above.", true);
+          return;
+        }
 
-          // 1. Info
+        // 2. حالة نجاح جلب التقرير
+        if (response.ok && data.success) {
+          document.getElementById('reportTitle').textContent = `${week} Report`;
+
+          // Student Info
           document.getElementById('rName').textContent = data.student_info.name || '-';
           document.getElementById('rCode').textContent = data.student_info.code || '-';
 
-          // 2. Exam 1
+          // Exam 1
           if (data.exam1) {
             document.getElementById('rExam1Title').innerHTML = `📝 ${data.exam1.title || 'Saturday Exam'}`;
             document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
@@ -428,14 +535,14 @@
             }
           }
 
-          // 3. Exam 2 (MCQ)
+          // Exam 2 (MCQ)
           if (data.exam2) {
             document.getElementById('rExam2Title').innerHTML = `🔘 ${data.exam2.title || 'Monday Exam'}`;
             document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
             document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
           }
 
-          // 4. Homework
+          // Homework
           if (data.homework) {
             document.getElementById('rHwTitle').innerHTML = `📚 ${data.homework.title || 'Weekly Homework'}`;
             document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
@@ -447,10 +554,9 @@
             }
           }
 
-          // 5. Attendance & Participation
+          // Attendance & Participation
           const sessionsContainer = document.getElementById('sessionsContainer');
           sessionsContainer.innerHTML = '';
-
           const att = data.attendance || {};
           const sessionKeys = ['session_1', 'session_2', 'session_3'];
 
@@ -482,12 +588,10 @@
 
           reportCard.style.display = 'block';
         } else {
-          errorMsg.textContent = data.message || "Invalid credentials or no report found for this week.";
-          errorMsg.style.display = 'block';
+          showNotice(data.message || "Invalid credentials or no report found.");
         }
       } catch (err) {
-        errorMsg.textContent = "Unable to connect to the server. Please try again later.";
-        errorMsg.style.display = 'block';
+        showNotice("Unable to connect to the server. Please try again later.");
       } finally {
         btn.disabled = false;
         btn.textContent = "View Report";
