@@ -372,7 +372,7 @@
 
     <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
 
-    <!-- قائمة اختيار الابن (تحت زر View Report مباشرة) -->
+    <!-- قائمة اختيار الابن (تحت زر View Report) -->
     <div class="form-group" id="studentSelectWrapper" style="display: none; margin-top: 16px;">
       <label style="color: var(--accent-yellow);">Select Student</label>
       <select id="studentSelect">
@@ -389,14 +389,14 @@
       </div>
 
       <!-- 1. Student Information -->
-      <div class="report-section">
+      <div class="report-section" id="studentInfoSection">
         <div class="section-title">👤 STUDENT INFO</div>
         <div class="metric-row"><span class="metric-label">Name</span><span class="metric-val" id="rName">-</span></div>
         <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
       </div>
 
       <!-- 2. Saturday Exam -->
-      <div class="report-section">
+      <div class="report-section" id="exam1Section">
         <div class="section-title" id="rExam1Title">📝 Saturday Exam</div>
         <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
@@ -404,22 +404,21 @@
       </div>
 
       <!-- 3. Monday Exam (MCQ) -->
-      <div class="report-section">
+      <div class="report-section" id="exam2Section">
         <div class="section-title" id="rExam2Title">🔘 Monday Exam</div>
         <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam2Grade">-</span></div>
       </div>
 
       <!-- 4. Weekly Homework -->
-      <div class="report-section">
+      <div class="report-section" id="hwSection">
         <div class="section-title" id="rHwTitle">📚 Weekly Homework</div>
         <div class="metric-row"><span class="metric-label">Status</span><span class="metric-val" id="rHwStatus1">-</span></div>
-        <!-- تم تعديل السطر بالأسفل لإضافة النقطتين ومسافة فاصلة واضحة -->
         <div class="metric-row" id="rHwRow2"><span class="metric-label" style="margin-right: 14px;">Note:</span><span class="metric-val" id="rHwStatus2" style="text-align: left;">-</span></div>
       </div>
 
       <!-- 5. Attendance & Participation -->
-      <div class="report-section">
+      <div class="report-section" id="attendanceSection">
         <div class="section-title">📅 ATTENDANCE & PARTICIPATION</div>
         <div id="sessionsContainer"></div>
       </div>
@@ -549,10 +548,14 @@
         if (response.ok && data.success) {
           document.getElementById('reportTitle').textContent = `${week} Report`;
 
-          document.getElementById('rName').textContent = data.student_info.name || '-';
-          document.getElementById('rCode').textContent = data.student_info.code || '-';
+          // Student Info
+          document.getElementById('rName').textContent = data.student_info ? (data.student_info.name || '-') : '-';
+          document.getElementById('rCode').textContent = data.student_info ? (data.student_info.code || '-') : '-';
 
+          // 1. Exam 1 (إظهار أو إخفاء الصندوق بالكامل)
+          const exam1Box = document.getElementById('exam1Section');
           if (data.exam1) {
+            exam1Box.style.display = 'block';
             document.getElementById('rExam1Title').innerHTML = `📝 ${data.exam1.title || 'Saturday Exam'}`;
             document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
             document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
@@ -563,15 +566,25 @@
             } else {
               linkBtn.style.display = 'none';
             }
+          } else {
+            exam1Box.style.display = 'none';
           }
 
+          // 2. Exam 2 (إظهار أو إخفاء الصندوق بالكامل)
+          const exam2Box = document.getElementById('exam2Section');
           if (data.exam2) {
+            exam2Box.style.display = 'block';
             document.getElementById('rExam2Title').innerHTML = `🔘 ${data.exam2.title || 'Monday Exam'}`;
             document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
             document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
+          } else {
+            exam2Box.style.display = 'none';
           }
 
+          // 3. Homework (إظهار أو إخفاء الصندوق بالكامل)
+          const hwBox = document.getElementById('hwSection');
           if (data.homework) {
+            hwBox.style.display = 'block';
             document.getElementById('rHwTitle').innerHTML = `📚 ${data.homework.title || 'Weekly Homework'}`;
             document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
             if (data.homework.status2) {
@@ -580,8 +593,11 @@
             } else {
               document.getElementById('rHwRow2').style.display = 'none';
             }
+          } else {
+            hwBox.style.display = 'none';
           }
 
+          // Attendance
           const sessionsContainer = document.getElementById('sessionsContainer');
           sessionsContainer.innerHTML = '';
           const att = data.attendance || {};
