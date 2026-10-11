@@ -249,6 +249,7 @@
     .metric-row {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
       padding: 6px 0;
       font-size: 1.05rem;
       border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -260,11 +261,13 @@
 
     .metric-label {
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .metric-val {
       font-weight: 600;
       color: #fff;
+      text-align: right;
     }
 
     .exam-link-btn {
@@ -369,7 +372,7 @@
 
     <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
 
-    <!-- قائمة اختيار الابن (أصبحت هنا تحت زر View Report مباشرة) -->
+    <!-- قائمة اختيار الابن (تحت زر View Report مباشرة) -->
     <div class="form-group" id="studentSelectWrapper" style="display: none; margin-top: 16px;">
       <label style="color: var(--accent-yellow);">Select Student</label>
       <select id="studentSelect">
@@ -411,7 +414,8 @@
       <div class="report-section">
         <div class="section-title" id="rHwTitle">📚 Weekly Homework</div>
         <div class="metric-row"><span class="metric-label">Status</span><span class="metric-val" id="rHwStatus1">-</span></div>
-        <div class="metric-row" id="rHwRow2"><span class="metric-label">Note</span><span class="metric-val" id="rHwStatus2">-</span></div>
+        <!-- تم تعديل السطر بالأسفل لإضافة النقطتين ومسافة فاصلة واضحة -->
+        <div class="metric-row" id="rHwRow2"><span class="metric-label" style="margin-right: 14px;">Note:</span><span class="metric-val" id="rHwStatus2" style="text-align: left;">-</span></div>
       </div>
 
       <!-- 5. Attendance & Participation -->
