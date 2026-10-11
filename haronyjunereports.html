@@ -65,7 +65,6 @@
       color: var(--text-muted);
     }
 
-    /* أزرار اختيار Student أو Parent */
     .role-toggle {
       display: flex;
       gap: 8px;
@@ -131,6 +130,35 @@
 
     input:focus, select:focus {
       border-color: var(--primary);
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper input {
+      padding-right: 42px;
+    }
+
+    .toggle-password-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, transform 0.1s;
+    }
+
+    .toggle-password-btn:active {
+      transform: scale(0.9);
     }
 
     select {
@@ -310,8 +338,8 @@
 
     <!-- زر التبديل بين Student و Parent -->
     <div class="role-toggle">
-      <button type="button" class="role-btn active" id="btnStudent" onclick="setRole('student')">👨‍🎓 Student</button>
-      <button type="button" class="role-btn" id="btnParent" onclick="setRole('parent')">👨‍👩‍👧 Parent</button>
+      <button type="button" class="role-btn active" id="btnStudent" onclick="setRole('student')">👨‍🎓 I am a Student</button>
+      <button type="button" class="role-btn" id="btnParent" onclick="setRole('parent')">👨‍👩‍👧 I am a Parent</button>
     </div>
 
     <div class="form-row">
@@ -321,13 +349,16 @@
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+          <button type="button" class="toggle-password-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">👁️</button>
+        </div>
       </div>
     </div>
 
-    <!-- قائمة اختيار الابن (تظهر تلقائياً لولي الأمر فقط لو مسجل له أكثر من طالب) -->
+    <!-- قائمة اختيار الابن (تظهر فقط لو وجد لولي الأمر أكثر من طالب) -->
     <div class="form-group" id="studentSelectWrapper" style="display: none;">
-      <label style="color: var(--accent-yellow);">Select Student / اختر الابن</label>
+      <label style="color: var(--accent-yellow);">Select Student</label>
       <select id="studentSelect">
         <option value="">-- Choose Student --</option>
       </select>
@@ -400,10 +431,17 @@
     let currentRole = 'student';
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
+    const togglePassBtn = document.getElementById('togglePasswordBtn');
     const studentSelectWrapper = document.getElementById('studentSelectWrapper');
     const studentSelect = document.getElementById('studentSelect');
     const msgBox = document.getElementById('msgBox');
     const reportCard = document.getElementById('reportCard');
+
+    togglePassBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      togglePassBtn.textContent = isPassword ? '🙈' : '👁️';
+    });
 
     function setRole(role) {
       currentRole = role;
@@ -435,7 +473,6 @@
       studentSelectWrapper.style.display = 'none';
     });
 
-    // جلب التقرير فور اختيار الابن من القائمة
     studentSelect.addEventListener('change', () => {
       if (studentSelect.value) {
         document.getElementById('fetchBtn').click();
@@ -492,9 +529,8 @@
 
         const data = await response.json();
 
-        // حالة ولي أمر وعنده أكثر من طالب
         if (response.ok && data.multiple_students) {
-          studentSelect.innerHTML = '<option value="">-- Choose Student / اختر الابن --</option>';
+          studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
           data.students.forEach(st => {
             const opt = document.createElement('option');
             opt.value = st.code;
@@ -506,15 +542,12 @@
           return;
         }
 
-        // عرض التقرير بنجاح
         if (response.ok && data.success) {
           document.getElementById('reportTitle').textContent = `${week} Report`;
 
-          // Student Info
           document.getElementById('rName').textContent = data.student_info.name || '-';
           document.getElementById('rCode').textContent = data.student_info.code || '-';
 
-          // Exam 1
           if (data.exam1) {
             document.getElementById('rExam1Title').innerHTML = `📝 ${data.exam1.title || 'Saturday Exam'}`;
             document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
@@ -528,14 +561,12 @@
             }
           }
 
-          // Exam 2 (MCQ)
           if (data.exam2) {
             document.getElementById('rExam2Title').innerHTML = `🔘 ${data.exam2.title || 'Monday Exam'}`;
             document.getElementById('rExam2Score').textContent = data.exam2.score || '-';
             document.getElementById('rExam2Grade').textContent = data.exam2.grade || '-';
           }
 
-          // Homework
           if (data.homework) {
             document.getElementById('rHwTitle').innerHTML = `📚 ${data.homework.title || 'Weekly Homework'}`;
             document.getElementById('rHwStatus1').textContent = data.homework.status1 || '-';
@@ -547,7 +578,6 @@
             }
           }
 
-          // Attendance & Participation
           const sessionsContainer = document.getElementById('sessionsContainer');
           sessionsContainer.innerHTML = '';
           const att = data.attendance || {};
