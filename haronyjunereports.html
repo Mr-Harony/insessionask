@@ -356,14 +356,6 @@
       </div>
     </div>
 
-    <!-- قائمة اختيار الابن (تظهر فقط لو وجد لولي الأمر أكثر من طالب) -->
-    <div class="form-group" id="studentSelectWrapper" style="display: none;">
-      <label style="color: var(--accent-yellow);">Select Student</label>
-      <select id="studentSelect">
-        <option value="">-- Choose Student --</option>
-      </select>
-    </div>
-
     <div class="form-group">
       <label>Select Week</label>
       <select id="weekSelect">
@@ -376,6 +368,14 @@
     </div>
 
     <button type="button" class="submit-btn" id="fetchBtn">View Report</button>
+
+    <!-- قائمة اختيار الابن (أصبحت هنا تحت زر View Report مباشرة) -->
+    <div class="form-group" id="studentSelectWrapper" style="display: none; margin-top: 16px;">
+      <label style="color: var(--accent-yellow);">Select Student</label>
+      <select id="studentSelect">
+        <option value="">-- Choose Student --</option>
+      </select>
+    </div>
 
     <div class="error-msg" id="msgBox"></div>
 
@@ -538,7 +538,7 @@
             studentSelect.appendChild(opt);
           });
           studentSelectWrapper.style.display = 'block';
-          showNotice("More than one student found. Please select which student to view above.", true);
+          showNotice("More than one student found. Please select which student to view below.", true);
           return;
         }
 
