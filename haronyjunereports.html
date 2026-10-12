@@ -214,6 +214,7 @@
       margin-bottom: 14px;
     }
 
+    /* عنوان التقرير باللون الأصفر الصريح */
     .report-top-bar h3 {
       font-size: 1.25rem;
       color: #ffeb3b;
@@ -270,19 +271,40 @@
       text-align: right;
     }
 
+    /* أزرار الروابط الخاصة بالامتحان */
     .exam-link-btn {
-      display: inline-block;
-      margin-top: 10px;
-      background-color: rgba(16, 185, 129, 0.2);
-      border: 1px solid var(--success);
-      color: #34d399;
+      display: block;
+      margin-top: 8px;
       padding: 10px 14px;
       border-radius: 8px;
       text-decoration: none;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       text-align: center;
       width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .exam-link-btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-paper {
+      background-color: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: #34d399;
+    }
+
+    .btn-ms {
+      background-color: rgba(59, 130, 246, 0.2);
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+    }
+
+    .btn-video {
+      background-color: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--accent-yellow);
+      color: #fcd34d;
     }
 
     .session-box {
@@ -395,12 +417,16 @@
         <div class="metric-row"><span class="metric-label">Code</span><span class="metric-val" id="rCode">-</span></div>
       </div>
 
-      <!-- 2. Saturday Exam -->
+      <!-- 2. Saturday Exam (مع روابط التصحيح والمارك سكيم والفيديو) -->
       <div class="report-section" id="exam1Section">
         <div class="section-title" id="rExam1Title">📝 Saturday Exam</div>
         <div class="metric-row"><span class="metric-label">Marks</span><span class="metric-val" id="rExam1Marks">-</span></div>
         <div class="metric-row"><span class="metric-label">Grade</span><span class="metric-val" id="rExam1Grade">-</span></div>
-        <a href="#" target="_blank" class="exam-link-btn" id="rExam1Link" style="display:none;">📄 View Corrected Exam Paper</a>
+        
+        <!-- الروابط الثلاثة -->
+        <a href="#" target="_blank" class="exam-link-btn btn-paper" id="rExam1Link" style="display:none; margin-top: 12px;">📄 View Corrected Exam Paper</a>
+        <a href="#" target="_blank" class="exam-link-btn btn-ms" id="rExam1MsLink" style="display:none;">📑 View Marking Scheme</a>
+        <a href="#" target="_blank" class="exam-link-btn btn-video" id="rExam1VideoLink" style="display:none;">📹 View Exam with Video Explanation (QR Codes)</a>
       </div>
 
       <!-- 3. Monday Exam (MCQ) -->
@@ -552,13 +578,15 @@
           document.getElementById('rName').textContent = data.student_info ? (data.student_info.name || '-') : '-';
           document.getElementById('rCode').textContent = data.student_info ? (data.student_info.code || '-') : '-';
 
-          // 1. Exam 1 (إظهار أو إخفاء الصندوق بالكامل)
+          // 1. Exam 1
           const exam1Box = document.getElementById('exam1Section');
           if (data.exam1) {
             exam1Box.style.display = 'block';
             document.getElementById('rExam1Title').innerHTML = `📝 ${data.exam1.title || 'Saturday Exam'}`;
             document.getElementById('rExam1Marks').textContent = data.exam1.marks || '-';
             document.getElementById('rExam1Grade').textContent = data.exam1.grade || '-';
+            
+            // رابط ورقة الطالب المصححة
             const linkBtn = document.getElementById('rExam1Link');
             if (data.exam1.link && data.exam1.link.startsWith('http')) {
               linkBtn.href = data.exam1.link;
@@ -566,11 +594,30 @@
             } else {
               linkBtn.style.display = 'none';
             }
+
+            // رابط المارك سكيم (Marking Scheme)
+            const msLinkBtn = document.getElementById('rExam1MsLink');
+            if (data.exam1.ms_link && data.exam1.ms_link.startsWith('http')) {
+              msLinkBtn.href = data.exam1.ms_link;
+              msLinkBtn.style.display = 'block';
+            } else {
+              msLinkBtn.style.display = 'none';
+            }
+
+            // رابط نسخة الأسئلة مع QR Code الفيديوهات
+            const videoLinkBtn = document.getElementById('rExam1VideoLink');
+            if (data.exam1.video_link && data.exam1.video_link.startsWith('http')) {
+              videoLinkBtn.href = data.exam1.video_link;
+              videoLinkBtn.style.display = 'block';
+            } else {
+              videoLinkBtn.style.display = 'none';
+            }
+
           } else {
             exam1Box.style.display = 'none';
           }
 
-          // 2. Exam 2 (إظهار أو إخفاء الصندوق بالكامل)
+          // 2. Exam 2
           const exam2Box = document.getElementById('exam2Section');
           if (data.exam2) {
             exam2Box.style.display = 'block';
@@ -581,7 +628,7 @@
             exam2Box.style.display = 'none';
           }
 
-          // 3. Homework (إظهار أو إخفاء الصندوق بالكامل)
+          // 3. Homework
           const hwBox = document.getElementById('hwSection');
           if (data.homework) {
             hwBox.style.display = 'block';
