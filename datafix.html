@@ -186,14 +186,12 @@
 </div>
 
 <script>
-    // روابط الـ Webhook الخاصة بمسار n8n
     const N8N_AUDIT_WEBHOOK = "https://n8n.sciencetoonz.com/webhook/audit-phones";
     const N8N_UPDATE_WEBHOOK = "https://your-n8n-domain.com/webhook/update-phone";
 
     let currentSerial = "";
     let currentTargetType = "";
 
-    // بدء عملية التدقيق والبحث في كل الجداول
     async function auditPhoneNumbers() {
         const serial = document.getElementById("serialInput").value.trim();
         const targetType = document.getElementById("targetType").value;
@@ -202,7 +200,6 @@
         const wrapper = document.getElementById("resultsTableWrapper");
         const tbody = document.getElementById("tableBody");
 
-        // التحقق من إدخال كود الطالب
         if (!serial) {
             alert("Please enter a Student Serial.");
             return;
@@ -216,7 +213,6 @@
         tbody.innerHTML = "";
 
         try {
-            // إرسال طلب البحث إلى n8n
             const res = await fetch(N8N_AUDIT_WEBHOOK, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -228,8 +224,10 @@
             const data = await res.json();
             loading.style.display = "none";
 
-            const records = data.records || [];
-            // في حال عدم العثور على أي نتائج
+            // التعامل بمرونة سواء أعاد السيرفر مصفوفة أو كائناً مباشراً
+            const resultData = Array.isArray(data) ? data[0] : data;
+            const records = (resultData && resultData.records) ? resultData.records : [];
+
             if (records.length === 0) {
                 alertBox.className = "alert-box alert-danger";
                 alertBox.innerText = "No records found matching this serial across any table.";
@@ -237,9 +235,10 @@
                 return;
             }
 
-            document.getElementById("studentHeader").innerText = `Student: ${data.student_name || serial} (${serial})`;
+            const studentName = resultData.student_name || serial;
+            document.getElementById("studentHeader").innerText = `Student: ${studentName} (${serial})`;
 
-            // فحص وجود تضارب بين الأرقام المسجلة
+            // فحص تطابق الأرقام عبر جميع المصادر
             const numbers = records.map(r => (r.phone || "").toString().trim()).filter(Boolean);
             const hasMismatch = new Set(numbers).size > 1;
 
@@ -252,13 +251,14 @@
             }
             alertBox.style.display = "block";
 
-            // تحديد الرقم المرجعي الأساسي من جدول الماستر للمقارنة
+            // تحديد الرقم المرجعي الأساسي من جدول الماستر
             const masterRec = records.find(r => r.is_master);
             const basePhone = masterRec ? masterRec.phone : (records[0]?.phone || "");
 
-            // بناء أسطر الجدول وتحديد العناصر المختلفة
+            // بناء صفوف الجدول
             records.forEach((r, idx) => {
-                const isMismatch = (r.phone || "").toString().trim() !== (basePhone || "").toString().trim();
+                const currentPhone = (r.phone || "").toString().trim();
+                const isMismatch = currentPhone !== (basePhone || "").toString().trim();
                 const tr = document.createElement("tr");
                 if (isMismatch) tr.className = "mismatch";
 
@@ -285,10 +285,8 @@
         }
     }
 
-    // إرسال الرقم المعدل للجدول المحدد
     async function updateNumber(sourceId, tableType, inputElementId) {
         const newPhone = document.getElementById(inputElementId).value.trim();
-        // تأكيد التعديل من المستخدم
         if (!confirm(`Are you sure you want to update the phone number to: ${newPhone}?`)) return;
 
         try {
@@ -306,7 +304,6 @@
 
             if (!res.ok) throw new Error("Update operation failed.");
             alert("Phone number updated successfully!");
-            // إعادة الفحص التلقائي بعد التعديل لتحديث الحالات والألوان
             auditPhoneNumbers();
         } catch (e) {
             alert("Update error: " + e.message);
