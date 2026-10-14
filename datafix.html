@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncMaster | مدقق مطابقة الأرقام</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7fafc;
+            margin: 0;
+            padding: 30px 15px;
+            color: #2d3748;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .brand h1 {
+            margin: 0;
+            color: #1a365d;
+            font-size: 28px;
+            letter-spacing: 0.5px;
+        }
+        .brand p {
+            margin: 5px 0 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+        .search-panel {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 12px 14px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+            outline: none;
+        }
+        button.btn-search {
+            background-color: #2b6cb0;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        button.btn-search:hover {
+            background-color: #2c5282;
+        }
+        .alert-box {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+        }
+        .alert-danger { background-color: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; }
+        .alert-success { background-color: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            text-align: right;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        th {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+        tr.mismatch {
+            background-color: #fff5f5;
+        }
+        .badge-mismatch {
+            background-color: #e53e3e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-match {
+            background-color: #38a169;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .phone-input {
+            width: 150px;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            direction: ltr;
+            text-align: right;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .btn-update {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-update:hover {
+            background-color: #2b6cb0;
+        }
+        .loading {
+            text-align: center;
+            color: #718096;
+            font-size: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="brand">
+        <h1>SyncMaster</h1>
+        <p>نظام التحقق المتقاطع وتوحيد أرقام الهواتف عبر السجلات والتقارير</p>
+    </div>
+
+    <div class="search-panel">
+        <input type="text" id="serialInput" placeholder="أدخل كود الطالب (Student Serial)" required>
+        <select id="targetType">
+            <option value="student_phone">رقم هاتف الطالب</option>
+            <option value="parent_phone">رقم هاتف ولي الأمر</option>
+        </select>
+        <button class="btn-search" onclick="auditPhoneNumbers()">بدء الفحص</button>
+    </div>
+
+    <div id="statusAlert" class="alert-box"></div>
+    <div id="loadingIndicator" class="loading" style="display:none;">جاري فحص جميع الجداول والأسابيع، يرجى الانتظار...</div>
+
+    <div id="resultsTableWrapper" style="display: none;">
+        <h3 id="studentHeader" style="margin-bottom: 12px; color: #1a365d;"></h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم الجدول / الملف</th>
+                    <th>نوع المصدر</th>
+                    <th>الرقم المسجل حالياً</th>
+                    <th>حالة المطابقة</th>
+                    <th>تعديل وتوحيد الرقم</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script
