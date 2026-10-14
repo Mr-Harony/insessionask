@@ -1,305 +1,335 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مدقق وموحد بيانات أرقام الهواتف | Data Fix</title>
+  <title>Data Fix</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --border-color: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --neutral: #64748b;
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --primary-blue: #2c5282;
+      --border-color: #e2e8f0;
+      --btn-blue: #3182ce;
+      --btn-blue-hover: #2b6cb0;
+      --sync-bg: #dcfce7;
+      --sync-border: #86efac;
+      --sync-text: #166534;
+      --mismatch-bg: #fee2e2;
+      --mismatch-border: #fca5a5;
+      --mismatch-text: #991b1b;
+      --badge-match-bg: #38a169;
+      --badge-mismatch-bg: #e53e3e;
+      --badge-notfound-bg: #94a3b8;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      padding: 24px 16px;
-      line-height: 1.5;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
     }
 
-    .container {
-      max-width: 1050px;
-      margin: 0 auto;
+    .main-wrapper {
+      width: 100%;
+      max-width: 950px;
     }
 
+    /* Header */
     header {
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 16px;
+      text-align: center;
+      margin-bottom: 30px;
     }
 
-    h1 {
-      font-size: 1.6rem;
-      color: var(--primary);
-      margin-bottom: 6px;
+    h1.main-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary-blue);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
 
-    p.subtitle {
-      color: var(--text-muted);
+    p.sub-title {
       font-size: 0.95rem;
+      color: var(--text-muted);
     }
 
-    /* لوحة التحكم والبحث */
-    .controls-panel {
+    /* Form Card */
+    .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 2fr 1.5fr 1.2fr;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      margin-bottom: 20px;
+    }
+
+    .controls-row {
+      display: flex;
       gap: 16px;
-      margin-bottom: 24px;
-      align-items: flex-end;
+      align-items: center;
+      margin-bottom: 20px;
     }
 
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 8px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .form-group input, 
-    .form-group select {
-      width: 100%;
-      padding: 10px 14px;
-      background: #0b1120;
-      border: 1px solid var(--border-color);
+    .input-serial {
+      flex: 2;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 1.5px solid #cbd5e1;
       border-radius: 8px;
-      color: var(--text);
-      font-size: 0.95rem;
       outline: none;
+      color: var(--text-main);
     }
 
-    .form-group input:focus, 
-    .form-group select:focus {
-      border-color: var(--primary);
+    .input-serial:focus {
+      border-color: var(--primary-blue);
     }
 
-    button.btn-search {
-      padding: 11px 20px;
-      background: var(--primary);
+    .select-target {
+      flex: 1.2;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      background-color: #fff;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .btn-audit {
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--primary-blue);
       border: none;
       border-radius: 8px;
-      color: #0b1120;
-      font-weight: 700;
-      font-size: 0.95rem;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: background 0.2s;
+      white-space: nowrap;
     }
 
-    button.btn-search:hover {
-      opacity: 0.9;
+    .btn-audit:hover {
+      background-color: #1a365d;
     }
 
-    /* شريط ملخص الحالة للطالب */
-    .summary-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px 20px;
+    /* Alert / Sync Bar */
+    .sync-alert {
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      font-weight: 500;
       margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+      display: none;
     }
 
-    .student-info {
-      font-size: 1.1rem;
-      font-weight: 700;
+    .sync-alert.synchronized {
+      display: block;
+      background-color: var(--sync-bg);
+      border: 1px solid var(--sync-border);
+      color: var(--sync-text);
     }
 
-    .sync-badge {
-      padding: 6px 16px;
-      border-radius: 9999px;
-      font-weight: 700;
-      font-size: 0.85rem;
+    .sync-alert.mismatch {
+      display: block;
+      background-color: var(--mismatch-bg);
+      border: 1px solid var(--mismatch-border);
+      color: var(--mismatch-text);
     }
 
-    .status-synchronized {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--success);
-      border: 1px solid var(--success);
+    /* Student Title */
+    .student-header {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: none;
     }
 
-    .status-mismatch {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
-
-    /* جدول عرض السجلات */
+    /* Table */
     .table-container {
+      display: none;
       overflow-x: auto;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      background: var(--card-bg);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      text-align: right;
+      text-align: left;
     }
 
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.9rem;
-    }
-
-    th {
-      background: #162032;
+    thead th {
+      background-color: #f1f5f9;
       color: var(--text-muted);
       font-weight: 600;
+      font-size: 0.85rem;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
     }
 
-    tr:last-child td {
+    tbody td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
       border-bottom: none;
     }
 
-    /* وسوم الحالة */
-    .tag {
+    .source-name {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .source-type {
+      color: var(--text-muted);
+    }
+
+    .phone-text {
+      font-size: 0.9rem;
+      color: #334155;
+    }
+
+    /* Badges */
+    .status-badge {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 6px;
       font-size: 0.75rem;
       font-weight: 700;
+      color: #ffffff;
+      text-transform: capitalize;
     }
 
-    .tag-match { background: rgba(34, 197, 94, 0.15); color: var(--success); }
-    .tag-mismatch { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-    .tag-notfound { background: rgba(100, 116, 139, 0.2); color: var(--neutral); }
+    .badge-match {
+      background-color: var(--badge-match-bg);
+    }
 
-    /* حقل التعديل والزر */
-    .action-group {
+    .badge-mismatch {
+      background-color: var(--badge-mismatch-bg);
+    }
+
+    .badge-notfound {
+      background-color: var(--badge-notfound-bg);
+    }
+
+    /* Action Cell */
+    .action-container {
       display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .action-input {
-      background: #0b1120;
-      border: 1px solid var(--border-color);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      flex-direction: column;
+      gap: 6px;
       width: 150px;
-      outline: none;
     }
 
-    .action-input:focus {
-      border-color: var(--primary);
-    }
-
-    .btn-save {
-      background: var(--success);
-      color: #fff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
+    .input-edit {
+      padding: 6px 10px;
       font-size: 0.85rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+      color: var(--text-main);
+    }
+
+    .input-edit:focus {
+      border-color: var(--btn-blue);
+    }
+
+    .btn-save-record {
+      padding: 4px 12px;
+      font-size: 0.8rem;
       font-weight: 600;
+      color: #ffffff;
+      background-color: var(--btn-blue);
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
-      transition: opacity 0.2s;
+      align-self: flex-start;
+      transition: background 0.2s;
     }
 
-    .btn-save:hover {
-      opacity: 0.9;
+    .btn-save-record:hover {
+      background-color: var(--btn-blue-hover);
     }
 
-    .btn-save:disabled, 
-    .action-input:disabled {
+    .input-edit:disabled,
+    .btn-save-record:disabled {
       opacity: 0.35;
       cursor: not-allowed;
     }
 
-    .loading-spinner {
+    .loading-state {
       display: none;
       text-align: center;
-      padding: 24px;
+      padding: 20px;
       color: var(--text-muted);
-      font-weight: 600;
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="main-wrapper">
+  <!-- عنوان الصفحة الرئيسي والفرعي -->
   <header>
-    <h1>مدقق وموحد بيانات أرقام الهواتف (Data Harmonizer)</h1>
-    <p class="subtitle">فحص السجلات عبر الماستر شيت وجداول الكريدينشيال وشيتات الأسابيع وتصحيحها</p>
+    <h1 class="main-title">Data Fix</h1>
+    <p class="sub-title">Cross-Sheet Phone Number Auditor & Data Harmonizer</p>
   </header>
 
-  <!-- صندوق البحث والخيارات -->
-  <div class="controls-panel">
-    <div class="form-group">
-      <label for="serialInput">سيريال / كود الطالب</label>
-      <input type="text" id="serialInput" placeholder="أدخل سيريال الطالب..." required>
-    </div>
-
-    <div class="form-group">
-      <label for="targetType">الرقم المستهدف للتدقيق</label>
-      <select id="targetType">
-        <option value="student_phone">هاتف الطالب (Student Phone)</option>
-        <option value="parent_phone">هاتف ولي الأمر (Parent Phone)</option>
+  <div class="card">
+    <!-- صندوق الفحص والخيارات -->
+    <div class="controls-row">
+      <input type="text" id="serialInput" class="input-serial" placeholder="104496" required>
+      <select id="targetType" class="select-target">
+        <option value="parent_phone">Parent Phone</option>
+        <option value="student_phone">Student Phone</option>
       </select>
+      <button class="btn-audit" onclick="runAudit()">Audit Records</button>
     </div>
 
-    <button class="btn-search" onclick="runAudit()">فحص وتدقيق (Audit)</button>
-  </div>
+    <!-- شريط حالة التحميل -->
+    <div id="loading" class="loading-state">Auditing records across tables...</div>
 
-  <!-- حالة التحميل -->
-  <div id="loading" class="loading-spinner">جاري سحب البيانات ومطابقتها من الخادم...</div>
+    <!-- شريط التوافق الأخضر / الأحمر -->
+    <div id="syncAlert" class="sync-alert"></div>
 
-  <!-- شريط ملخص الطالب -->
-  <div id="summaryArea" class="summary-card" style="display: none;">
-    <div class="student-info">
-      <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: normal;">اسم الطالب: </span>
-      <span id="studentNameDisplay"></span>
+    <!-- عنوان اسم الطالب مع السيريال -->
+    <div id="studentHeader" class="student-header"></div>
+
+    <!-- جدول عرض البيانات والمصادر -->
+    <div class="table-container" id="tableContainer">
+      <table>
+        <thead>
+          <tr>
+            <th>Sheet / Table Source</th>
+            <th>Source Type</th>
+            <th>Recorded Phone Number</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
     </div>
-    <div id="overallStatusBadge" class="sync-badge"></div>
-  </div>
-
-  <!-- جدول عرض المصادر والنتائج -->
-  <div class="table-container" id="tableWrapper" style="display: none;">
-    <table>
-      <thead>
-        <tr>
-          <th>المصدر (Source)</th>
-          <th>نوع المصدر</th>
-          <th>الرقم المسجل حالياً</th>
-          <th>الحالة</th>
-          <th>التعديل والحفظ الفوري</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
   </div>
 </div>
 
 <script>
-  // استبدل هذين الرابطين بروابط الـ Production Webhook الخاصة بك في n8n عند التفعيل
-  const AUDIT_WEBHOOK_URL = 'https://YOUR-N8N-DOMAIN.com/webhook/audit-records';
-  const UPDATE_WEBHOOK_URL = 'https://YOUR-N8N-DOMAIN.com/webhook/update-record';
+  // روابط الـ Webhook المباشرة الخاصة بك على n8n
+  const AUDIT_WEBHOOK_URL = 'https://n8n.sciencetoonz.com/webhook/audit-phones';
+  const UPDATE_WEBHOOK_URL = 'https://n8n.sciencetoonz.com/webhook/update-phone';
 
   // 1. استدعاء تدقيق البيانات
   async function runAudit() {
@@ -307,13 +337,19 @@
     const targetType = document.getElementById('targetType').value;
 
     if (!serial) {
-      alert('يرجى كتابة سيريال الطالب أولاً');
+      alert('Please enter a student serial.');
       return;
     }
 
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('summaryArea').style.display = 'none';
-    document.getElementById('tableWrapper').style.display = 'none';
+    const loading = document.getElementById('loading');
+    const syncAlert = document.getElementById('syncAlert');
+    const studentHeader = document.getElementById('studentHeader');
+    const tableContainer = document.getElementById('tableContainer');
+
+    loading.style.display = 'block';
+    syncAlert.style.display = 'none';
+    studentHeader.style.display = 'none';
+    tableContainer.style.display = 'none';
 
     try {
       const response = await fetch(AUDIT_WEBHOOK_URL, {
@@ -325,64 +361,72 @@
         })
       });
 
-      if (!response.ok) throw new Error('فشل الاتصال بالخادم');
+      if (!response.ok) throw new Error('Network error');
 
       const data = await response.json();
-      renderTable(data);
+      renderUI(data, serial);
     } catch (err) {
-      alert('حدث خطأ أثناء فحص البيانات. تأكد من تفعيل Webhook في n8n وصحة الرابط.');
+      alert('Error fetching data from n8n. Please check Webhook status and CORS.');
       console.error(err);
     } finally {
-      document.getElementById('loading').style.display = 'none';
+      loading.style.display = 'none';
     }
   }
 
-  // 2. رسم الجدول وعرض النتائج
-  function renderTable(payload) {
+  // 2. رسم الجدول وعرض البيانات بنفس تصميم الصورة
+  function renderUI(payload, serial) {
     const { student_name, records, all_synchronized } = payload;
 
-    document.getElementById('studentNameDisplay').innerText = student_name || 'غير محدد';
+    const syncAlert = document.getElementById('syncAlert');
+    const studentHeader = document.getElementById('studentHeader');
+    const tableContainer = document.getElementById('tableContainer');
+    const tbody = document.getElementById('tableBody');
 
-    const statusBadge = document.getElementById('overallStatusBadge');
+    // ضبط نص شريط المزامنة
     if (all_synchronized) {
-      statusBadge.innerText = 'All Synchronized (متطابق)';
-      statusBadge.className = 'sync-badge status-synchronized';
+      syncAlert.className = 'sync-alert synchronized';
+      syncAlert.innerText = 'All synchronized: Phone number is identical across all inspected tables.';
     } else {
-      statusBadge.innerText = 'Mismatch (يوجد تعارض)';
-      statusBadge.className = 'sync-badge status-mismatch';
+      syncAlert.className = 'sync-alert mismatch';
+      syncAlert.innerText = 'Mismatch detected: Phone numbers are not identical across all inspected tables.';
     }
 
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
+    // عرض اسم وسيريال الطالب
+    studentHeader.innerText = `Student: (${serial}) ${student_name || ''}`;
+    studentHeader.style.display = 'block';
 
+    // تعبئة صفوف الجدول
+    tbody.innerHTML = '';
     records.forEach(rec => {
       const isNotFound = rec.status === 'Not Found';
       const isMatch = rec.status === 'Match';
 
+      let badgeClass = 'badge-mismatch';
+      if (isMatch) badgeClass = 'badge-match';
+      if (isNotFound) badgeClass = 'badge-notfound';
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><strong>${rec.source_name}</strong></td>
-        <td><span style="color: var(--text-muted);">${rec.source_type}</span></td>
-        <td><code>${rec.recorded_phone || '---'}</code></td>
+        <td><span class="source-name">${rec.source_name}</span></td>
+        <td><span class="source-type">${rec.source_type}</span></td>
+        <td><span class="phone-text">${rec.recorded_phone || ''}</span></td>
         <td>
-          <span class="tag ${isNotFound ? 'tag-notfound' : isMatch ? 'tag-match' : 'tag-mismatch'}">
-            ${rec.status}
-          </span>
+          <span class="status-badge ${badgeClass}">${rec.status}</span>
         </td>
         <td>
-          <div class="action-group">
+          <div class="action-container">
             <input 
               type="text" 
-              class="action-input" 
+              class="input-edit" 
               id="input-${rec.source_id}" 
               value="${rec.recorded_phone || ''}" 
               ${isNotFound ? 'disabled' : ''} 
             />
             <button 
-              class="btn-save" 
+              class="btn-save-record" 
               onclick="saveRecord('${rec.source_type}', '${rec.source_id}')" 
               ${isNotFound ? 'disabled' : ''}>
-              حفظ
+              Save
             </button>
           </div>
         </td>
@@ -390,18 +434,17 @@
       tbody.appendChild(tr);
     });
 
-    document.getElementById('summaryArea').style.display = 'flex';
-    document.getElementById('tableWrapper').style.display = 'block';
+    tableContainer.style.display = 'block';
   }
 
-  // 3. إرسال أمر التحديث عند الضغط على حفظ
+  // 3. إرسال أمر التحديث عند الضغط على Save
   async function saveRecord(tableType, sourceId) {
     const serial = document.getElementById('serialInput').value.trim();
     const targetType = document.getElementById('targetType').value;
     const newPhone = document.getElementById(`input-${sourceId}`).value.trim();
 
     if (!newPhone) {
-      alert('يرجى كتابة رقم الهاتف قبل الحفظ');
+      alert('Please enter a valid phone number.');
       return;
     }
 
@@ -420,13 +463,12 @@
 
       const result = await response.json();
       if (result.success) {
-        alert('تم تحديث الرقم بنجاح');
-        runAudit(); // إعادة الفحص تلقائياً لتحديث شريط التوافق والألوان
+        runAudit(); // إعادة الفحص تلقائياً لتحديث الحالة بعد التعديل
       } else {
-        alert('لم تتم العملية: ' + (result.message || 'خطأ غير معروف'));
+        alert('Update failed: ' + (result.message || 'Unknown error'));
       }
     } catch (err) {
-      alert('حدث خطأ أثناء محاولة التحديث');
+      alert('Error updating record.');
       console.error(err);
     }
   }
