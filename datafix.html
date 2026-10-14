@@ -46,3 +46,273 @@
             font-size: 15px;
             border-radius: 8px;
             border: 1px solid #cbd5e0;
+            outline: none;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            border-color: #3182ce;
+        }
+        button.btn-search {
+            background-color: #2b6cb0;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+            padding: 12px 24px;
+        }
+        button.btn-search:hover {
+            background-color: #2c5282;
+        }
+        .alert-box {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+        }
+        .alert-danger {
+            background-color: #fed7d7;
+            color: #9b2c2c;
+            border: 1px solid #feb2b2;
+        }
+        .alert-success {
+            background-color: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        th {
+            background-color: #edf2f7;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        tr.mismatch {
+            background-color: #fff5f5;
+        }
+        .badge-mismatch {
+            background-color: #e53e3e;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-match {
+            background-color: #38a169;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .phone-input {
+            width: 160px;
+            padding: 6px 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .btn-update {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn-update:hover {
+            background-color: #2b6cb0;
+        }
+        .loading {
+            text-align: center;
+            color: #718096;
+            font-size: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="brand">
+        <h1>Data Fix</h1>
+        <p>Cross-Sheet Phone Number Auditor & Data Harmonizer</p>
+    </div>
+
+    <div class="search-panel">
+        <input type="text" id="serialInput" placeholder="Enter Student Serial" required>
+        <select id="targetType">
+            <option value="student_phone">Student Phone</option>
+            <option value="parent_phone">Parent Phone</option>
+        </select>
+        <button class="btn-search" onclick="auditPhoneNumbers()">Audit Records</button>
+    </div>
+
+    <div id="statusAlert" class="alert-box"></div>
+    <div id="loadingIndicator" class="loading" style="display:none;">Auditing all sheets and weekly reports, please wait...</div>
+
+    <div id="resultsTableWrapper" style="display: none;">
+        <h3 id="studentHeader" style="margin-bottom: 12px; color: #1a365d;"></h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Sheet / Table Source</th>
+                    <th>Source Type</th>
+                    <th>Recorded Phone Number</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // روابط الـ Webhook الخاصة بمسار n8n
+    const N8N_AUDIT_WEBHOOK = "https://your-n8n-domain.com/webhook/audit-phones";
+    const N8N_UPDATE_WEBHOOK = "https://your-n8n-domain.com/webhook/update-phone";
+
+    let currentSerial = "";
+    let currentTargetType = "";
+
+    // بدء عملية التدقيق والبحث في كل الجداول
+    async function auditPhoneNumbers() {
+        const serial = document.getElementById("serialInput").value.trim();
+        const targetType = document.getElementById("targetType").value;
+        const alertBox = document.getElementById("statusAlert");
+        const loading = document.getElementById("loadingIndicator");
+        const wrapper = document.getElementById("resultsTableWrapper");
+        const tbody = document.getElementById("tableBody");
+
+        // التحقق من إدخال كود الطالب
+        if (!serial) {
+            alert("Please enter a Student Serial.");
+            return;
+        }
+
+        currentSerial = serial;
+        currentTargetType = targetType;
+        alertBox.style.display = "none";
+        wrapper.style.display = "none";
+        loading.style.display = "block";
+        tbody.innerHTML = "";
+
+        try {
+            // إرسال طلب البحث إلى n8n
+            const res = await fetch(N8N_AUDIT_WEBHOOK, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ studentserial: serial, target_type: targetType })
+            });
+
+            if (!res.ok) throw new Error("Failed to retrieve data from server.");
+
+            const data = await res.json();
+            loading.style.display = "none";
+
+            const records = data.records || [];
+            // في حال عدم العثور على أي نتائج
+            if (records.length === 0) {
+                alertBox.className = "alert-box alert-danger";
+                alertBox.innerText = "No records found matching this serial across any table.";
+                alertBox.style.display = "block";
+                return;
+            }
+
+            document.getElementById("studentHeader").innerText = `Student: ${data.student_name || serial} (${serial})`;
+
+            // فحص وجود تضارب بين الأرقام المسجلة
+            const numbers = records.map(r => (r.phone || "").toString().trim()).filter(Boolean);
+            const hasMismatch = new Set(numbers).size > 1;
+
+            if (hasMismatch) {
+                alertBox.className = "alert-box alert-danger";
+                alertBox.innerText = "Warning: Mismatch detected across tables! Update inconsistent records below.";
+            } else {
+                alertBox.className = "alert-box alert-success";
+                alertBox.innerText = "All synchronized: Phone number is identical across all inspected tables.";
+            }
+            alertBox.style.display = "block";
+
+            // تحديد الرقم المرجعي الأساسي من جدول الماستر للمقارنة
+            const masterRec = records.find(r => r.is_master);
+            const basePhone = masterRec ? masterRec.phone : (records[0]?.phone || "");
+
+            // بناء أسطر الجدول وتحديد العناصر المختلفة
+            records.forEach((r, idx) => {
+                const isMismatch = (r.phone || "").toString().trim() !== (basePhone || "").toString().trim();
+                const tr = document.createElement("tr");
+                if (isMismatch) tr.className = "mismatch";
+
+                tr.innerHTML = `
+                    <td><strong>${r.source_name}</strong></td>
+                    <td>${r.table_type_label}</td>
+                    <td style="font-family: monospace;">${r.phone || "—"}</td>
+                    <td>${isMismatch ? '<span class="badge-mismatch">Mismatch</span>' : '<span class="badge-match">Match</span>'}</td>
+                    <td>
+                        <input type="text" class="phone-input" id="edit_${idx}" value="${r.phone || ""}">
+                        <button class="btn-update" onclick="updateNumber('${r.source_id}', '${r.table_type}', 'edit_${idx}')">Save</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            wrapper.style.display = "block";
+
+        } catch (err) {
+            loading.style.display = "none";
+            alertBox.className = "alert-box alert-danger";
+            alertBox.innerText = "Audit error: " + err.message;
+            alertBox.style.display = "block";
+        }
+    }
+
+    // إرسال الرقم المعدل للجدول المحدد
+    async function updateNumber(sourceId, tableType, inputElementId) {
+        const newPhone = document.getElementById(inputElementId).value.trim();
+        // تأكيد التعديل من المستخدم
+        if (!confirm(`Are you sure you want to update the phone number to: ${newPhone}?`)) return;
+
+        try {
+            const res = await fetch(N8N_UPDATE_WEBHOOK, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentserial: currentSerial,
+                    target_type: currentTargetType,
+                    source_id: sourceId,
+                    table_type: tableType,
+                    new_phone: newPhone
+                })
+            });
+
+            if (!res.ok) throw new Error("Update operation failed.");
+            alert("Phone number updated successfully!");
+            // إعادة الفحص التلقائي بعد التعديل لتحديث الحالات والألوان
+            auditPhoneNumbers();
+        } catch (e) {
+            alert("Update error: " + e.message);
+        }
+    }
+</script>
+
+</body>
+</html>
