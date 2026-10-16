@@ -98,16 +98,6 @@
       margin-bottom: 16px;
     }
 
-    .form-row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .form-row .form-group {
-      flex: 1;
-      min-width: 0;
-    }
-
     label {
       display: block;
       font-size: 0.95rem;
@@ -287,7 +277,6 @@
       transform: scale(0.98);
     }
 
-/* توحيد لون وتصميم جميع أزرار الروابط بلون هادئ ومريح للعين */
     .btn-paper,
     .btn-ms,
     .btn-video,
@@ -364,17 +353,18 @@
       <button type="button" class="role-btn" id="btnParent" onclick="setRole('parent')">👨‍👩‍👧 I am a Parent</button>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="username" placeholder="Username / Code" autocomplete="username">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-          <button type="button" class="toggle-password-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">👁️</button>
-        </div>
+    <!-- حقل Username بعرض كامل -->
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Username / Code" autocomplete="username">
+    </div>
+
+    <!-- حقل Password بعرض كامل تحته مباشرة -->
+    <div class="form-group">
+      <label>Password</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="toggle-password-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">👁️</button>
       </div>
     </div>
 
@@ -426,7 +416,7 @@
         <a href="#" target="_blank" class="exam-link-btn btn-video" id="rExam1VideoLink" style="display:none;">📹 View Exam with Video Explanation (QR Codes)</a>
       </div>
 
-      <!-- 3. Monday Exam (MCQ) مع زر مراجعة الأخطاء -->
+      <!-- 3. Monday Exam (MCQ) -->
       <div class="report-section" id="exam2Section">
         <div class="section-title" id="rExam2Title">🔘 Monday Exam</div>
         <div class="metric-row"><span class="metric-label">Score</span><span class="metric-val" id="rExam2Score">-</span></div>
