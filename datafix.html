@@ -130,7 +130,7 @@
       padding: 14px 18px;
       font-size: 0.95rem;
       font-weight: 500;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       display: none;
     }
 
@@ -148,13 +148,52 @@
       color: var(--mismatch-text);
     }
 
+    /* Duplicate Alert Bar */
+    .duplicate-alert {
+      display: none;
+      background-color: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #be123c;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
     /* Student Title */
     .student-header {
       font-size: 1.15rem;
       font-weight: 800;
       color: var(--text-main);
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       display: none;
+    }
+
+    /* Credentials Info Box */
+    .credentials-card {
+      display: none;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .credentials-card span {
+      margin-right: 24px;
+    }
+
+    .credentials-card code {
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background-color: #e2e8f0;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      color: #0f172a;
+      font-weight: 600;
     }
 
     /* Table */
@@ -282,7 +321,7 @@
 <body>
 
 <div class="main-wrapper">
-  <!-- عنوان الصفحة الرئيسي والفرعي -->
+  <!-- عنوان الصفحة -->
   <header>
     <h1 class="main-title">Data Fix</h1>
     <p class="sub-title">Cross-Sheet Phone Number Auditor & Data Harmonizer</p>
@@ -305,8 +344,19 @@
     <!-- شريط التوافق الأخضر / الأحمر -->
     <div id="syncAlert" class="sync-alert"></div>
 
+    <!-- تنبيه السجلات المكررة -->
+    <div id="duplicateAlert" class="duplicate-alert">
+      ⚠️ Notice: Multiple duplicate records detected for this student serial in Credentials table.
+    </div>
+
     <!-- عنوان اسم الطالب مع السيريال -->
     <div id="studentHeader" class="student-header"></div>
+
+    <!-- بطاقة عرض بيانات تسجيل الدخول -->
+    <div id="credentialsCard" class="credentials-card">
+      <span><strong>Username:</strong> <code id="dispUsername">---</code></span>
+      <span><strong>Password:</strong> <code id="dispPassword" style="color: #0369a1;">---</code></span>
+    </div>
 
     <!-- جدول عرض البيانات والمصادر -->
     <div class="table-container" id="tableContainer">
@@ -343,12 +393,16 @@
 
     const loading = document.getElementById('loading');
     const syncAlert = document.getElementById('syncAlert');
+    const duplicateAlert = document.getElementById('duplicateAlert');
     const studentHeader = document.getElementById('studentHeader');
+    const credentialsCard = document.getElementById('credentialsCard');
     const tableContainer = document.getElementById('tableContainer');
 
     loading.style.display = 'block';
     syncAlert.style.display = 'none';
+    duplicateAlert.style.display = 'none';
     studentHeader.style.display = 'none';
+    credentialsCard.style.display = 'none';
     tableContainer.style.display = 'none';
 
     try {
@@ -375,10 +429,14 @@
 
   // 2. رسم الجدول وعرض البيانات بنفس تصميم الصورة
   function renderUI(payload, serial) {
-    const { student_name, records, all_synchronized } = payload;
+    const { student_name, username, password, has_duplicates, records, all_synchronized } = payload;
 
     const syncAlert = document.getElementById('syncAlert');
+    const duplicateAlert = document.getElementById('duplicateAlert');
     const studentHeader = document.getElementById('studentHeader');
+    const credentialsCard = document.getElementById('credentialsCard');
+    const dispUsername = document.getElementById('dispUsername');
+    const dispPassword = document.getElementById('dispPassword');
     const tableContainer = document.getElementById('tableContainer');
     const tbody = document.getElementById('tableBody');
 
@@ -391,13 +449,29 @@
       syncAlert.innerText = 'Mismatch detected: Phone numbers are not identical across all inspected tables.';
     }
 
+    // إظهار تنبيه التكرار إذا وُجد
+    if (has_duplicates) {
+      duplicateAlert.style.display = 'block';
+    } else {
+      duplicateAlert.style.display = 'none';
+    }
+
     // عرض اسم وسيريال الطالب
     studentHeader.innerText = `Student: (${serial}) ${student_name || ''}`;
     studentHeader.style.display = 'block';
 
+    // عرض بيانات تسجيل الدخول
+    if (username || password) {
+      dispUsername.innerText = username || '---';
+      dispPassword.innerText = password || '---';
+      credentialsCard.style.display = 'block';
+    } else {
+      credentialsCard.style.display = 'none';
+    }
+
     // تعبئة صفوف الجدول
     tbody.innerHTML = '';
-    records.forEach(rec => {
+    records.forEach((rec, idx) => {
       const isNotFound = rec.status === 'Not Found';
       const isMatch = rec.status === 'Match';
 
@@ -405,6 +479,7 @@
       if (isMatch) badgeClass = 'badge-match';
       if (isNotFound) badgeClass = 'badge-notfound';
 
+      const rowInputId = `input-field-${idx}`;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><span class="source-name">${rec.source_name}</span></td>
@@ -418,13 +493,13 @@
             <input 
               type="text" 
               class="input-edit" 
-              id="input-${rec.source_id}" 
-              value="${rec.recorded_phone || ''}" 
+              id="${rowInputId}" 
+              value="${(!isNotFound && rec.recorded_phone !== '---') ? rec.recorded_phone : ''}" 
               ${isNotFound ? 'disabled' : ''} 
             />
             <button 
               class="btn-save-record" 
-              onclick="saveRecord('${rec.source_type}', '${rec.source_id}')" 
+              onclick="saveRecord('${rec.source_type}', '${rec.source_id}', '${rowInputId}', this)" 
               ${isNotFound ? 'disabled' : ''}>
               Save
             </button>
@@ -438,15 +513,19 @@
   }
 
   // 3. إرسال أمر التحديث عند الضغط على Save
-  async function saveRecord(tableType, sourceId) {
+  async function saveRecord(tableType, sourceId, inputId, btnElem) {
     const serial = document.getElementById('serialInput').value.trim();
     const targetType = document.getElementById('targetType').value;
-    const newPhone = document.getElementById(`input-${sourceId}`).value.trim();
+    const newPhone = document.getElementById(inputId).value.trim();
 
     if (!newPhone) {
       alert('Please enter a valid phone number.');
       return;
     }
+
+    const originalText = btnElem.innerText;
+    btnElem.innerText = 'Saving...';
+    btnElem.disabled = true;
 
     try {
       const response = await fetch(UPDATE_WEBHOOK_URL, {
@@ -462,14 +541,21 @@
       });
 
       const result = await response.json();
-      if (result.success) {
-        runAudit(); // إعادة الفحص تلقائياً لتحديث الحالة بعد التعديل
+      if (result.success || response.ok) {
+        btnElem.innerText = 'Saved!';
+        setTimeout(() => {
+          runAudit(); // إعادة الفحص تلقائياً لتحديث الحالة بعد التعديل
+        }, 600);
       } else {
         alert('Update failed: ' + (result.message || 'Unknown error'));
+        btnElem.innerText = originalText;
+        btnElem.disabled = false;
       }
     } catch (err) {
       alert('Error updating record.');
       console.error(err);
+      btnElem.innerText = originalText;
+      btnElem.disabled = false;
     }
   }
 </script>
