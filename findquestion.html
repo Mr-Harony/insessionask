@@ -126,15 +126,16 @@
       background-color: #f0fdf4;
       border: 1px solid #bbf7d0;
       color: #166534;
-      font-weight: 600;
-      font-size: 16px;
+      font-weight: 700;
+      font-size: 18px;
       display: none;
       text-align: center;
       direction: ltr;
       word-break: break-word;
+      user-select: all;
     }
 
-    /* تصميم قائمة الكليك يمين */
+    /* قائمة الكليك يمين */
     .context-menu {
       display: none;
       position: fixed;
@@ -256,7 +257,7 @@
       resultBox.style.display = 'none';
     }
 
-    // النقر المباشر باليسار يفتح الكاميرا/الملفات
+    // النقر المباشر يفتح منتقي الملفات أو الكاميرا
     dropArea.addEventListener('click', function () {
       imageInput.click();
     });
@@ -264,6 +265,24 @@
     imageInput.addEventListener('change', function () {
       if (this.files && this.files[0]) {
         handleImageFile(this.files[0]);
+      }
+    });
+
+    // دعم السحب والإفلات
+    dropArea.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      dropArea.style.borderColor = '#2563eb';
+    });
+
+    dropArea.addEventListener('dragleave', function () {
+      dropArea.style.borderColor = '#cbd5e1';
+    });
+
+    dropArea.addEventListener('drop', function (e) {
+      e.preventDefault();
+      dropArea.style.borderColor = '#cbd5e1';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleImageFile(e.dataTransfer.files[0]);
       }
     });
 
@@ -279,7 +298,7 @@
       }
     });
 
-    // إظهار قائمة الكليك يمين عند النقر بالزر الأيمن على المربع
+    // قائمة الزر الأيمن
     dropArea.addEventListener('contextmenu', function (e) {
       e.preventDefault();
       contextMenu.style.display = 'block';
@@ -287,12 +306,10 @@
       contextMenu.style.top = e.clientY + 'px';
     });
 
-    // إخفاء القائمة عند النقر في أي مكان آخر
     window.addEventListener('click', function () {
       contextMenu.style.display = 'none';
     });
 
-    // أحداث خيارات القائمة
     menuUpload.addEventListener('click', function (e) {
       e.stopPropagation();
       contextMenu.style.display = 'none';
@@ -324,7 +341,7 @@
       clearImage();
     });
 
-    // زر البحث
+    // إرسال الصورة وقراءة الاستجابة بمرونة (نص مباشر أو JSON)
     findBtn.addEventListener('click', async function () {
       if (!selectedFile) {
         alert('من فضلك التقط أو الصق صورة السؤال أولاً.');
@@ -348,9 +365,20 @@
           throw new Error('فشل الاتصال بالخادم (' + response.status + ')');
         }
 
-        const data = await response.json();
+        const rawText = await response.text();
+        let finalOutput = rawText;
+
+        try {
+          const parsed = JSON.parse(rawText);
+          if (parsed && typeof parsed === 'object') {
+            finalOutput = parsed.result || parsed.message || parsed.text || JSON.stringify(parsed);
+          }
+        } catch (e) {
+          finalOutput = rawText;
+        }
+
         resultBox.style.display = 'block';
-        resultBox.innerText = data.result || data.message || JSON.stringify(data);
+        resultBox.innerText = finalOutput.trim();
 
       } catch (error) {
         alert('حدث خطأ أثناء الاتصال: ' + error.message);
