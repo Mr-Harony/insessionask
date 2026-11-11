@@ -371,7 +371,8 @@
     <div class="form-group">
       <label>Select Week</label>
       <select id="weekSelect">
-        <option value="Week 9" selected>Week 9 (Fri 30 Oct - Tues 03 Nov)</option>
+        <option value="Week 10" selected>Week 10 (Fri 06 Nov - Tues 10 Nov)</option>
+        <option value="Week 9">Week 9 (Fri 30 Oct - Tues 03 Nov)</option>
         <option value="Week 8">Week 8 (Fri 23 Oct - Tues 27 Oct)</option>
         <option value="Week 7">Week 7 (Fri 16 Oct - Tues 20 Oct)</option>
         <option value="Week 6">Week 6 (Fri 09 Oct - Tues 13 Oct)</option>
@@ -678,6 +679,8 @@
           });
 
           reportCard.style.display = 'block';
+        } else if (!response.ok && (response.status >= 500 || data.message === "Error in workflow")) {
+          showNotice("الصفحة عليها ضغط كبير دلوقتي، من فضلك جرّب تاني بعد ربع ساعة / The page is very busy right now, please try again in 15 minutes.");
         } else {
           showNotice(data.message || "Invalid credentials or no report found.");
         }
