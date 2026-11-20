@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#008069">
+<title>HQAC Admin</title>
+<style>
+  :root{
+    --head:#008069; --accent:#00a884; --bg:#f0f2f5; --panel:#fff; --text:#111b21; --muted:#667781; --line:#e9edef;
+    --chat:#efeae2; --me:#d9fdd3; --ai:#fff; --warn:#e8a400; --warnbg:#fff4d6; --sel:#f0f2f5;
+  }
+  body.dark{
+    --head:#202c33; --bg:#0b141a; --panel:#111b21; --text:#e9edef; --muted:#8696a0; --line:#222d34;
+    --chat:#0b141a; --me:#005c4b; --ai:#202c33; --warnbg:#3d3418; --sel:#2a3942;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+  button,input,select{font:inherit;color:inherit}
+  button{cursor:pointer;background:none;border:0}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* login */
+  #login{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+  .lgcard{background:var(--panel);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.08);text-align:center}
+  .lgcard .bigav{width:70px;height:70px;border-radius:50%;background:var(--head);color:#fff;display:grid;place-items:center;font-weight:800;font-size:24px;margin:0 auto 12px}
+  .lgcard h1{font-size:20px}
+  .lgcard p{color:var(--muted);font-size:13.5px;margin:4px 0 18px}
+  .lgcard input{width:100%;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);outline:none}
+  .lgcard input:focus{border-color:var(--accent)}
+  .lgcard button{width:100%;margin-top:14px;background:var(--accent);color:#fff;font-weight:700;padding:12px;border-radius:24px}
+  #lgErr{color:#d93025;font-size:13px;min-height:18px;margin-top:8px}
+
+  /* app */
+  #app{display:none;flex-direction:column;height:100dvh}
+  #app.on{display:flex}
+  .top{background:var(--head);color:#fff;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px 16px;flex-shrink:0}
+  .top h1{font-size:18px;flex:1}
+  .top .tag{font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-weight:600}
+  .hb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+  .hb:hover{background:rgba(255,255,255,.15)}
+  .testbar{background:#fff3cd;color:#7a5b00;font-size:12.5px;text-align:center;padding:4px 8px;flex-shrink:0}
+  body.dark .testbar{background:#3d3418;color:#ffd666}
+
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:12px 16px;flex-shrink:0}
+  .stat{background:var(--panel);border-radius:12px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .stat .l{font-size:12px;color:var(--muted)}
+  .stat .v{font-size:20px;font-weight:700;margin-top:2px}
+  .stat.money .v{color:var(--accent)}
+
+  .main{flex:1;display:flex;min-height:0;gap:0;margin:0 16px 16px;background:var(--panel);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  #listPane{width:440px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+  .filters{padding:10px;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line)}
+  .filters input[type=search]{flex:1 1 100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:20px;background:var(--bg);outline:none;font-size:15px}
+  .filters input[type=search]:focus{border-color:var(--accent)}
+  .seg{display:flex;background:var(--bg);border-radius:18px;padding:3px}
+  .seg button{padding:5px 11px;border-radius:15px;font-size:13px;color:var(--muted);font-weight:600}
+  .seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+  .filters select{padding:5px 8px;border-radius:15px;border:1.5px solid var(--line);background:var(--panel);font-size:13px}
+  .chk{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);font-weight:600}
+  .lhead{display:grid;grid-template-columns:1fr 46px 56px 74px;gap:6px;padding:8px 14px;font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line)}
+  .lhead span:not(:first-child){text-align:right}
+  #students{overflow-y:auto;flex:1}
+  .srow{display:grid;grid-template-columns:1fr 46px 56px 74px;gap:6px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;width:100%;text-align:left}
+  .srow:hover{background:var(--sel)}
+  .srow.on{background:var(--sel);box-shadow:inset 3px 0 0 var(--accent)}
+  .srow .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .srow .sub{font-size:12px;color:var(--muted)}
+  .srow .c{text-align:right;font-size:14px}
+  .srow .cost{color:var(--accent);font-weight:700}
+  .flagdot{color:var(--warn);font-size:12px}
+  .empty{padding:30px;text-align:center;color:var(--muted)}
+
+  #detail{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--chat)}
+  .dhead{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .dhead .back{display:none;font-size:22px;width:36px;height:36px}
+  .dhead .who{flex:1;min-width:0}
+  .dhead b{font-size:16px}
+  .dhead .sub{font-size:12.5px;color:var(--muted)}
+  .dstats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+  .dstats div{display:flex;flex-direction:column;align-items:flex-end}
+  .dstats .l{font-size:11px;color:var(--muted)}
+  .dstats .v{font-weight:700}
+  .dstats .v.money{color:var(--accent)}
+  #thread{flex:1;overflow-y:auto;padding:10px 4% 20px;display:flex;flex-direction:column}
+  .pick{margin:auto;color:var(--muted);text-align:center;padding:20px}
+
+  .frame{display:flex;flex-direction:column;border:2.5px solid #8696a0;border-radius:16px;padding:4px 8px 12px;margin:18px 0 6px;background:rgba(134,150,160,.14)}
+  .fhead{align-self:center;font-size:12.5px;font-weight:700;color:#fff;background:#8696a0;padding:3px 14px;border-radius:10px;margin:-14px 0 6px}
+  .msg{max-width:min(82%,640px);padding:6px 9px 6px;border-radius:8px;box-shadow:0 1px .5px rgba(11,20,26,.13);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;position:relative}
+  .msg.me{align-self:flex-end;background:var(--me)}
+  .msg.ai{align-self:flex-start;background:var(--ai)}
+  .msg.ai.flagged{box-shadow:0 0 0 2px var(--warn);background:var(--warnbg)}
+  .mtag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:8px;margin-right:6px;vertical-align:1px}
+  .mtag.new{background:#d1f4e9;color:#00664f}
+  .mtag.fu{background:#e3e8ff;color:#3346a8}
+  body.dark .mtag.new{background:#0c3b2e;color:#7ee2c0}
+  body.dark .mtag.fu{background:#262f55;color:#aab6ff}
+  .photos{display:flex;gap:4px;margin:2px 0 6px}
+  .photos span{width:64px;height:48px;border-radius:6px;background:linear-gradient(135deg,#cfd8dc,#b0bec5);display:grid;place-items:center;font-size:18px}
+  .meta{display:flex;justify-content:flex-end;gap:10px;align-items:center;font-size:11.5px;color:var(--muted);margin-top:4px;white-space:normal}
+  .meta .cost{font-weight:700;color:var(--accent)}
+  .flag{font-size:12px;font-weight:700;color:var(--muted);padding:2px 8px;border-radius:10px;border:1px solid var(--line)}
+  .flag.on{color:#fff;background:var(--warn);border-color:var(--warn)}
+
+  @media (max-width:1000px){ .stats{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:900px){
+    .stats{grid-template-columns:repeat(2,1fr);padding:10px 12px;gap:8px}
+    .stat .v{font-size:18px}
+    .top .tag{display:none}
+    .main{margin:0;border-radius:0}
+    #listPane{width:100%;border:0}
+    #detail{display:none}
+    body.in-detail #listPane,body.in-detail .stats{display:none}
+    body.in-detail #detail{display:flex}
+    .dhead .back{display:grid;place-items:center}
+    .dhead{flex-wrap:wrap}
+    .dstats{width:100%;justify-content:space-between}
+    .msg{max-width:88%}
+  }
+</style>
+</head>
+<body>
+
+<section id="login">
+  <div class="lgcard">
+    <div class="bigav">MH</div>
+    <h1>HQAC Admin</h1>
+    <p>Harony Quick Ask Chat — students' questions</p>
+    <input type="password" id="adminPass" placeholder="Admin password" autocomplete="current-password">
+    <div id="lgErr"></div>
+    <button id="lgBtn">Open</button>
+  </div>
+</section>
+
+<section id="app">
+  <div class="top">
+    <h1>HQAC Admin</h1><span class="tag">Harony Quick Ask Chat</span>
+    <button class="hb" id="themeBtn" title="Dark / Light">🌙</button>
+    <button class="hb" id="logoutBtn" title="Log out">🚪</button>
+  </div>
+  <div class="testbar" id="testbar">Test version — all students and numbers below are fake</div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="main">
+    <div id="listPane">
+      <div class="filters">
+        <input type="search" id="q" placeholder="Search student name, serial, or words in a question">
+        <div class="seg" id="range">
+          <button data-r="today">Today</button><button data-r="7">7 days</button><button data-r="30">30 days</button><button data-r="all" class="on">All</button>
+        </div>
+        <select id="sort">
+          <option value="last">Latest activity</option>
+          <option value="cost">Highest cost</option>
+          <option value="count">Most questions</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="flagOnly"> ⚠️ Flagged only</label>
+      </div>
+      <div class="lhead"><span>Student</span><span>New</span><span>F-ups</span><span>Cost</span></div>
+      <div id="students"></div>
+    </div>
+
+    <div id="detail">
+      <div class="dhead" id="dhead"><div class="pick">Choose a student to see their questions.</div></div>
+      <div id="thread"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const TEST_MODE = true;   // true = fake data; later this page will read from the HQAC workflow (admin webhook)
+  const $ = id => document.getElementById(id);
+  const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+  const usd = n => '$' + (n < 1 ? n.toFixed(4) : n.toFixed(2));
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  function dayLabel(t){ const a = new Date(t).setHours(0,0,0,0), b = new Date().setHours(0,0,0,0);
+    if (a === b) return 'Today'; if (b - a === 864e5) return 'Yesterday';
+    return new Date(t).toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'}); }
+  const when = t => dayLabel(t) === 'Today' ? timeOf(t) : `${dayLabel(t)}, ${timeOf(t)}`;
+
+  /* ---------- fake data (same columns the real HQAC history table will have) ---------- */
+  function fakeData(){
+    let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    const pick = a => a[Math.floor(rnd() * a.length)];
+    const names = ['Omar Ewis','Hawraa Rady','Youmna Sadek','Joud Shawki','Yousef Abdelaziz','Sama Moustafa','Mohamed Tarek','Laila Hassan','Adam Fathy','Nour Kamal','Karim Adel','Malak Sherif'];
+    const newQs = ['Why does light bend when it enters water?','How do I find the critical angle for glass?','What is specific heat capacity?','Can you explain this circuit question?','How do I calculate the resistance in this diagram?','What is the difference between speed and velocity?','Why is the answer B and not C in question 4?','How does a transformer work?','What is half-life?','How do I draw the ray diagram for a converging lens?'];
+    const fuQs = ['Why not 30°?','Can you explain the second step again?','And what if it was diamond?','So the unit is J/kg°C?','What about if the current doubles?','Is this in the syllabus?','Can you give me a similar example?'];
+    const ans = ['Light slows down when it enters a denser medium, so it changes direction towards the normal. Use **n = sin i / sin r**.','The critical angle is found with **sin c = 1/n**. For glass (n = 1.5), c ≈ 41.8°.','Specific heat capacity is the energy needed to raise the temperature of **1 kg** of a substance by **1 °C**.','In series, add the resistances: **R = R1 + R2**. In parallel: **1/R = 1/R1 + 1/R2**.','Good question. The angle in the diagram is measured from the **normal**, not the surface, so it is 60° not 30°.'];
+    const now = Date.now(); const out = [];
+    names.forEach((name, i) => {
+      const st = { serial: String(1001 + i * 3), name, rows: [] };
+      let t = now - (25 + rnd() * 20) * 864e5, cum = 0, topics = 2 + Math.floor(rnd() * 7);
+      for (let k = 0; k < topics; k++){
+        t += rnd() * 4 * 864e5 + 3600e3; if (t > now - 600e3) t = now - (topics - k) * 900e3;
+        const topic = 't' + i + '_' + k, fus = Math.floor(rnd() * 4);
+        for (let j = 0; j <= fus; j++){
+          const imgs = j === 0 && rnd() < 0.55 ? 1 + Math.floor(rnd() * 3) : 0;
+          const cost = +(0.0012 + rnd() * 0.004 + imgs * (0.002 + rnd() * 0.004) + (j ? 0.001 * j : 0)).toFixed(5);
+          cum = +(cum + cost).toFixed(5);
+          st.rows.push({ serial: st.serial, name, topic, mode: j === 0 ? 'new' : 'followup', t: t + j * 240e3, question: j === 0 ? pick(newQs) : pick(fuQs), answer: pick(ans), images: imgs, cost, cumulative: cum });
+        }
+      }
+      // make the fake data look current: first students asked today, the rest in the last days
+      const gap = i < 5 ? (10 + rnd() * 300) * 60e3 : (1 + rnd() * 9) * 864e5;
+      const shift = (now - gap) - st.rows[st.rows.length - 1].t;
+      st.rows.forEach(r => { r.t += shift; out.push(r); });
+    });
+    return out;
+  }
+
+  /* ---------- state ---------- */
+  let rows = [], range = 'all', current = null;
+  const flags = (() => { try { return JSON.parse(store.get('HQAC_admin_flags')) || {}; } catch(e){ return {}; } })();
+  const keyOf = r => r.serial + '|' + r.t;
+  const saveFlags = () => store.set('HQAC_admin_flags', JSON.stringify(flags));
+  function inRange(t){ if (range === 'all') return true; if (range === 'today') return new Date(t).setHours(0,0,0,0) === new Date().setHours(0,0,0,0); return t >= Date.now() - (+range) * 864e5; }
+
+  /* ---------- top numbers ---------- */
+  function renderStats(){
+    const today = rows.filter(r => new Date(r.t).setHours(0,0,0,0) === new Date().setHours(0,0,0,0));
+    const R = rows.filter(r => inRange(r.t));
+    const card = (l, v, cls='') => `<div class="stat ${cls}"><div class="l">${l}</div><div class="v num">${v}</div></div>`;
+    const lbl = {today:'today', '7':'last 7 days', '30':'last 30 days', all:'all time'}[range];
+    $('stats').innerHTML =
+      card('Questions today', today.length) +
+      card('Students today', new Set(today.map(r => r.serial)).size) +
+      card(`New (${lbl})`, R.filter(r => r.mode === 'new').length) +
+      card(`Follow-ups (${lbl})`, R.filter(r => r.mode !== 'new').length) +
+      card(`Cost (${lbl})`, usd(R.reduce((a, r) => a + r.cost, 0)), 'money') +
+      card('Total cost, all students', usd(rows.reduce((a, r) => a + r.cost, 0)), 'money');
+  }
+
+  /* ---------- student list ---------- */
+  function students(){
+    const q = $('q').value.trim().toLowerCase(), flagOnly = $('flagOnly').checked, map = new Map();
+    for (const r of rows){
+      if (!map.has(r.serial)) map.set(r.serial, { serial: r.serial, name: r.name, all: [] });
+      map.get(r.serial).all.push(r);
+    }
+    let list = [...map.values()].map(s => {
+      const inR = s.all.filter(r => inRange(r.t));
+      const last = s.all.reduce((a, r) => r.t > a.t ? r : a);
+      return { ...s, inR, nNew: inR.filter(r => r.mode === 'new').length, nFu: inR.filter(r => r.mode !== 'new').length,
+               total: last.cumulative, rangeCost: inR.reduce((a, r) => a + r.cost, 0), lastT: last.t,
+               flagged: s.all.some(r => flags[keyOf(r)]) };
+    }).filter(s => s.inR.length);
+    if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || s.serial.includes(q) || s.all.some(r => r.question.toLowerCase().includes(q)));
+    if (flagOnly) list = list.filter(s => s.flagged);
+    const by = $('sort').value;
+    list.sort((a, b) => by === 'cost' ? b.total - a.total : by === 'count' ? (b.nNew + b.nFu) - (a.nNew + a.nFu) : b.lastT - a.lastT);
+    return list;
+  }
+  function renderList(){
+    const list = students(), box = $('students');
+    if (!list.length){ box.innerHTML = '<div class="empty">No students match.</div>'; return; }
+    box.innerHTML = '';
+    for (const s of list){
+      const b = document.createElement('button'); b.className = 'srow' + (current === s.serial ? ' on' : '');
+      b.innerHTML = `<div><div class="nm">${esc(s.name)} ${s.flagged ? '<span class="flagdot">⚠️</span>' : ''}</div><div class="sub">#${s.serial} · last ${when(s.lastT)}</div></div>
+        <div class="c num">${s.nNew}</div><div class="c num">${s.nFu}</div><div class="c num cost" title="Total since joining">${usd(s.total)}</div>`;
+      b.onclick = () => openStudent(s.serial);
+      box.appendChild(b);
+    }
+  }
+
+  /* ---------- one student's questions ---------- */
+  function openStudent(serial){
+    current = serial; renderList();
+    const all = rows.filter(r => r.serial === serial).sort((a, b) => a.t - b.t);
+    const R = all.filter(r => inRange(r.t)), last = all[all.length - 1];
+    $('dhead').innerHTML = `<button class="back" id="back" title="Back">←</button>
+      <div class="who"><b>${esc(last.name)}</b><div class="sub">#${serial} · ${all.length} questions since joining</div></div>
+      <div class="dstats">
+        <div><span class="l">New</span><span class="v num">${R.filter(r => r.mode === 'new').length}</span></div>
+        <div><span class="l">Follow-ups</span><span class="v num">${R.filter(r => r.mode !== 'new').length}</span></div>
+        <div><span class="l">Cost (${range === 'all' ? 'all' : 'period'})</span><span class="v num money">${usd(R.reduce((a, r) => a + r.cost, 0))}</span></div>
+        <div><span class="l">Total since joining</span><span class="v num money">${usd(last.cumulative)}</span></div>
+      </div>`;
+    $('back').onclick = () => document.body.classList.remove('in-detail');
+    const th = $('thread'); th.innerHTML = '';
+    const flagOnly = $('flagOnly').checked;
+    const topics = [];
+    for (const r of R){ let f = topics.find(x => x.id === r.topic); if (!f){ f = { id: r.topic, rows: [] }; topics.push(f); } f.rows.push(r); }
+    for (const f of topics){
+      if (flagOnly && !f.rows.some(r => flags[keyOf(r)])) continue;
+      const fr = document.createElement('div'); fr.className = 'frame';
+      fr.innerHTML = `<div class="fhead">${when(f.rows[0].t)}</div>`;
+      for (const r of f.rows){
+        const me = document.createElement('div'); me.className = 'msg me';
+        me.innerHTML = (r.images ? `<div class="photos">${'<span>📷</span>'.repeat(r.images)}</div>` : '') +
+          `<span class="mtag ${r.mode === 'new' ? 'new' : 'fu'}">${r.mode === 'new' ? 'NEW' : 'FOLLOW-UP'}</span>${esc(r.question)}` +
+          `<div class="meta">${timeOf(r.t)}</div>`;
+        const ai = document.createElement('div'); const k = keyOf(r);
+        ai.className = 'msg ai' + (flags[k] ? ' flagged' : '');
+        ai.innerHTML = esc(r.answer).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') +
+          `<div class="meta"><span>Cost <span class="cost num">${usd(r.cost)}</span></span><span>Total so far <span class="cost num">${usd(r.cumulative)}</span></span>` +
+          `<button class="flag ${flags[k] ? 'on' : ''}">⚠️ ${flags[k] ? 'Flagged' : 'Flag'}</button></div>`;
+        ai.querySelector('.flag').onclick = () => { flags[k] ? delete flags[k] : (flags[k] = 1); saveFlags(); openStudent(serial); };
+        fr.append(me, ai);
+      }
+      th.appendChild(fr);
+    }
+    if (!th.children.length) th.innerHTML = '<div class="pick">No questions in this period.</div>';
+    th.scrollTop = th.scrollHeight;
+    document.body.classList.add('in-detail');
+  }
+
+  function refresh(){ renderStats(); renderList(); if (current) openStudent(current); }
+
+  /* ---------- wiring ---------- */
+  $('range').onclick = e => { const b = e.target.closest('button'); if (!b) return; range = b.dataset.r; [...$('range').children].forEach(x => x.classList.toggle('on', x === b)); refresh(); };
+  $('q').oninput = renderList; $('sort').onchange = renderList; $('flagOnly').onchange = refresh;
+  if (store.get('HQAC_admin_dark') === '1') document.body.classList.add('dark');
+  $('themeBtn').onclick = () => store.set('HQAC_admin_dark', document.body.classList.toggle('dark') ? '1' : '0');
+  function open(){ $('login').style.display = 'none'; $('app').classList.add('on'); rows = fakeData(); refresh(); }
+  $('lgBtn').onclick = () => {
+    const p = $('adminPass').value.trim();
+    if (!p){ $('lgErr').textContent = 'Please enter the admin password.'; return; }
+    // TEST_MODE: any password opens. Real version: the password is checked by n8n and the data comes only after that.
+    store.set('HQAC_admin_ok', '1'); open();
+  };
+  $('adminPass').onkeydown = e => { if (e.key === 'Enter') $('lgBtn').click(); };
+  $('logoutBtn').onclick = () => { store.del('HQAC_admin_ok'); location.reload(); };
+  if (!TEST_MODE) $('testbar').style.display = 'none';
+  if (store.get('HQAC_admin_ok') === '1') open();
+})();
+</script>
+</body>
+</html>
