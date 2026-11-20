@@ -69,7 +69,7 @@
   .msg.me.first::before{content:"";position:absolute;top:0;right:-8px;border-top:10px solid var(--me);border-right:8px solid transparent}
   .msg.ai.first::before{content:"";position:absolute;top:0;left:-8px;border-top:10px solid var(--ai);border-left:8px solid transparent}
   .msg .imgs{display:grid;gap:3px;margin:-3px -5px 5px -6px;border-radius:6px;overflow:hidden;white-space:normal}
-  .msg .imgs.n2,.msg .imgs.n3{grid-template-columns:1fr 1fr}
+  .msg .imgs.n2,.msg .imgs.n3,.msg .imgs.n4{grid-template-columns:1fr 1fr}
   .msg .imgs.n3 img:first-child{grid-column:1/3}
   .msg .imgs img{width:100%;height:140px;object-fit:cover;display:block;cursor:zoom-in;background:#ccc}
   .msg .imgs.n1 img{height:auto;max-height:320px;min-width:200px}
@@ -90,17 +90,13 @@
   body.dark .frame.cur{border-color:var(--accent);background:rgba(0,168,132,.06)}
   .fhead{align-self:center;font-size:12px;font-weight:600;color:var(--muted);background:var(--ai);padding:3px 12px;border-radius:8px;margin:4px 0 2px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
   .frame.cur .fhead{color:var(--accent)}
-  .mode-choose .composer,.mode-wait .composer,.mode-choose #intent,.mode-wait #intent{display:none}
-  #choose{display:none;flex-direction:column;gap:8px;padding:8px 8px calc(10px + env(safe-area-inset-bottom));flex-shrink:0}
+  .mode-choose .composer,.mode-wait .composer{opacity:.4;pointer-events:none;filter:grayscale(1)}
+  #choose{display:none;flex-direction:column;gap:8px;padding:8px 8px 2px;flex-shrink:0}
   .mode-choose #choose{display:flex}
   #limitNote{display:none;text-align:center;font-size:13.5px;color:var(--muted);padding:0 10px}
   .cbtns{display:flex;gap:8px}
   .cbtns button{flex:1;padding:13px 8px;border-radius:24px;font-weight:700;font-size:15.5px;background:var(--pill);color:var(--accent);box-shadow:0 1px 2px rgba(11,20,26,.2)}
   #bNew{background:var(--accent);color:#fff}
-  #intent{display:flex;align-items:center;gap:8px;padding:6px 16px 0;font-size:13px;color:var(--muted);flex-shrink:0}
-  #intent.hide{display:none}
-  #intent b{color:var(--text)}
-  #intentChange{margin-left:auto;color:var(--accent);font-weight:700;font-size:13px;padding:2px 4px}
 
   .composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex-shrink:0}
   .pill{flex:1;display:flex;align-items:flex-end;background:var(--pill);border-radius:24px;min-height:48px;padding:0 4px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
@@ -183,7 +179,6 @@
       <button id="bFollow">↩️ Follow up</button>
     </div>
   </div>
-  <div id="intent"><span id="intentText"></span><button id="intentChange">Change</button></div>
   <div class="composer">
     <div class="pill">
       <button class="ib" id="attach" title="Photos"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z"/></svg></button>
@@ -221,7 +216,7 @@
   /* ---------- settings ---------- */
   const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/HQAC-ask"; // new HQAC workflow (not created yet)
   const TEST_MODE   = true;   // true = fake replies, nothing is sent to n8n
-  const MAX_IMGS = 3;
+  const MAX_IMGS = 4;        // max photos in one question
   const MAX_FRAMES = 4;      // the student sees only the last 4 questions (frames)
   const MAX_PER_FRAME = 4;   // 1 question + 3 follow-ups per frame
   const K_USER = 'HQAC_username', K_PASS = 'HQAC_password', K_DARK = 'HQAC_dark';
@@ -276,11 +271,14 @@
   const asked = f => f ? f.msgs.filter(m => m.role === 'me').length : 0;
 
   /* ---------- New question / Follow up ---------- */
-  function setMode(m){ document.body.classList.remove('mode-choose','mode-compose','mode-wait'); document.body.classList.add('mode-' + m); }
+  function setMode(m){
+    document.body.classList.remove('mode-choose','mode-compose','mode-wait'); document.body.classList.add('mode-' + m);
+    $('text').disabled = m !== 'compose';
+  }
   function afterAnswer(){
     if (busy) return setMode('wait');
     const f = cur();
-    if (!f){ intent = 'new'; $('intent').classList.add('hide'); setMode('compose'); if (!isTouch) $('text').focus(); return; }
+    if (!f){ intent = 'new'; setMode('compose'); if (!isTouch) $('text').focus(); return; }
     const full = asked(f) >= MAX_PER_FRAME;
     $('bFollow').style.display = full ? 'none' : '';
     $('limitNote').style.display = full ? 'block' : 'none';
@@ -288,9 +286,6 @@
   }
   function choose(kind){
     intent = kind;
-    const f = cur();
-    $('intentText').innerHTML = kind === 'new' ? '❓ <b>New question</b>' : `↩️ <b>Follow-up</b> on your ${timeOf(f.t)} question`;
-    $('intent').classList.remove('hide');
     setMode('compose');
     $('text').focus();
   }
@@ -404,7 +399,7 @@
           : `(Test reply) Follow-up ${n-1} of 3 — the assistant would also see the ${n-1} earlier message${n-1>1?'s':''} in this frame.`;
         if (images.length) answer += `\nI received ${images.length} photo${images.length>1?'s':''}.`;
       } else {
-        const payload = { username: user, password: pass, question, image_1: images[0] || null, image_2: images[1] || null, image_3: images[2] || null,
+        const payload = { username: user, password: pass, question, image_1: images[0] || null, image_2: images[1] || null, image_3: images[2] || null, image_4: images[3] || null,
                           mode, topic_id: frame.id };
         const r = await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         answer = await r.text();
@@ -446,7 +441,6 @@
   $('pSend').onclick = sendPreview;
   $('bNew').onclick = () => choose('new');
   $('bFollow').onclick = () => choose('follow');
-  $('intentChange').onclick = afterAnswer;
   $('pClose').onclick = closePreview;
   $('pDel').onclick = () => { pending.splice(sel, 1); sel = Math.max(0, Math.min(sel, pending.length - 1)); pending.length ? renderPreview() : closePreview(); };
   $('lightbox').onclick = () => history.back();
