@@ -121,6 +121,12 @@
   .pthumbs button.sel{border-color:var(--accent);opacity:1}
   .pthumbs img{width:100%;height:100%;object-fit:cover}
   .pthumbs .add{border:2px solid #8696a0;opacity:1;display:grid;place-items:center;color:#d1d7db}
+  #pMore{display:flex;flex-direction:column;align-items:center;gap:8px;padding:2px 12px 12px}
+  .pmbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .pmbtn{padding:10px 16px;border-radius:22px;border:1.5px solid #00a884;background:rgba(0,168,132,.15);color:#fff;font-weight:700;font-size:14.5px}
+  .pmnote{font-size:13px;color:#aebac1;text-align:center;line-height:1.5}
+  .pmnote b{color:#fff}
+  .pmnote.full{color:#7ee2c0}
   #pHint{text-align:center;font-size:14.5px;font-weight:600;color:#ffd166;padding:0 16px 6px;min-height:26px}
   #pHint.shake{animation:shake .4s}
   @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
@@ -201,6 +207,7 @@
   </div>
   <div class="pmain"><img id="pBig" alt=""></div>
   <div class="pthumbs" id="pThumbs"></div>
+  <div id="pMore"></div>
   <div id="pHint"></div>
   <div class="pcap">
     <div class="pill" id="capPill"><textarea id="caption" rows="1" placeholder="Write your question about the photo..."></textarea></div>
@@ -364,10 +371,17 @@
     $('pCount').textContent = `${pending.length} of ${MAX_IMGS} photos`;
     const t = $('pThumbs'); t.innerHTML = '';
     pending.forEach((s, i) => { const b = document.createElement('button'); if (i === sel) b.className = 'sel'; b.innerHTML = `<img src="${s}" alt="">`; b.onclick = () => { sel = i; renderPreview(); }; t.appendChild(b); });
-    if (pending.length < MAX_IMGS){
-      const a = document.createElement('button'); a.className = 'add'; a.title = 'Add another photo';
-      a.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>';
-      a.onclick = () => $('gallery').click(); t.appendChild(a);
+    // clear "add more photos" buttons + how many are allowed
+    const left = MAX_IMGS - pending.length, more = $('pMore');
+    if (left > 0){
+      more.innerHTML = '<div class="pmbtns">' +
+        (isTouch ? '<button class="pmbtn" id="pmCam">📷 Take another photo</button><button class="pmbtn" id="pmGal">🖼️ Add from gallery</button>'
+                 : '<button class="pmbtn" id="pmGal">＋ Add another photo</button>') +
+        `</div><div class="pmnote">You can send up to <b>${MAX_IMGS} photos</b> in one question · <b>${left} more</b> allowed${isTouch ? '' : ' · or paste with Ctrl+V'}</div>`;
+      $('pmGal').onclick = () => $('gallery').click();
+      if ($('pmCam')) $('pmCam').onclick = () => $('camera').click();
+    } else {
+      more.innerHTML = `<div class="pmnote full">✔ Maximum reached: <b>${MAX_IMGS} photos</b> in one question</div>`;
     }
     checkHint();
   }
