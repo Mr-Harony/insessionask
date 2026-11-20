@@ -82,6 +82,26 @@
   .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
   @keyframes b{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 
+  /* ===== question frames ===== */
+  .frame{align-self:stretch;display:flex;flex-direction:column;border:1.5px solid rgba(11,20,26,.10);border-radius:14px;padding:4px 8px 10px;margin:10px 0 4px;background:rgba(255,255,255,.28)}
+  .frame.cur{border-color:var(--accent);background:rgba(0,168,132,.07)}
+  .frame.old .msg{opacity:.85}
+  body.dark .frame{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.02)}
+  body.dark .frame.cur{border-color:var(--accent);background:rgba(0,168,132,.06)}
+  .fhead{align-self:center;font-size:12px;font-weight:600;color:var(--muted);background:var(--ai);padding:3px 12px;border-radius:8px;margin:4px 0 2px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .frame.cur .fhead{color:var(--accent)}
+  .mode-choose .composer,.mode-wait .composer,.mode-choose #intent,.mode-wait #intent{display:none}
+  #choose{display:none;flex-direction:column;gap:8px;padding:8px 8px calc(10px + env(safe-area-inset-bottom));flex-shrink:0}
+  .mode-choose #choose{display:flex}
+  #limitNote{display:none;text-align:center;font-size:13.5px;color:var(--muted);padding:0 10px}
+  .cbtns{display:flex;gap:8px}
+  .cbtns button{flex:1;padding:13px 8px;border-radius:24px;font-weight:700;font-size:15.5px;background:var(--pill);color:var(--accent);box-shadow:0 1px 2px rgba(11,20,26,.2)}
+  #bNew{background:var(--accent);color:#fff}
+  #intent{display:flex;align-items:center;gap:8px;padding:6px 16px 0;font-size:13px;color:var(--muted);flex-shrink:0}
+  #intent.hide{display:none}
+  #intent b{color:var(--text)}
+  #intentChange{margin-left:auto;color:var(--accent);font-weight:700;font-size:13px;padding:2px 4px}
+
   .composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex-shrink:0}
   .pill{flex:1;display:flex;align-items:flex-end;background:var(--pill);border-radius:24px;min-height:48px;padding:0 4px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
   .pill .ib{width:42px;height:48px;display:grid;place-items:center;color:var(--icon);flex-shrink:0}
@@ -156,6 +176,14 @@
   </div>
   <div class="testbar" id="testbar">Test version — replies are not real yet</div>
   <div id="msgs"></div>
+  <div id="choose">
+    <div id="limitNote">You've asked 3 follow-ups on this question. Please start a new question.</div>
+    <div class="cbtns">
+      <button id="bNew">❓ New question</button>
+      <button id="bFollow">↩️ Follow up</button>
+    </div>
+  </div>
+  <div id="intent"><span id="intentText"></span><button id="intentChange">Change</button></div>
   <div class="composer">
     <div class="pill">
       <button class="ib" id="attach" title="Photos"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z"/></svg></button>
@@ -193,7 +221,9 @@
   /* ---------- settings ---------- */
   const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/HQAC-ask"; // new HQAC workflow (not created yet)
   const TEST_MODE   = true;   // true = fake replies, nothing is sent to n8n
-  const MAX_IMGS = 3, KEEP_DAYS = 7;
+  const MAX_IMGS = 3;
+  const MAX_FRAMES = 4;      // the student sees only the last 4 questions (frames)
+  const MAX_PER_FRAME = 4;   // 1 question + 3 follow-ups per frame
   const K_USER = 'HQAC_username', K_PASS = 'HQAC_password', K_DARK = 'HQAC_dark';
 
   const $ = id => document.getElementById(id);
@@ -201,7 +231,7 @@
   const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
                   set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
                   del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
-  let user = '', pass = '', msgs = [], pending = [], sel = 0, busy = false;
+  let user = '', pass = '', frames = [], pending = [], sel = 0, busy = false, intent = 'new';
 
   /* ---------- screens + phone back button ---------- */
   function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id || (id !== 'login' && s.id === 'chat'))); }
@@ -216,13 +246,12 @@
   $('mTheme').onclick = () => { const d = document.body.classList.toggle('dark'); store.set(K_DARK, d ? '1' : '0'); closeMenu(); };
 
   /* ---------- login ---------- */
-  const chatKey = () => 'HQAC_chat_' + user.toLowerCase();
+  const chatKey = () => 'HQAC_frames_' + user.toLowerCase();
   function startChat(){
     show('chat');
-    try { msgs = JSON.parse(store.get(chatKey())) || []; } catch(e){ msgs = []; }
-    const cut = Date.now() - KEEP_DAYS*864e5; msgs = msgs.filter(m => m.t >= cut); saveMsgs();
-    render();
-    if (!isTouch) $('text').focus();
+    try { frames = JSON.parse(store.get(chatKey())) || []; } catch(e){ frames = []; }
+    frames = frames.slice(-MAX_FRAMES); saveFrames();
+    render(); afterAnswer();
   }
   $('lgBtn').onclick = () => {
     const u = $('username').value.trim(), p = $('password').value.trim();
@@ -232,16 +261,38 @@
   };
   $('password').addEventListener('keydown', e => { if (e.key === 'Enter') $('lgBtn').click(); });
   $('mLogout').onclick = () => { store.del(K_USER); store.del(K_PASS); user = pass = ''; $('password').value=''; closeMenu(); show('login'); };
-  $('mClear').onclick = () => { closeMenu(); if (confirm('Clear this chat from this device?')){ msgs = []; saveMsgs(); render(); } };
+  $('mClear').onclick = () => { closeMenu(); if (confirm('Clear this chat from this device?')){ frames = []; saveFrames(); render(); afterAnswer(); } };
   $('menuBtn').onclick = e => { e.stopPropagation(); $('menu').classList.toggle('on'); };
   function closeMenu(){ $('menu').classList.remove('on'); }
   document.addEventListener('click', closeMenu);
 
   /* ---------- chat history on this device (for display) ---------- */
-  function saveMsgs(){
-    // keep the newest messages that fit in browser storage
-    let list = msgs.slice();
+  function saveFrames(){
+    // keep the newest frames that fit in browser storage
+    let list = frames.slice(-MAX_FRAMES);
     while (list.length && !store.set(chatKey(), JSON.stringify(list))) list.shift();
+  }
+  const cur = () => frames[frames.length - 1];
+  const asked = f => f ? f.msgs.filter(m => m.role === 'me').length : 0;
+
+  /* ---------- New question / Follow up ---------- */
+  function setMode(m){ document.body.classList.remove('mode-choose','mode-compose','mode-wait'); document.body.classList.add('mode-' + m); }
+  function afterAnswer(){
+    if (busy) return setMode('wait');
+    const f = cur();
+    if (!f){ intent = 'new'; $('intent').classList.add('hide'); setMode('compose'); if (!isTouch) $('text').focus(); return; }
+    const full = asked(f) >= MAX_PER_FRAME;
+    $('bFollow').style.display = full ? 'none' : '';
+    $('limitNote').style.display = full ? 'block' : 'none';
+    setMode('choose');
+  }
+  function choose(kind){
+    intent = kind;
+    const f = cur();
+    $('intentText').innerHTML = kind === 'new' ? '❓ <b>New question</b>' : `↩️ <b>Follow-up</b> on your ${timeOf(f.t)} question`;
+    $('intent').classList.remove('hide');
+    setMode('compose');
+    $('text').focus();
   }
   const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<b>$1</b>'); // same as Quick Ask
@@ -251,15 +302,19 @@
     if (a === b) return 'Today'; if (b - a === 864e5) return 'Yesterday';
     return new Date(t).toLocaleDateString([], {weekday:'long', day:'numeric', month:'short'});
   }
+  function frameTitle(t){ const d = dayLabel(t); return d === 'Today' ? timeOf(t) : `${d}, ${timeOf(t)}`; }
   function render(){
     const box = $('msgs'); box.innerHTML = '';
-    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Type your question, take a photo, or send photos from your gallery.<br>I remember your last few questions, so you can ask a follow-up.<br><small>Chats are kept on this device for ${KEEP_DAYS} days.</small></div>`);
-    let lastDay = '', lastRole = '';
-    for (const m of msgs){
-      const d = dayLabel(m.t); if (d !== lastDay){ box.insertAdjacentHTML('beforeend', `<div class="day">${d}</div>`); lastDay = d; lastRole = ''; }
-      box.appendChild(bubble(m, m.role !== lastRole)); lastRole = m.role;
-    }
-    if (busy) box.insertAdjacentHTML('beforeend', '<div class="typing"><i></i><i></i><i></i></div>');
+    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Type your question, take a photo, or send photos from your gallery.<br>After each answer, choose <b>Follow up</b> to continue the same question, or <b>New question</b> to start a new one.</div>`);
+    frames.forEach((f, i) => {
+      const last = i === frames.length - 1;
+      const fr = document.createElement('div'); fr.className = 'frame ' + (last ? 'cur' : 'old');
+      fr.innerHTML = `<div class="fhead">${frameTitle(f.t)}</div>`;
+      let lastRole = '';
+      for (const m of f.msgs){ fr.appendChild(bubble(m, m.role !== lastRole)); lastRole = m.role; }
+      if (busy && last) fr.insertAdjacentHTML('beforeend', '<div class="typing"><i></i><i></i><i></i></div>');
+      box.appendChild(fr);
+    });
     box.scrollTop = box.scrollHeight;
   }
   function bubble(m, first){
@@ -292,6 +347,8 @@
   async function addFiles(files){
     files = files.filter(f => f && f.type && f.type.startsWith('image/'));
     if (!files.length) return;
+    if (document.body.classList.contains('mode-choose')){ toast('First choose: New question or Follow up'); return; }
+    if (busy){ toast('Please wait for the answer to your last question'); return; }
     for (const f of files){
       if (pending.length >= MAX_IMGS){ toast(`Maximum ${MAX_IMGS} photos per question`); break; }
       try { pending.push(await resize(f, 1920, 0.8)); sel = pending.length - 1; } catch(e){ toast("This photo couldn't be opened. Try another one."); }
@@ -329,27 +386,34 @@
   async function ask(question, images){
     if (busy){ toast('Please wait for the answer to your last question'); return false; }
     const thumbs = await Promise.all(images.map(thumbOf).map(p => p.catch(() => '')));
+    const mode = intent === 'follow' && cur() && asked(cur()) < MAX_PER_FRAME ? 'followup' : 'new';
+    if (mode === 'new'){ frames.push({ id: 'f' + Date.now(), t: Date.now(), msgs: [] }); frames = frames.slice(-MAX_FRAMES); }
+    const frame = cur();
     const m = { role:'me', text: question, imgs: thumbs.filter(Boolean), t: Date.now() };
-    msgs.push(m); busy = true; saveMsgs(); render();
+    frame.msgs.push(m); busy = true; setMode('wait'); saveFrames(); render();
     setTimeout(() => { m.delivered = true; render(); }, 300);
-    setTimeout(() => { m.read = true; $('status').textContent = 'typing…'; saveMsgs(); render(); }, 700);
+    setTimeout(() => { m.read = true; $('status').textContent = 'typing…'; saveFrames(); render(); }, 700);
 
     let answer, failed = false;
     try {
       if (TEST_MODE){
         await new Promise(r => setTimeout(r, 2200));
-        const n = msgs.filter(x => x.role === 'ai').length;
-        answer = `(Test reply ${n+1}) In the real version Mr. Harony's assistant answers here.` + (images.length ? `\nI received ${images.length} photo${images.length>1?'s':''}.` : '') + (n ? `\nI would also remember your previous ${Math.min(n,3)} question${Math.min(n,3)>1?'s':''}.` : '');
+        const n = asked(frame);
+        answer = mode === 'new'
+          ? `(Test reply) New question — in the real version Mr. Harony's assistant answers here, without any previous history.`
+          : `(Test reply) Follow-up ${n-1} of 3 — the assistant would also see the ${n-1} earlier message${n-1>1?'s':''} in this frame.`;
+        if (images.length) answer += `\nI received ${images.length} photo${images.length>1?'s':''}.`;
       } else {
-        const payload = { username: user, password: pass, question, image_1: images[0] || null, image_2: images[1] || null, image_3: images[2] || null };
+        const payload = { username: user, password: pass, question, image_1: images[0] || null, image_2: images[1] || null, image_3: images[2] || null,
+                          mode, topic_id: frame.id };
         const r = await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         answer = await r.text();
         if (!r.ok && !answer) throw new Error('HTTP ' + r.status);
       }
     } catch(e){ failed = true; answer = "Couldn't reach the server. Please check your internet and try again."; }
 
-    msgs.push({ role: failed ? 'err' : 'ai', text: answer, t: Date.now() });
-    busy = false; $('status').textContent = 'online'; saveMsgs(); render();
+    frame.msgs.push({ role: failed ? 'err' : 'ai', text: answer, t: Date.now() });
+    busy = false; $('status').textContent = 'online'; saveFrames(); render(); afterAnswer();
     return true;
   }
   async function sendText(){
@@ -380,6 +444,9 @@
   $('gallery').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
   $('camera').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
   $('pSend').onclick = sendPreview;
+  $('bNew').onclick = () => choose('new');
+  $('bFollow').onclick = () => choose('follow');
+  $('intentChange').onclick = afterAnswer;
   $('pClose').onclick = closePreview;
   $('pDel').onclick = () => { pending.splice(sel, 1); sel = Math.max(0, Math.min(sel, pending.length - 1)); pending.length ? renderPreview() : closePreview(); };
   $('lightbox').onclick = () => history.back();
