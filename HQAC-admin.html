@@ -7,24 +7,24 @@
 <title>HQAC Admin</title>
 <style>
   :root{
-    --head:#008069; --accent:#00a884; --bg:#f0f2f5; --panel:#fff; --text:#111b21; --muted:#667781; --line:#e9edef;
-    --chat:#efeae2; --me:#d9fdd3; --ai:#fff; --warn:#e8a400; --warnbg:#fff4d6; --sel:#f0f2f5;
+    --head:#008069; --accent:#00a884; --bg:#d1d7db; --panel:#fff; --bar:#f0f2f5; --text:#111b21; --muted:#667781; --line:#e9edef;
+    --chat:#efeae2; --out:#d9fdd3; --in:#fff; --warn:#e8a400; --warnbg:#fff4d6; --sel:#f0f2f5; --wallop:.06;
   }
   body.dark{
-    --head:#202c33; --bg:#0b141a; --panel:#111b21; --text:#e9edef; --muted:#8696a0; --line:#222d34;
-    --chat:#0b141a; --me:#005c4b; --ai:#202c33; --warnbg:#3d3418; --sel:#2a3942;
+    --head:#202c33; --bg:#0a1014; --panel:#111b21; --bar:#202c33; --text:#e9edef; --muted:#8696a0; --line:#222d34;
+    --chat:#0b141a; --out:#005c4b; --in:#202c33; --warnbg:#3d3418; --sel:#2a3942; --wallop:.05;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
   button,input,select{font:inherit;color:inherit}
   button{cursor:pointer;background:none;border:0}
   .num{font-variant-numeric:tabular-nums}
 
-  /* login */
-  #login{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-  .lgcard{background:var(--panel);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.08);text-align:center}
-  .lgcard .bigav{width:70px;height:70px;border-radius:50%;background:var(--head);color:#fff;display:grid;place-items:center;font-weight:800;font-size:24px;margin:0 auto 12px}
+  /* ===== login ===== */
+  #login{height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .lgcard{background:var(--panel);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.12);text-align:center}
+  .lgcard .bigav{width:70px;height:70px;border-radius:50%;background:#008069;color:#fff;display:grid;place-items:center;font-weight:800;font-size:24px;margin:0 auto 12px}
   .lgcard h1{font-size:20px}
   .lgcard p{color:var(--muted);font-size:13.5px;margin:4px 0 18px}
   .lgcard input{width:100%;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);outline:none}
@@ -32,66 +32,86 @@
   .lgcard button{width:100%;margin-top:14px;background:var(--accent);color:#fff;font-weight:700;padding:12px;border-radius:24px}
   #lgErr{color:#d93025;font-size:13px;min-height:18px;margin-top:8px}
 
-  /* app */
-  #app{display:none;flex-direction:column;height:100dvh}
+  /* ===== app: names on the left, messages in the big area ===== */
+  #app{display:none;height:100dvh;max-width:1600px;margin:0 auto;background:var(--panel);box-shadow:0 0 16px rgba(0,0,0,.15)}
   #app.on{display:flex}
-  .top{background:var(--head);color:#fff;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px 16px;flex-shrink:0}
-  .top h1{font-size:18px;flex:1}
-  .top .tag{font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-weight:600}
-  .hb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px}
-  .hb:hover{background:rgba(255,255,255,.15)}
-  .testbar{background:#fff3cd;color:#7a5b00;font-size:12.5px;text-align:center;padding:4px 8px;flex-shrink:0}
+  .av{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex-shrink:0;font-size:16px}
+  .hb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+  .hb:hover{background:rgba(128,128,128,.18)}
+
+  /* ----- left: students ----- */
+  #side{width:420px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-width:0}
+  .shead{background:var(--head);color:#fff;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 8px 8px 16px;min-height:60px;flex-shrink:0}
+  .shead h1{font-size:19px;flex:1}
+  .testbar{background:#fff3cd;color:#7a5b00;font-size:12px;text-align:center;padding:3px 8px;flex-shrink:0}
   body.dark .testbar{background:#3d3418;color:#ffd666}
-
-  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:12px 16px;flex-shrink:0}
-  .stat{background:var(--panel);border-radius:12px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
-  .stat .l{font-size:12px;color:var(--muted)}
-  .stat .v{font-size:20px;font-weight:700;margin-top:2px}
-  .stat.money .v{color:var(--accent)}
-
-  .main{flex:1;display:flex;min-height:0;gap:0;margin:0 16px 16px;background:var(--panel);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-  #listPane{width:440px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
-  .filters{padding:10px;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line)}
-  .filters input[type=search]{flex:1 1 100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:20px;background:var(--bg);outline:none;font-size:15px}
-  .filters input[type=search]:focus{border-color:var(--accent)}
-  .seg{display:flex;background:var(--bg);border-radius:18px;padding:3px}
-  .seg button{padding:5px 11px;border-radius:15px;font-size:13px;color:var(--muted);font-weight:600}
-  .seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
-  .filters select{padding:5px 8px;border-radius:15px;border:1.5px solid var(--line);background:var(--panel);font-size:13px}
-  .chk{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);font-weight:600}
-  .lhead{display:grid;grid-template-columns:1fr 46px 56px 74px;gap:6px;padding:8px 14px;font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line)}
-  .lhead span:not(:first-child){text-align:right}
+  .search{padding:8px 12px 4px;flex-shrink:0}
+  .search input{width:100%;padding:9px 14px;border:0;border-radius:20px;background:var(--bar);outline:none;font-size:15px}
+  .chips{display:flex;gap:6px;padding:6px 12px 8px;overflow-x:auto;flex-shrink:0;border-bottom:1px solid var(--line);align-items:center}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{padding:5px 12px;border-radius:16px;background:var(--bar);color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0}
+  .chip.on{background:#d1f4e9;color:#00664f}
+  body.dark .chip.on{background:#0c3b2e;color:#7ee2c0}
+  .chips select{padding:5px 8px;border-radius:16px;border:0;background:var(--bar);color:var(--muted);font-size:13px;font-weight:600;flex-shrink:0}
+  .chips .sep{width:1px;height:18px;background:var(--line);flex-shrink:0}
+  #statsSide{display:none}
   #students{overflow-y:auto;flex:1}
-  .srow{display:grid;grid-template-columns:1fr 46px 56px 74px;gap:6px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;width:100%;text-align:left}
+  .srow{display:flex;gap:12px;align-items:center;padding:0 14px;width:100%;text-align:left;min-height:86px}
   .srow:hover{background:var(--sel)}
-  .srow.on{background:var(--sel);box-shadow:inset 3px 0 0 var(--accent)}
-  .srow .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .srow .sub{font-size:12px;color:var(--muted)}
-  .srow .c{text-align:right;font-size:14px}
-  .srow .cost{color:var(--accent);font-weight:700}
-  .flagdot{color:var(--warn);font-size:12px}
+  .srow.on{background:var(--sel)}
+  .srow .body{flex:1;min-width:0;border-bottom:1px solid var(--line);padding:10px 0;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:2px}
+  .srow .l1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .srow .nm{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .srow .tm{font-size:12px;color:var(--muted);flex-shrink:0}
+  .srow .prev{font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .srow .l3{display:flex;gap:6px;align-items:center;font-size:12px;margin-top:2px}
+  .pillc{padding:1px 8px;border-radius:9px;font-weight:700}
+  .pillc.new{background:#d1f4e9;color:#00664f}
+  .pillc.fu{background:#e3e8ff;color:#3346a8}
+  body.dark .pillc.new{background:#0c3b2e;color:#7ee2c0}
+  body.dark .pillc.fu{background:#262f55;color:#aab6ff}
+  .srow .cost{margin-left:auto;font-weight:700;color:var(--accent);font-size:13.5px}
   .empty{padding:30px;text-align:center;color:var(--muted)}
 
-  #detail{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--chat)}
-  .dhead{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-  .dhead .back{display:none;font-size:22px;width:36px;height:36px}
-  .dhead .who{flex:1;min-width:0}
-  .dhead b{font-size:16px}
+  /* ----- right: messages ----- */
+  #detail{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--chat);position:relative}
+  #detail::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--wallop);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160' fill='none' stroke='%23808080' stroke-width='2'%3E%3Cellipse cx='35' cy='35' rx='18' ry='7'/%3E%3Cellipse cx='35' cy='35' rx='18' ry='7' transform='rotate(60 35 35)'/%3E%3Cellipse cx='35' cy='35' rx='18' ry='7' transform='rotate(120 35 35)'/%3E%3Cpath d='M110 20h12M113 20v14l-9 18h24l-9-18V20'/%3E%3Cpath d='M20 110l10 10 10-10 10 10 10-10'/%3E%3Ccircle cx='120' cy='115' r='9'/%3E%3Cpath d='M120 98v-6M120 138v-6M137 115h6M97 115h6'/%3E%3Cpath d='M70 75l8-14 8 14z'/%3E%3C/svg%3E");}
+  #detail > *{position:relative}
+  /* overview (nothing selected) */
+  #overview{margin:auto;padding:24px;max-width:640px;width:100%;text-align:center}
+  #overview h2{font-size:22px;font-weight:600;margin-bottom:4px}
+  #overview p{color:var(--muted);margin-bottom:18px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat{background:var(--panel);border-radius:12px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.08);text-align:left}
+  .stat .l{font-size:12px;color:var(--muted)}
+  .stat .v{font-size:21px;font-weight:700;margin-top:2px}
+  .stat.money .v{color:var(--accent)}
+  /* one student */
+  #chatview{display:none;flex-direction:column;flex:1;min-height:0}
+  body.has-student #chatview{display:flex}
+  body.has-student #overview{display:none}
+  .dhead{background:var(--bar);border-bottom:1px solid var(--line);padding:calc(6px + env(safe-area-inset-top)) 14px 6px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:60px}
+  .dhead .av{width:40px;height:40px;font-size:14px}
+  .dhead .back{display:none;font-size:22px}
+  .dhead .who{flex:1;min-width:0;line-height:1.3}
+  .dhead b{font-size:16px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .dhead .sub{font-size:12.5px;color:var(--muted)}
-  .dstats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+  .dstats{display:flex;gap:16px;font-size:13px}
   .dstats div{display:flex;flex-direction:column;align-items:flex-end}
-  .dstats .l{font-size:11px;color:var(--muted)}
+  .dstats .l{font-size:11px;color:var(--muted);white-space:nowrap}
   .dstats .v{font-weight:700}
   .dstats .v.money{color:var(--accent)}
-  #thread{flex:1;overflow-y:auto;padding:10px 4% 20px;display:flex;flex-direction:column}
-  .pick{margin:auto;color:var(--muted);text-align:center;padding:20px}
-
-  .frame{display:flex;flex-direction:column;border:2.5px solid #8696a0;border-radius:16px;padding:4px 8px 12px;margin:18px 0 6px;background:rgba(134,150,160,.14)}
+  #thread{flex:1;overflow-y:auto;padding:10px 5% 20px;display:flex;flex-direction:column}
+  .frame{display:flex;flex-direction:column;border:2.5px solid #8696a0;border-radius:16px;padding:4px 10px 12px;margin:18px 0 6px;background:rgba(134,150,160,.14)}
   .fhead{align-self:center;font-size:12.5px;font-weight:700;color:#fff;background:#8696a0;padding:3px 14px;border-radius:10px;margin:-14px 0 6px}
-  .msg{max-width:min(82%,640px);padding:6px 9px 6px;border-radius:8px;box-shadow:0 1px .5px rgba(11,20,26,.13);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;position:relative}
-  .msg.me{align-self:flex-end;background:var(--me)}
-  .msg.ai{align-self:flex-start;background:var(--ai)}
-  .msg.ai.flagged{box-shadow:0 0 0 2px var(--warn);background:var(--warnbg)}
+  .msg{max-width:min(78%,640px);padding:6px 9px;border-radius:8px;box-shadow:0 1px .5px rgba(11,20,26,.13);margin-top:8px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;position:relative}
+  .msg.in{align-self:flex-start;background:var(--in);border-top-left-radius:0}     /* the student */
+  .msg.out{align-self:flex-end;background:var(--out);border-top-right-radius:0}    /* our answer */
+  .msg.in::before{content:"";position:absolute;top:0;left:-8px;border-top:10px solid var(--in);border-left:8px solid transparent}
+  .msg.out::before{content:"";position:absolute;top:0;right:-8px;border-top:10px solid var(--out);border-right:8px solid transparent}
+  .msg.out.flagged{box-shadow:0 0 0 2.5px var(--warn);background:var(--warnbg)}
+  .msg.out.flagged::before{border-top-color:var(--warnbg)}
   .mtag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:8px;margin-right:6px;vertical-align:1px}
   .mtag.new{background:#d1f4e9;color:#00664f}
   .mtag.fu{background:#e3e8ff;color:#3346a8}
@@ -99,25 +119,30 @@
   body.dark .mtag.fu{background:#262f55;color:#aab6ff}
   .photos{display:flex;gap:4px;margin:2px 0 6px}
   .photos span{width:64px;height:48px;border-radius:6px;background:linear-gradient(135deg,#cfd8dc,#b0bec5);display:grid;place-items:center;font-size:18px}
-  .meta{display:flex;justify-content:flex-end;gap:10px;align-items:center;font-size:11.5px;color:var(--muted);margin-top:4px;white-space:normal}
+  .meta{display:flex;justify-content:flex-end;gap:10px;align-items:center;font-size:11.5px;color:var(--muted);margin-top:4px;white-space:normal;flex-wrap:wrap}
+  body.dark .msg.out .meta{color:#a5c9c0}
   .meta .cost{font-weight:700;color:var(--accent)}
-  .flag{font-size:12px;font-weight:700;color:var(--muted);padding:2px 8px;border-radius:10px;border:1px solid var(--line)}
+  body.dark .msg.out .meta .cost{color:#7ee2c0}
+  .flag{font-size:12px;font-weight:700;color:var(--muted);padding:2px 8px;border-radius:10px;border:1px solid rgba(128,128,128,.4);background:rgba(255,255,255,.5)}
+  body.dark .flag{background:rgba(0,0,0,.2);color:#d1d7db}
   .flag.on{color:#fff;background:var(--warn);border-color:var(--warn)}
+  .pick{margin:auto;color:var(--muted);text-align:center;padding:20px}
 
-  @media (max-width:1000px){ .stats{grid-template-columns:repeat(3,1fr)} }
+  /* ===== phone: list screen, then chat screen ===== */
   @media (max-width:900px){
-    .stats{grid-template-columns:repeat(2,1fr);padding:10px 12px;gap:8px}
-    .stat .v{font-size:18px}
-    .top .tag{display:none}
-    .main{margin:0;border-radius:0}
-    #listPane{width:100%;border:0}
+    #side{width:100%;border:0}
     #detail{display:none}
-    body.in-detail #listPane,body.in-detail .stats{display:none}
+    body.in-detail #side{display:none}
     body.in-detail #detail{display:flex}
-    .dhead .back{display:grid;place-items:center}
+    #statsSide{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;flex-shrink:0;border-bottom:1px solid var(--line)}
+    #statsSide::-webkit-scrollbar{display:none}
+    #statsSide .stat{flex-shrink:0;min-width:128px;background:var(--bar);box-shadow:none;padding:8px 10px}
+    #statsSide .stat .v{font-size:17px}
     .dhead{flex-wrap:wrap}
-    .dstats{width:100%;justify-content:space-between}
+    .dhead .back{display:grid}
+    .dstats{width:100%;justify-content:space-between;padding:2px 4px 2px}
     .msg{max-width:88%}
+    #thread{padding:10px 12px 20px}
   }
 </style>
 </head>
@@ -135,38 +160,44 @@
 </section>
 
 <section id="app">
-  <div class="top">
-    <h1>HQAC Admin</h1><span class="tag">Harony Quick Ask Chat</span>
-    <button class="hb" id="themeBtn" title="Dark / Light">🌙</button>
-    <button class="hb" id="logoutBtn" title="Log out">🚪</button>
-  </div>
-  <div class="testbar" id="testbar">Test version — all students and numbers below are fake</div>
-
-  <div class="stats" id="stats"></div>
-
-  <div class="main">
-    <div id="listPane">
-      <div class="filters">
-        <input type="search" id="q" placeholder="Search student name, serial, or words in a question">
-        <div class="seg" id="range">
-          <button data-r="today">Today</button><button data-r="7">7 days</button><button data-r="30">30 days</button><button data-r="all" class="on">All</button>
-        </div>
-        <select id="sort">
-          <option value="last">Latest activity</option>
-          <option value="cost">Highest cost</option>
-          <option value="count">Most questions</option>
-        </select>
-        <label class="chk"><input type="checkbox" id="flagOnly"> ⚠️ Flagged only</label>
-      </div>
-      <div class="lhead"><span>Student</span><span>New</span><span>F-ups</span><span>Cost</span></div>
-      <div id="students"></div>
+  <!-- left: students -->
+  <aside id="side">
+    <div class="shead">
+      <h1>HQAC Admin</h1>
+      <button class="hb" id="themeBtn" title="Dark / Light">🌙</button>
+      <button class="hb" id="logoutBtn" title="Log out">🚪</button>
     </div>
+    <div class="testbar" id="testbar">Test version — all students and numbers are fake</div>
+    <div class="search"><input type="search" id="q" placeholder="Search name, serial, or words in a question"></div>
+    <div class="chips" id="chips">
+      <button class="chip" data-r="today">Today</button>
+      <button class="chip" data-r="7">7 days</button>
+      <button class="chip" data-r="30">30 days</button>
+      <button class="chip on" data-r="all">All</button>
+      <span class="sep"></span>
+      <button class="chip" id="flagOnly">⚠️ Flagged</button>
+      <select id="sort" title="Sort">
+        <option value="last">Latest first</option>
+        <option value="cost">Highest cost</option>
+        <option value="count">Most questions</option>
+      </select>
+    </div>
+    <div id="statsSide"></div>
+    <div id="students"></div>
+  </aside>
 
-    <div id="detail">
-      <div class="dhead" id="dhead"><div class="pick">Choose a student to see their questions.</div></div>
+  <!-- right: messages -->
+  <main id="detail">
+    <div id="overview">
+      <h2>Harony Quick Ask Chat</h2>
+      <p>Choose a student on the left to see their questions and our answers.</p>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div id="chatview">
+      <div class="dhead" id="dhead"></div>
       <div id="thread"></div>
     </div>
-  </div>
+  </main>
 </section>
 
 <script>
@@ -177,10 +208,15 @@
   const usd = n => '$' + (n < 1 ? n.toFixed(4) : n.toFixed(2));
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-  function dayLabel(t){ const a = new Date(t).setHours(0,0,0,0), b = new Date().setHours(0,0,0,0);
+  const dayStart = t => new Date(t).setHours(0,0,0,0);
+  function dayLabel(t){ const a = dayStart(t), b = dayStart(Date.now());
     if (a === b) return 'Today'; if (b - a === 864e5) return 'Yesterday';
     return new Date(t).toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'}); }
   const when = t => dayLabel(t) === 'Today' ? timeOf(t) : `${dayLabel(t)}, ${timeOf(t)}`;
+  const listWhen = t => dayLabel(t) === 'Today' ? timeOf(t) : dayLabel(t);
+  const COLORS = ['#00a884','#5b72e8','#e0683c','#b453c6','#d6a100','#2f9bd6','#d6457b','#5c8f3a'];
+  const colorOf = s => COLORS[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
+  const initials = n => n.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
   /* ---------- fake data (same columns the real HQAC history table will have) ---------- */
   function fakeData(){
@@ -195,10 +231,10 @@
       const st = { serial: String(1001 + i * 3), name, rows: [] };
       let t = now - (25 + rnd() * 20) * 864e5, cum = 0, topics = 2 + Math.floor(rnd() * 7);
       for (let k = 0; k < topics; k++){
-        t += rnd() * 4 * 864e5 + 3600e3; if (t > now - 600e3) t = now - (topics - k) * 900e3;
+        t += rnd() * 4 * 864e5 + 3600e3;
         const topic = 't' + i + '_' + k, fus = Math.floor(rnd() * 4);
         for (let j = 0; j <= fus; j++){
-          const imgs = j === 0 && rnd() < 0.55 ? 1 + Math.floor(rnd() * 3) : 0;
+          const imgs = j === 0 && rnd() < 0.55 ? 1 + Math.floor(rnd() * 4) : 0;
           const cost = +(0.0012 + rnd() * 0.004 + imgs * (0.002 + rnd() * 0.004) + (j ? 0.001 * j : 0)).toFixed(5);
           cum = +(cum + cost).toFixed(5);
           st.rows.push({ serial: st.serial, name, topic, mode: j === 0 ? 'new' : 'followup', t: t + j * 240e3, question: j === 0 ? pick(newQs) : pick(fuQs), answer: pick(ans), images: imgs, cost, cumulative: cum });
@@ -213,30 +249,31 @@
   }
 
   /* ---------- state ---------- */
-  let rows = [], range = 'all', current = null;
+  let rows = [], range = 'all', current = null, flagOnly = false;
   const flags = (() => { try { return JSON.parse(store.get('HQAC_admin_flags')) || {}; } catch(e){ return {}; } })();
-  const keyOf = r => r.serial + '|' + r.t;
+  const keyOf = r => r.serial + '|' + r.topic + '|' + r.mode + '|' + r.question;
   const saveFlags = () => store.set('HQAC_admin_flags', JSON.stringify(flags));
-  function inRange(t){ if (range === 'all') return true; if (range === 'today') return new Date(t).setHours(0,0,0,0) === new Date().setHours(0,0,0,0); return t >= Date.now() - (+range) * 864e5; }
+  function inRange(t){ if (range === 'all') return true; if (range === 'today') return dayStart(t) === dayStart(Date.now()); return t >= Date.now() - (+range) * 864e5; }
 
-  /* ---------- top numbers ---------- */
+  /* ---------- overall numbers ---------- */
   function renderStats(){
-    const today = rows.filter(r => new Date(r.t).setHours(0,0,0,0) === new Date().setHours(0,0,0,0));
+    const today = rows.filter(r => dayStart(r.t) === dayStart(Date.now()));
     const R = rows.filter(r => inRange(r.t));
     const card = (l, v, cls='') => `<div class="stat ${cls}"><div class="l">${l}</div><div class="v num">${v}</div></div>`;
-    const lbl = {today:'today', '7':'last 7 days', '30':'last 30 days', all:'all time'}[range];
-    $('stats').innerHTML =
+    const lbl = {today:'today', '7':'7 days', '30':'30 days', all:'all time'}[range];
+    const html =
       card('Questions today', today.length) +
       card('Students today', new Set(today.map(r => r.serial)).size) +
       card(`New (${lbl})`, R.filter(r => r.mode === 'new').length) +
       card(`Follow-ups (${lbl})`, R.filter(r => r.mode !== 'new').length) +
       card(`Cost (${lbl})`, usd(R.reduce((a, r) => a + r.cost, 0)), 'money') +
       card('Total cost, all students', usd(rows.reduce((a, r) => a + r.cost, 0)), 'money');
+    $('stats').innerHTML = html; $('statsSide').innerHTML = html;
   }
 
-  /* ---------- student list ---------- */
+  /* ---------- left: student list ---------- */
   function students(){
-    const q = $('q').value.trim().toLowerCase(), flagOnly = $('flagOnly').checked, map = new Map();
+    const q = $('q').value.trim().toLowerCase(), map = new Map();
     for (const r of rows){
       if (!map.has(r.serial)) map.set(r.serial, { serial: r.serial, name: r.name, all: [] });
       map.get(r.serial).all.push(r);
@@ -244,9 +281,8 @@
     let list = [...map.values()].map(s => {
       const inR = s.all.filter(r => inRange(r.t));
       const last = s.all.reduce((a, r) => r.t > a.t ? r : a);
-      return { ...s, inR, nNew: inR.filter(r => r.mode === 'new').length, nFu: inR.filter(r => r.mode !== 'new').length,
-               total: last.cumulative, rangeCost: inR.reduce((a, r) => a + r.cost, 0), lastT: last.t,
-               flagged: s.all.some(r => flags[keyOf(r)]) };
+      return { ...s, inR, last, nNew: inR.filter(r => r.mode === 'new').length, nFu: inR.filter(r => r.mode !== 'new').length,
+               total: last.cumulative, lastT: last.t, flagged: s.all.some(r => flags[keyOf(r)]) };
     }).filter(s => s.inR.length);
     if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || s.serial.includes(q) || s.all.some(r => r.question.toLowerCase().includes(q)));
     if (flagOnly) list = list.filter(s => s.flagged);
@@ -260,29 +296,34 @@
     box.innerHTML = '';
     for (const s of list){
       const b = document.createElement('button'); b.className = 'srow' + (current === s.serial ? ' on' : '');
-      b.innerHTML = `<div><div class="nm">${esc(s.name)} ${s.flagged ? '<span class="flagdot">⚠️</span>' : ''}</div><div class="sub">#${s.serial} · last ${when(s.lastT)}</div></div>
-        <div class="c num">${s.nNew}</div><div class="c num">${s.nFu}</div><div class="c num cost" title="Total since joining">${usd(s.total)}</div>`;
+      b.innerHTML = `<div class="av" style="background:${colorOf(s.serial)}">${initials(s.name)}</div>
+        <div class="body">
+          <div class="l1"><span class="nm">${esc(s.name)}${s.flagged ? ' ⚠️' : ''}</span><span class="tm">${listWhen(s.lastT)}</span></div>
+          <div class="prev">${s.last.images ? '📷 ' : ''}${esc(s.last.question)}</div>
+          <div class="l3"><span class="pillc new num">${s.nNew} new</span><span class="pillc fu num">${s.nFu} follow-ups</span><span class="cost num" title="Total cost since joining">${usd(s.total)}</span></div>
+        </div>`;
       b.onclick = () => openStudent(s.serial);
       box.appendChild(b);
     }
   }
 
-  /* ---------- one student's questions ---------- */
-  function openStudent(serial){
+  /* ---------- right: one student's messages ---------- */
+  function openStudent(serial, keepScroll){
+    const th = $('thread'), oldTop = th.scrollTop;
     current = serial; renderList();
     const all = rows.filter(r => r.serial === serial).sort((a, b) => a.t - b.t);
     const R = all.filter(r => inRange(r.t)), last = all[all.length - 1];
-    $('dhead').innerHTML = `<button class="back" id="back" title="Back">←</button>
-      <div class="who"><b>${esc(last.name)}</b><div class="sub">#${serial} · ${all.length} questions since joining</div></div>
+    $('dhead').innerHTML = `<button class="hb back" id="back" title="Back">←</button>
+      <div class="av" style="background:${colorOf(serial)}">${initials(last.name)}</div>
+      <div class="who"><b>${esc(last.name)}</b><span class="sub">#${serial} · ${all.length} questions since joining</span></div>
       <div class="dstats">
         <div><span class="l">New</span><span class="v num">${R.filter(r => r.mode === 'new').length}</span></div>
         <div><span class="l">Follow-ups</span><span class="v num">${R.filter(r => r.mode !== 'new').length}</span></div>
-        <div><span class="l">Cost (${range === 'all' ? 'all' : 'period'})</span><span class="v num money">${usd(R.reduce((a, r) => a + r.cost, 0))}</span></div>
+        <div><span class="l">Cost${range === 'all' ? '' : ' (period)'}</span><span class="v num money">${usd(R.reduce((a, r) => a + r.cost, 0))}</span></div>
         <div><span class="l">Total since joining</span><span class="v num money">${usd(last.cumulative)}</span></div>
       </div>`;
-    $('back').onclick = () => document.body.classList.remove('in-detail');
-    const th = $('thread'); th.innerHTML = '';
-    const flagOnly = $('flagOnly').checked;
+    $('back').onclick = closeStudent;
+    th.innerHTML = '';
     const topics = [];
     for (const r of R){ let f = topics.find(x => x.id === r.topic); if (!f){ f = { id: r.topic, rows: [] }; topics.push(f); } f.rows.push(r); }
     for (const f of topics){
@@ -290,30 +331,36 @@
       const fr = document.createElement('div'); fr.className = 'frame';
       fr.innerHTML = `<div class="fhead">${when(f.rows[0].t)}</div>`;
       for (const r of f.rows){
-        const me = document.createElement('div'); me.className = 'msg me';
-        me.innerHTML = (r.images ? `<div class="photos">${'<span>📷</span>'.repeat(r.images)}</div>` : '') +
+        const q = document.createElement('div'); q.className = 'msg in';
+        q.innerHTML = (r.images ? `<div class="photos">${'<span>📷</span>'.repeat(r.images)}</div>` : '') +
           `<span class="mtag ${r.mode === 'new' ? 'new' : 'fu'}">${r.mode === 'new' ? 'NEW' : 'FOLLOW-UP'}</span>${esc(r.question)}` +
           `<div class="meta">${timeOf(r.t)}</div>`;
-        const ai = document.createElement('div'); const k = keyOf(r);
-        ai.className = 'msg ai' + (flags[k] ? ' flagged' : '');
-        ai.innerHTML = esc(r.answer).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') +
+        const a = document.createElement('div'); const k = keyOf(r);
+        a.className = 'msg out' + (flags[k] ? ' flagged' : '');
+        a.innerHTML = esc(r.answer).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') +
           `<div class="meta"><span>Cost <span class="cost num">${usd(r.cost)}</span></span><span>Total so far <span class="cost num">${usd(r.cumulative)}</span></span>` +
           `<button class="flag ${flags[k] ? 'on' : ''}">⚠️ ${flags[k] ? 'Flagged' : 'Flag'}</button></div>`;
-        ai.querySelector('.flag').onclick = () => { flags[k] ? delete flags[k] : (flags[k] = 1); saveFlags(); openStudent(serial); };
-        fr.append(me, ai);
+        a.querySelector('.flag').onclick = () => { flags[k] ? delete flags[k] : (flags[k] = 1); saveFlags(); openStudent(serial, true); };
+        fr.append(q, a);
       }
       th.appendChild(fr);
     }
     if (!th.children.length) th.innerHTML = '<div class="pick">No questions in this period.</div>';
-    th.scrollTop = th.scrollHeight;
-    document.body.classList.add('in-detail');
+    document.body.classList.add('has-student', 'in-detail');
+    th.scrollTop = keepScroll ? oldTop : th.scrollHeight;
   }
-
-  function refresh(){ renderStats(); renderList(); if (current) openStudent(current); }
+  function closeStudent(){ current = null; document.body.classList.remove('has-student', 'in-detail'); renderList(); }
+  function refresh(){ renderStats(); renderList(); if (current) openStudent(current, true); }
 
   /* ---------- wiring ---------- */
-  $('range').onclick = e => { const b = e.target.closest('button'); if (!b) return; range = b.dataset.r; [...$('range').children].forEach(x => x.classList.toggle('on', x === b)); refresh(); };
-  $('q').oninput = renderList; $('sort').onchange = renderList; $('flagOnly').onchange = refresh;
+  $('chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    if (b.id === 'flagOnly'){ flagOnly = !flagOnly; b.classList.toggle('on', flagOnly); }
+    else { range = b.dataset.r; document.querySelectorAll('.chip[data-r]').forEach(x => x.classList.toggle('on', x === b)); }
+    refresh();
+  });
+  $('q').oninput = renderList; $('sort').onchange = renderList;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && current) closeStudent(); });
   if (store.get('HQAC_admin_dark') === '1') document.body.classList.add('dark');
   $('themeBtn').onclick = () => store.set('HQAC_admin_dark', document.body.classList.toggle('dark') ? '1' : '0');
   function open(){ $('login').style.display = 'none'; $('app').classList.add('on'); rows = fakeData(); refresh(); }
