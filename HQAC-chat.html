@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#008069">
+<title>Harony Quick Ask Chat</title>
+<style>
+  :root{
+    --head:#008069; --accent:#00a884; --bg:#efeae2; --panel:#fff; --me:#d9fdd3; --ai:#fff;
+    --text:#111b21; --muted:#667781; --line:#e9edef; --tick:#53bdeb; --icon:#54656f; --pill:#fff; --sys:#ffeecd;
+    --wallop:.06;
+  }
+  body.dark{
+    --head:#202c33; --bg:#0b141a; --panel:#111b21; --me:#005c4b; --ai:#202c33;
+    --text:#e9edef; --muted:#8696a0; --line:#222d34; --icon:#8696a0; --pill:#2a3942; --sys:#182229;
+    --wallop:.05;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15.5px}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  svg{display:block}
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;max-width:900px;margin:0 auto;background:var(--bg)}
+  .screen.on{display:flex}
+
+  /* ===== login ===== */
+  #login{background:var(--panel)}
+  .lgtop{background:var(--head);color:#fff;padding:calc(36px + env(safe-area-inset-top)) 24px 30px;text-align:center}
+  .lgtop .bigav{width:84px;height:84px;border-radius:50%;background:#fff;color:#008069;display:grid;place-items:center;font-weight:800;font-size:30px;margin:0 auto 14px}
+  .lgtop h1{font-size:22px}
+  .lgtop p{opacity:.85;font-size:14px;margin-top:4px}
+  .lgbody{padding:28px 24px;max-width:420px;width:100%;margin:0 auto}
+  .lgbody label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+  .lgbody input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);outline:none}
+  .lgbody input:focus{border-color:var(--accent)}
+  .lgbtn{width:100%;margin-top:22px;background:var(--accent);color:#fff;font-weight:700;font-size:16px;padding:13px;border-radius:24px}
+  .lgnote{font-size:12.5px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+  #lgErr{color:#d93025;font-size:13.5px;margin-top:10px;min-height:18px;text-align:center}
+
+  /* ===== chat ===== */
+  .chead{background:var(--head);color:#fff;display:flex;align-items:center;gap:10px;padding:calc(6px + env(safe-area-inset-top)) 6px 6px 12px;min-height:60px;flex-shrink:0}
+  .av{width:40px;height:40px;border-radius:50%;background:#fff;color:#008069;display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0}
+  .who{flex:1;min-width:0;line-height:1.3}
+  .who b{display:block;font-size:17px}
+  #status{font-size:13px;opacity:.85}
+  .hb{width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
+  .hb:active{background:rgba(255,255,255,.15)}
+  #menu{position:absolute;top:calc(54px + env(safe-area-inset-top));right:8px;background:var(--panel);color:var(--text);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none;z-index:20;min-width:190px;padding:6px 0}
+  #menu.on{display:block}
+  #menu button{display:block;width:100%;text-align:left;padding:12px 18px;font-size:15px}
+  #menu button:active{background:var(--line)}
+  .testbar{background:#fff3cd;color:#7a5b00;font-size:12.5px;text-align:center;padding:4px 8px;flex-shrink:0}
+  body.dark .testbar{background:#3d3418;color:#ffd666}
+
+  #msgs{flex:1;overflow-y:auto;padding:8px 4% 8px;display:flex;flex-direction:column;overscroll-behavior:contain;position:relative}
+  #msgs::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:var(--wallop);z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160' fill='none' stroke='%23808080' stroke-width='2'%3E%3Cellipse cx='35' cy='35' rx='18' ry='7'/%3E%3Cellipse cx='35' cy='35' rx='18' ry='7' transform='rotate(60 35 35)'/%3E%3Cellipse cx='35' cy='35' rx='18' ry='7' transform='rotate(120 35 35)'/%3E%3Cpath d='M110 20h12M113 20v14l-9 18h24l-9-18V20'/%3E%3Cpath d='M20 110l10 10 10-10 10 10 10-10'/%3E%3Ccircle cx='120' cy='115' r='9'/%3E%3Cpath d='M120 98v-6M120 138v-6M137 115h6M97 115h6'/%3E%3Cpath d='M70 75l8-14 8 14z'/%3E%3C/svg%3E");}
+  #msgs > *{position:relative;z-index:1}
+  .day{align-self:center;background:var(--ai);color:var(--muted);font-size:12.5px;padding:5px 12px;border-radius:8px;margin:10px 0 8px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .sys{align-self:center;max-width:460px;text-align:center;background:var(--sys);color:var(--muted);font-size:13px;padding:8px 14px;border-radius:8px;margin:10px 0;line-height:1.6;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .msg{max-width:min(80%,620px);padding:6px 8px 7px 9px;border-radius:8px;box-shadow:0 1px .5px rgba(11,20,26,.13);position:relative;line-height:1.55;word-wrap:break-word;white-space:pre-wrap;margin-top:2px}
+  .msg.first{margin-top:10px}
+  .msg.me{align-self:flex-end;background:var(--me)}
+  .msg.ai{align-self:flex-start;background:var(--ai)}
+  .msg.err{align-self:flex-start;background:#fde8e8;color:#9b1c1c}
+  .msg.me.first{border-top-right-radius:0}
+  .msg.ai.first,.msg.err.first{border-top-left-radius:0}
+  .msg.me.first::before{content:"";position:absolute;top:0;right:-8px;border-top:10px solid var(--me);border-right:8px solid transparent}
+  .msg.ai.first::before{content:"";position:absolute;top:0;left:-8px;border-top:10px solid var(--ai);border-left:8px solid transparent}
+  .msg .imgs{display:grid;gap:3px;margin:-3px -5px 5px -6px;border-radius:6px;overflow:hidden;white-space:normal}
+  .msg .imgs.n2,.msg .imgs.n3{grid-template-columns:1fr 1fr}
+  .msg .imgs.n3 img:first-child{grid-column:1/3}
+  .msg .imgs img{width:100%;height:140px;object-fit:cover;display:block;cursor:zoom-in;background:#ccc}
+  .msg .imgs.n1 img{height:auto;max-height:320px;min-width:200px}
+  .meta{float:right;margin:10px 0 -6px 12px;font-size:11px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:3px;position:relative;top:2px}
+  body.dark .msg.me .meta{color:#a5c9c0}
+  .tk{letter-spacing:-3px;font-size:12.5px}
+  .tk.read{color:var(--tick)}
+  .typing{align-self:flex-start;background:var(--ai);border-radius:8px;border-top-left-radius:0;padding:12px 14px;box-shadow:0 1px .5px rgba(11,20,26,.13);display:flex;gap:4px;margin-top:10px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:#9aa5ab;animation:b 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes b{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+  .composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex-shrink:0}
+  .pill{flex:1;display:flex;align-items:flex-end;background:var(--pill);border-radius:24px;min-height:48px;padding:0 4px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .pill .ib{width:42px;height:48px;display:grid;place-items:center;color:var(--icon);flex-shrink:0}
+  #text{flex:1;resize:none;border:0;outline:none;background:none;color:var(--text);font:inherit;font-size:16px;line-height:1.45;padding:12px 4px;max-height:130px;min-width:0}
+  #text::placeholder{color:var(--muted)}
+  .round{width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .round:disabled{opacity:.5}
+  #camBtn.hide{display:none}
+  .drop{position:absolute;inset:0;background:rgba(0,168,132,.12);border:3px dashed var(--accent);display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--accent);z-index:5}
+  .drop.on{display:flex}
+
+  /* ===== photo preview (like WhatsApp "add a caption") ===== */
+  #preview{background:#0b141a;color:#fff;z-index:30}
+  .phead{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 10px 8px}
+  .phead .hb{color:#fff}
+  .phead span{flex:1;text-align:center;font-size:15px;opacity:.85}
+  .pmain{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:0 10px}
+  .pmain img{max-width:100%;max-height:100%;object-fit:contain}
+  .pthumbs{display:flex;gap:8px;justify-content:center;padding:10px;overflow-x:auto}
+  .pthumbs button{width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;border:2px solid transparent;opacity:.6}
+  .pthumbs button.sel{border-color:var(--accent);opacity:1}
+  .pthumbs img{width:100%;height:100%;object-fit:cover}
+  .pthumbs .add{border:2px solid #8696a0;opacity:1;display:grid;place-items:center;color:#d1d7db}
+  #pHint{text-align:center;font-size:14.5px;font-weight:600;color:#ffd166;padding:0 16px 6px;min-height:26px}
+  #pHint.shake{animation:shake .4s}
+  @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  .pcap{display:flex;align-items:flex-end;gap:6px;padding:6px 8px calc(10px + env(safe-area-inset-bottom))}
+  .pcap .pill{background:#2a3942;box-shadow:none}
+  .pcap .pill.need{box-shadow:0 0 0 2px #ffd166}
+  #caption{flex:1;resize:none;border:0;outline:none;background:none;color:#fff;font:inherit;font-size:16px;line-height:1.45;padding:12px 14px;max-height:110px;min-width:0}
+  #caption::placeholder{color:#8696a0}
+
+  #lightbox{background:#0b141a;z-index:40;align-items:center;justify-content:center;padding:16px}
+  #lightbox img{max-width:100%;max-height:100%}
+  #lbClose{position:absolute;top:calc(10px + env(safe-area-inset-top));right:10px;color:#fff}
+  #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#323739;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media (min-width:901px){ body{background:#d1d7db} body.dark{background:#0a1014} .screen{box-shadow:0 0 14px rgba(0,0,0,.12)} }
+</style>
+</head>
+<body>
+
+<!-- ===== login (same username/password as Quick Ask) ===== -->
+<section class="screen" id="login">
+  <div class="lgtop">
+    <div class="bigav">MH</div>
+    <h1>Harony Quick Ask Chat</h1>
+    <p>Ask Mr. Harony's assistant — it remembers your last questions</p>
+  </div>
+  <div class="lgbody">
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Enter your email or username" autocomplete="username">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+    <div id="lgErr"></div>
+    <button class="lgbtn" id="lgBtn">Start chatting</button>
+    <div class="lgnote">Same username and password you use for Quick Ask.<br>You only need to enter them once on this device.</div>
+  </div>
+</section>
+
+<!-- ===== chat ===== -->
+<section class="screen" id="chat">
+  <div class="chead">
+    <div class="av">MH</div>
+    <div class="who"><b>Mr Harony</b><span id="status">online</span></div>
+    <button class="hb" id="menuBtn" title="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+  </div>
+  <div id="menu">
+    <button id="mTheme">🌙 Dark / Light</button>
+    <button id="mClear">🗑️ Clear this chat</button>
+    <button id="mLogout">🚪 Log out</button>
+  </div>
+  <div class="testbar" id="testbar">Test version — replies are not real yet</div>
+  <div id="msgs"></div>
+  <div class="composer">
+    <div class="pill">
+      <button class="ib" id="attach" title="Photos"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z"/></svg></button>
+      <textarea id="text" rows="1" placeholder="Message"></textarea>
+      <button class="ib" id="camBtn" title="Camera"><svg width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.2 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.2L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></button>
+    </div>
+    <button class="round" id="send" title="Send"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+  </div>
+  <div class="drop" id="drop">Drop the photo here</div>
+  <input type="file" id="gallery" accept="image/*" multiple hidden>
+  <input type="file" id="camera" accept="image/*" capture="environment" hidden>
+</section>
+
+<!-- ===== photo preview + question ===== -->
+<section class="screen" id="preview">
+  <div class="phead">
+    <button class="hb" id="pClose" title="Cancel"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button>
+    <span id="pCount"></span>
+    <button class="hb" id="pDel" title="Remove this photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+  </div>
+  <div class="pmain"><img id="pBig" alt=""></div>
+  <div class="pthumbs" id="pThumbs"></div>
+  <div id="pHint"></div>
+  <div class="pcap">
+    <div class="pill" id="capPill"><textarea id="caption" rows="1" placeholder="Write your question about the photo..."></textarea></div>
+    <button class="round" id="pSend" title="Send"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+  </div>
+</section>
+
+<section class="screen" id="lightbox"><button class="hb" id="lbClose"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button><img alt=""></section>
+<div id="toast"></div>
+
+<script>
+(() => {
+  /* ---------- settings ---------- */
+  const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/HQAC-ask"; // new HQAC workflow (not created yet)
+  const TEST_MODE   = true;   // true = fake replies, nothing is sent to n8n
+  const MAX_IMGS = 3, KEEP_DAYS = 7;
+  const K_USER = 'HQAC_username', K_PASS = 'HQAC_password', K_DARK = 'HQAC_dark';
+
+  const $ = id => document.getElementById(id);
+  const isTouch = matchMedia('(pointer:coarse)').matches;
+  const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+                  set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+                  del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+  let user = '', pass = '', msgs = [], pending = [], sel = 0, busy = false;
+
+  /* ---------- screens + phone back button ---------- */
+  function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id || (id !== 'login' && s.id === 'chat'))); }
+  function overlay(id, on){ $(id).classList.toggle('on', on); }
+  addEventListener('popstate', () => {
+    if ($('lightbox').classList.contains('on')) return overlay('lightbox', false);
+    if ($('preview').classList.contains('on')) return hidePreview();
+  });
+
+  /* ---------- theme ---------- */
+  if (store.get(K_DARK) === '1') document.body.classList.add('dark');
+  $('mTheme').onclick = () => { const d = document.body.classList.toggle('dark'); store.set(K_DARK, d ? '1' : '0'); closeMenu(); };
+
+  /* ---------- login ---------- */
+  const chatKey = () => 'HQAC_chat_' + user.toLowerCase();
+  function startChat(){
+    show('chat');
+    try { msgs = JSON.parse(store.get(chatKey())) || []; } catch(e){ msgs = []; }
+    const cut = Date.now() - KEEP_DAYS*864e5; msgs = msgs.filter(m => m.t >= cut); saveMsgs();
+    render();
+    if (!isTouch) $('text').focus();
+  }
+  $('lgBtn').onclick = () => {
+    const u = $('username').value.trim(), p = $('password').value.trim();
+    if (!u || !p){ $('lgErr').textContent = 'Please enter your username and password.'; return; }
+    user = u; pass = p; store.set(K_USER, u); store.set(K_PASS, p); $('lgErr').textContent = '';
+    startChat();
+  };
+  $('password').addEventListener('keydown', e => { if (e.key === 'Enter') $('lgBtn').click(); });
+  $('mLogout').onclick = () => { store.del(K_USER); store.del(K_PASS); user = pass = ''; $('password').value=''; closeMenu(); show('login'); };
+  $('mClear').onclick = () => { closeMenu(); if (confirm('Clear this chat from this device?')){ msgs = []; saveMsgs(); render(); } };
+  $('menuBtn').onclick = e => { e.stopPropagation(); $('menu').classList.toggle('on'); };
+  function closeMenu(){ $('menu').classList.remove('on'); }
+  document.addEventListener('click', closeMenu);
+
+  /* ---------- chat history on this device (for display) ---------- */
+  function saveMsgs(){
+    // keep the newest messages that fit in browser storage
+    let list = msgs.slice();
+    while (list.length && !store.set(chatKey(), JSON.stringify(list))) list.shift();
+  }
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<b>$1</b>'); // same as Quick Ask
+  const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  function dayLabel(t){
+    const a = new Date(t).setHours(0,0,0,0), b = new Date().setHours(0,0,0,0);
+    if (a === b) return 'Today'; if (b - a === 864e5) return 'Yesterday';
+    return new Date(t).toLocaleDateString([], {weekday:'long', day:'numeric', month:'short'});
+  }
+  function render(){
+    const box = $('msgs'); box.innerHTML = '';
+    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Type your question, take a photo, or send photos from your gallery.<br>I remember your last few questions, so you can ask a follow-up.<br><small>Chats are kept on this device for ${KEEP_DAYS} days.</small></div>`);
+    let lastDay = '', lastRole = '';
+    for (const m of msgs){
+      const d = dayLabel(m.t); if (d !== lastDay){ box.insertAdjacentHTML('beforeend', `<div class="day">${d}</div>`); lastDay = d; lastRole = ''; }
+      box.appendChild(bubble(m, m.role !== lastRole)); lastRole = m.role;
+    }
+    if (busy) box.insertAdjacentHTML('beforeend', '<div class="typing"><i></i><i></i><i></i></div>');
+    box.scrollTop = box.scrollHeight;
+  }
+  function bubble(m, first){
+    const el = document.createElement('div'); el.className = 'msg ' + m.role + (first ? ' first' : '');
+    let h = '';
+    if (m.imgs && m.imgs.length) h += `<div class="imgs n${m.imgs.length}">` + m.imgs.map(s => `<img src="${s}" alt="photo">`).join('') + '</div>';
+    if (m.text) h += fmt(m.text);
+    const tk = m.role === 'me' ? `<span class="tk ${m.read ? 'read' : ''}">${m.delivered || m.read ? '✓✓' : '✓'}</span>` : '';
+    h += `<span class="meta">${timeOf(m.t)}${tk}</span>`;
+    el.innerHTML = h;
+    el.querySelectorAll('img').forEach(i => i.onclick = () => { $('lightbox').querySelector('img').src = i.src; overlay('lightbox', true); history.pushState({v:'lb'}, ''); });
+    return el;
+  }
+
+  /* ---------- photos: same size/quality as Quick Ask (1920px, JPEG 0.8) ---------- */
+  function resize(file, maxDim, q){
+    return new Promise((res, rej) => {
+      const url = URL.createObjectURL(file); const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim){ if (w > h){ h = Math.round(h*maxDim/w); w = maxDim; } else { w = Math.round(w*maxDim/h); h = maxDim; } }
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', q));
+      };
+      img.onerror = rej; img.src = url;
+    });
+  }
+  const thumbOf = dataUrl => fetch(dataUrl).then(r => r.blob()).then(b => resize(b, 480, 0.7)); // small copy kept for the chat display
+  async function addFiles(files){
+    files = files.filter(f => f && f.type && f.type.startsWith('image/'));
+    if (!files.length) return;
+    for (const f of files){
+      if (pending.length >= MAX_IMGS){ toast(`Maximum ${MAX_IMGS} photos per question`); break; }
+      try { pending.push(await resize(f, 1920, 0.8)); sel = pending.length - 1; } catch(e){ toast("This photo couldn't be opened. Try another one."); }
+    }
+    if (pending.length) showPreview();
+  }
+  function showPreview(){
+    if (!$('preview').classList.contains('on')){
+      if ($('text').value.trim() && !$('caption').value){ $('caption').value = $('text').value; $('text').value = ''; grow($('text'), 130); syncCam(); }
+      overlay('preview', true); history.pushState({v:'preview'}, '');
+    }
+    renderPreview(); if (!isTouch) $('caption').focus();
+  }
+  function hidePreview(){ overlay('preview', false); pending = []; sel = 0; $('caption').value = ''; $('pHint').textContent = ''; $('capPill').classList.remove('need'); }
+  const closePreview = () => { if ($('preview').classList.contains('on')) history.back(); };
+  function renderPreview(){
+    $('pBig').src = pending[sel] || '';
+    $('pCount').textContent = `${pending.length} of ${MAX_IMGS} photos`;
+    const t = $('pThumbs'); t.innerHTML = '';
+    pending.forEach((s, i) => { const b = document.createElement('button'); if (i === sel) b.className = 'sel'; b.innerHTML = `<img src="${s}" alt="">`; b.onclick = () => { sel = i; renderPreview(); }; t.appendChild(b); });
+    if (pending.length < MAX_IMGS){
+      const a = document.createElement('button'); a.className = 'add'; a.title = 'Add another photo';
+      a.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>';
+      a.onclick = () => $('gallery').click(); t.appendChild(a);
+    }
+    checkHint();
+  }
+  function checkHint(){
+    const empty = !$('caption').value.trim();
+    $('pHint').textContent = empty ? (pending.length > 1 ? '👇 Write your question about the photos' : '👇 Write your question about the photo') : '';
+    $('capPill').classList.toggle('need', empty);
+  }
+
+  /* ---------- send: same request as Quick Ask {username, password, question, image_1..3} ---------- */
+  async function ask(question, images){
+    if (busy){ toast('Please wait for the answer to your last question'); return false; }
+    const thumbs = await Promise.all(images.map(thumbOf).map(p => p.catch(() => '')));
+    const m = { role:'me', text: question, imgs: thumbs.filter(Boolean), t: Date.now() };
+    msgs.push(m); busy = true; saveMsgs(); render();
+    setTimeout(() => { m.delivered = true; render(); }, 300);
+    setTimeout(() => { m.read = true; $('status').textContent = 'typing…'; saveMsgs(); render(); }, 700);
+
+    let answer, failed = false;
+    try {
+      if (TEST_MODE){
+        await new Promise(r => setTimeout(r, 2200));
+        const n = msgs.filter(x => x.role === 'ai').length;
+        answer = `(Test reply ${n+1}) In the real version Mr. Harony's assistant answers here.` + (images.length ? `\nI received ${images.length} photo${images.length>1?'s':''}.` : '') + (n ? `\nI would also remember your previous ${Math.min(n,3)} question${Math.min(n,3)>1?'s':''}.` : '');
+      } else {
+        const payload = { username: user, password: pass, question, image_1: images[0] || null, image_2: images[1] || null, image_3: images[2] || null };
+        const r = await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        answer = await r.text();
+        if (!r.ok && !answer) throw new Error('HTTP ' + r.status);
+      }
+    } catch(e){ failed = true; answer = "Couldn't reach the server. Please check your internet and try again."; }
+
+    msgs.push({ role: failed ? 'err' : 'ai', text: answer, t: Date.now() });
+    busy = false; $('status').textContent = 'online'; saveMsgs(); render();
+    return true;
+  }
+  async function sendText(){
+    const t = $('text').value.trim(); if (!t || busy) { if (busy) toast('Please wait for the answer to your last question'); return; }
+    $('text').value = ''; grow($('text'), 130); syncCam();
+    await ask(t, []);
+  }
+  async function sendPreview(){
+    const t = $('caption').value.trim();
+    if (!t){ const h = $('pHint'); h.classList.remove('shake'); void h.offsetWidth; h.classList.add('shake'); $('caption').focus(); return; }
+    if (busy){ toast('Please wait for the answer to your last question'); return; }
+    const imgs = pending.slice(); closePreview();
+    await ask(t, imgs);
+  }
+
+  /* ---------- wiring ---------- */
+  function grow(t, max){ t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, max) + 'px'; }
+  function syncCam(){ $('camBtn').classList.toggle('hide', !!$('text').value); }
+  function toast(m){ const el = $('toast'); el.textContent = m; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600); }
+  $('text').placeholder = isTouch ? 'Message' : 'Message — or paste a photo (Ctrl+V)';
+  $('send').onclick = sendText;
+  $('text').addEventListener('input', () => { grow($('text'), 130); syncCam(); });
+  $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !isTouch){ e.preventDefault(); sendText(); } });
+  $('caption').addEventListener('input', () => { grow($('caption'), 110); checkHint(); });
+  $('caption').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !isTouch){ e.preventDefault(); sendPreview(); } });
+  $('attach').onclick = () => $('gallery').click();
+  $('camBtn').onclick = () => $('camera').click();
+  $('gallery').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
+  $('camera').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
+  $('pSend').onclick = sendPreview;
+  $('pClose').onclick = closePreview;
+  $('pDel').onclick = () => { pending.splice(sel, 1); sel = Math.max(0, Math.min(sel, pending.length - 1)); pending.length ? renderPreview() : closePreview(); };
+  $('lightbox').onclick = () => history.back();
+  document.addEventListener('paste', e => {
+    if ($('login').classList.contains('on')) return;
+    const files = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    e.preventDefault(); addFiles(files);
+  });
+  const chat = $('chat'); let dragN = 0;
+  chat.addEventListener('dragenter', e => { if ([...e.dataTransfer.types].includes('Files')){ dragN++; $('drop').classList.add('on'); } });
+  chat.addEventListener('dragleave', () => { if (--dragN <= 0){ dragN = 0; $('drop').classList.remove('on'); } });
+  chat.addEventListener('dragover', e => e.preventDefault());
+  chat.addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('drop').classList.remove('on'); addFiles([...e.dataTransfer.files]); });
+  if (!TEST_MODE) $('testbar').style.display = 'none';
+
+  /* ---------- start ---------- */
+  user = store.get(K_USER) || ''; pass = store.get(K_PASS) || '';
+  // pre-fill from Quick Ask's saved login on this device (read only)
+  $('username').value = user || store.get('harony_username') || '';
+  $('password').value = pass || store.get('harony_password') || '';
+  if (user && pass) startChat(); else show('login');
+})();
+</script>
+</body>
+</html>
