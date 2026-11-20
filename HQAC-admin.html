@@ -170,7 +170,7 @@
       <button class="hb" id="logoutBtn" title="Log out">🚪</button>
     </div>
     <div class="testbar" id="testbar">Test version — all students and numbers are fake</div>
-    <div class="search"><input type="search" id="q" placeholder="Search name, code, course, class, or a question"></div>
+    <div class="search"><input type="search" id="q" placeholder="Search name, code, course, or a question"></div>
     <div class="chips" id="chips">
       <button class="chip" data-r="today">Today</button>
       <button class="chip" data-r="7">7 days</button>
@@ -221,7 +221,7 @@
   const initials = n => n.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
   // "1010 Joud Shawki 260211": 4-digit code first, 6-digit code last
   const fullName = s => `<span class="code">${esc(s.serial)}</span> ${esc(s.name)} <span class="code">${esc(s.studentSerial || '')}</span>`;
-  const courseLine = s => [s.course, s.cls ? 'Class ' + s.cls : ''].filter(Boolean).map(esc).join(' · ');
+  const courseLine = s => esc(s.course || '');
 
   /* ---------- fake data (same columns the real HQAC history table will have) ---------- */
   function fakeData(){
@@ -234,7 +234,7 @@
     const now = Date.now(); const out = [];
     names.forEach((name, i) => {
       const st = { serial: String(1001 + i * 3), name, rows: [] };
-      const studentSerial = String(260100 + i * 37), course = i % 4 === 3 ? 'Jun 2027' : 'Nov 2026', cls = pick(['D1','D2','F1','F2','G1']);
+      const studentSerial = String(260100 + i * 37), course = i % 4 === 3 ? 'Jun 2027' : 'Nov 2026';
       let t = now - (25 + rnd() * 20) * 864e5, cum = 0, topics = 2 + Math.floor(rnd() * 7);
       for (let k = 0; k < topics; k++){
         t += rnd() * 4 * 864e5 + 3600e3;
@@ -243,7 +243,7 @@
           const imgs = j === 0 && rnd() < 0.55 ? 1 + Math.floor(rnd() * 4) : 0;
           const cost = +(0.0012 + rnd() * 0.004 + imgs * (0.002 + rnd() * 0.004) + (j ? 0.001 * j : 0)).toFixed(5);
           cum = +(cum + cost).toFixed(5);
-          st.rows.push({ serial: st.serial, studentSerial, course, cls, name, topic, mode: j === 0 ? 'new' : 'followup', t: t + j * 240e3, question: j === 0 ? pick(newQs) : pick(fuQs), answer: pick(ans), images: imgs, cost, cumulative: cum });
+          st.rows.push({ serial: st.serial, studentSerial, course, name, topic, mode: j === 0 ? 'new' : 'followup', t: t + j * 240e3, question: j === 0 ? pick(newQs) : pick(fuQs), answer: pick(ans), images: imgs, cost, cumulative: cum });
         }
       }
       // make the fake data look current: first students asked today, the rest in the last days
@@ -281,7 +281,7 @@
   function students(){
     const q = $('q').value.trim().toLowerCase(), map = new Map();
     for (const r of rows){
-      if (!map.has(r.serial)) map.set(r.serial, { serial: r.serial, studentSerial: r.studentSerial, course: r.course, cls: r.cls, name: r.name, all: [] });
+      if (!map.has(r.serial)) map.set(r.serial, { serial: r.serial, studentSerial: r.studentSerial, course: r.course, name: r.name, all: [] });
       map.get(r.serial).all.push(r);
     }
     let list = [...map.values()].map(s => {
@@ -290,7 +290,7 @@
       return { ...s, inR, last, nNew: inR.filter(r => r.mode === 'new').length, nFu: inR.filter(r => r.mode !== 'new').length,
                total: last.cumulative, lastT: last.t, flagged: s.all.some(r => flags[keyOf(r)]) };
     }).filter(s => s.inR.length);
-    if (q) list = list.filter(s => `${s.serial} ${s.name} ${s.studentSerial} ${s.course} class ${s.cls}`.toLowerCase().includes(q) || s.all.some(r => r.question.toLowerCase().includes(q)));
+    if (q) list = list.filter(s => `${s.serial} ${s.name} ${s.studentSerial} ${s.course}`.toLowerCase().includes(q) || s.all.some(r => r.question.toLowerCase().includes(q)));
     if (flagOnly) list = list.filter(s => s.flagged);
     const by = $('sort').value;
     list.sort((a, b) => by === 'cost' ? b.total - a.total : by === 'count' ? (b.nNew + b.nFu) - (a.nNew + a.nFu) : b.lastT - a.lastT);
