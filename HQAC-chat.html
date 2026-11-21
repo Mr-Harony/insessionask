@@ -109,6 +109,10 @@
   .slot{position:relative;border:2px dashed #aebac1;border-radius:10px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:92px;text-align:center;overflow:hidden}
   .slot.next{border-color:var(--accent);background:rgba(0,168,132,.07)}
   .slot.off{opacity:.42}
+  .slot.await{border-style:solid;background:rgba(0,168,132,.16);animation:pulse 1s infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 4px rgba(0,168,132,.3)}}
+  .keys{font-weight:700;font-size:14px;color:var(--text)}
+  kbd{display:inline-block;padding:2px 7px;border-radius:6px;border:1.5px solid var(--muted);border-bottom-width:3px;background:var(--panel);font:inherit;font-size:13px}
   .slot .st{font-size:12.5px;font-weight:700;color:var(--muted)}
   .slot .st small{font-weight:600;font-size:11px}
   .sbtns{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
@@ -391,7 +395,15 @@
       }
       if (!files.length){ toast('No image in the clipboard. Copy an image first.'); return; }
       addFiles(files);
-    } catch (e) { toast('The browser blocked Paste. Click the box and press Ctrl+V instead.'); }
+    } catch (e) { askForCtrlV(); }
+  }
+  function askForCtrlV(){
+    const slot = document.querySelector('.slot.next');
+    if (!slot){ toast('Press Ctrl+V to paste your photo.'); return; }
+    slot.classList.add('await');
+    slot.innerHTML = '<span class="st">Now press</span><span class="keys"><kbd>Ctrl</kbd> + <kbd>V</kbd></span><span class="sor">to paste your photo here</span>';
+    clearTimeout(askForCtrlV.t);
+    askForCtrlV.t = setTimeout(() => { if (document.body.classList.contains('mode-newq')) renderNewQ(); }, 8000);
   }
   function openCtx(x, y){
     const m = $('ctx'); m.classList.add('on');
