@@ -146,6 +146,20 @@
     .msg{max-width:88%}
     #thread{padding:10px 12px 20px}
   }
+  .mdl{font-weight:700;padding:1px 8px;border-radius:9px;background:rgba(128,128,128,.18);color:var(--text);white-space:nowrap}
+  .mdl.terra{background:#fde7d3;color:#8a4a00}
+  .mdl.gemini{background:#dbe9ff;color:#1c4a9c}
+  body.dark .mdl.terra{background:#4a3212;color:#ffc98a}
+  body.dark .mdl.gemini{background:#1c2f55;color:#a9c7ff}
+  .photos{flex-wrap:wrap}
+  .ph{display:inline-block;padding:4px 10px;border-radius:8px;background:rgba(128,128,128,.16);font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:none}
+  .ph.gone{color:var(--muted);font-weight:600}
+  .olderbtn{align-self:center;margin:6px 0 2px;padding:9px 18px;border-radius:20px;background:var(--panel);color:var(--accent);font-weight:700;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .olderbtn:disabled{opacity:.6}
+  .note{align-self:center;text-align:center;font-size:12.5px;color:var(--muted);background:var(--panel);padding:5px 12px;border-radius:8px;margin:8px 0 0;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .frame.arch{border-style:dashed;opacity:.95}
+  #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#323739;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -166,18 +180,16 @@
   <aside id="side">
     <div class="shead">
       <h1>HQAC Admin</h1>
+      <button class="hb" id="refreshBtn" title="Refresh">🔄</button>
       <button class="hb" id="themeBtn" title="Dark / Light">🌙</button>
       <button class="hb" id="logoutBtn" title="Log out">🚪</button>
     </div>
     <div class="testbar" id="testbar">Test version — all students and numbers are fake</div>
-    <div class="search"><input type="search" id="q" placeholder="Search name, code, course, or a question"></div>
+    <div class="search"><input type="search" id="q" placeholder="Search name, code or course"></div>
     <div class="chips" id="chips">
-      <button class="chip" data-r="today">Today</button>
-      <button class="chip" data-r="7">7 days</button>
-      <button class="chip" data-r="30">30 days</button>
-      <button class="chip on" data-r="all">All</button>
-      <span class="sep"></span>
+      <button class="chip" id="todayOnly">Asked today</button>
       <button class="chip" id="flagOnly">⚠️ Flagged</button>
+      <span class="sep"></span>
       <select id="sort" title="Sort">
         <option value="last">Latest first</option>
         <option value="cost">Highest cost</option>
@@ -201,186 +213,239 @@
     </div>
   </main>
 </section>
+<div id="toast"></div>
 
 <script>
 (() => {
-  const TEST_MODE = true;   // true = fake data; later this page will read from the HQAC workflow (admin webhook)
+  const ADMIN_URL = "https://n8n.sciencetoonz.com/webhook/HQAC-admin";   // HQAC workflow, read only; the password is checked there
+  const TEST_MODE = false;   // true = fake data, nothing is requested from n8n
+  const K_PASS = 'HQAC_admin_pass', K_DARK = 'HQAC_admin_dark', K_FLAGS = 'HQAC_admin_flags';
   const $ = id => document.getElementById(id);
   const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
-  const usd = n => '$' + (n < 1 ? n.toFixed(4) : n.toFixed(2));
+  const usd = n => '$' + (Number(n) < 1 ? Number(n).toFixed(4) : Number(n).toFixed(2));
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<b>$1</b>');
   const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
   const dayStart = t => new Date(t).setHours(0,0,0,0);
   function dayLabel(t){ const a = dayStart(t), b = dayStart(Date.now());
     if (a === b) return 'Today'; if (b - a === 864e5) return 'Yesterday';
     return new Date(t).toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'}); }
   const when = t => dayLabel(t) === 'Today' ? timeOf(t) : `${dayLabel(t)}, ${timeOf(t)}`;
-  const listWhen = t => dayLabel(t) === 'Today' ? timeOf(t) : dayLabel(t);
+  const listWhen = t => !t ? '' : (dayLabel(t) === 'Today' ? timeOf(t) : dayLabel(t));
   const COLORS = ['#00a884','#5b72e8','#e0683c','#b453c6','#d6a100','#2f9bd6','#d6457b','#5c8f3a'];
   const colorOf = s => COLORS[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
-  const initials = n => n.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
-  // "1010 Joud Shawki 260211": 4-digit code first, 6-digit code last
+  const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
   const fullName = s => `<span class="code">${esc(s.serial)}</span> ${esc(s.name)} <span class="code">${esc(s.studentSerial || '')}</span>`;
-  const courseLine = s => esc(s.course || '');
+  // which model answered: short readable name
+  function modelName(m){
+    m = String(m || '');
+    if (/terra/i.test(m)) return { text: 'GPT-6.1 Terra', cls: 'terra' };
+    if (/gemini/i.test(m)) return { text: 'Gemini 3.8 Flash', cls: 'gemini' };
+    return { text: m.split('/').pop() || 'unknown model', cls: '' };
+  }
+  function toast(m){ const el = $('toast'); el.textContent = m; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 3000); }
 
-  /* ---------- fake data (same columns the real HQAC history table will have) ---------- */
-  function fakeData(){
-    let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
-    const pick = a => a[Math.floor(rnd() * a.length)];
-    const names = ['Omar Ewis','Hawraa Rady','Youmna Sadek','Joud Shawki','Yousef Abdelaziz','Sama Moustafa','Mohamed Tarek','Laila Hassan','Adam Fathy','Nour Kamal','Karim Adel','Malak Sherif'];
-    const newQs = ['Why does light bend when it enters water?','How do I find the critical angle for glass?','What is specific heat capacity?','Can you explain this circuit question?','How do I calculate the resistance in this diagram?','What is the difference between speed and velocity?','Why is the answer B and not C in question 4?','How does a transformer work?','What is half-life?','How do I draw the ray diagram for a converging lens?'];
-    const fuQs = ['Why not 30°?','Can you explain the second step again?','And what if it was diamond?','So the unit is J/kg°C?','What about if the current doubles?','Is this in the syllabus?','Can you give me a similar example?'];
-    const ans = ['Light slows down when it enters a denser medium, so it changes direction towards the normal. Use **n = sin i / sin r**.','The critical angle is found with **sin c = 1/n**. For glass (n = 1.5), c ≈ 41.8°.','Specific heat capacity is the energy needed to raise the temperature of **1 kg** of a substance by **1 °C**.','In series, add the resistances: **R = R1 + R2**. In parallel: **1/R = 1/R1 + 1/R2**.','Good question. The angle in the diagram is measured from the **normal**, not the surface, so it is 60° not 30°.'];
-    const now = Date.now(); const out = [];
-    names.forEach((name, i) => {
-      const st = { serial: String(1001 + i * 3), name, rows: [] };
-      const studentSerial = String(260100 + i * 37), course = i % 4 === 3 ? 'Jun 2027' : 'Nov 2026';
-      let t = now - (25 + rnd() * 20) * 864e5, cum = 0, topics = 2 + Math.floor(rnd() * 7);
-      for (let k = 0; k < topics; k++){
-        t += rnd() * 4 * 864e5 + 3600e3;
-        const topic = 't' + i + '_' + k, fus = Math.floor(rnd() * 4);
-        for (let j = 0; j <= fus; j++){
-          const imgs = j === 0 && rnd() < 0.55 ? 1 + Math.floor(rnd() * 4) : 0;
-          const cost = +(0.0012 + rnd() * 0.004 + imgs * (0.002 + rnd() * 0.004) + (j ? 0.001 * j : 0)).toFixed(5);
-          cum = +(cum + cost).toFixed(5);
-          st.rows.push({ serial: st.serial, studentSerial, course, name, topic, mode: j === 0 ? 'new' : 'followup', t: t + j * 240e3, question: j === 0 ? pick(newQs) : pick(fuQs), answer: pick(ans), images: imgs, cost, cumulative: cum });
-        }
-      }
-      // make the fake data look current: first students asked today, the rest in the last days
-      const gap = i < 5 ? (10 + rnd() * 300) * 60e3 : (1 + rnd() * 9) * 864e5;
-      const shift = (now - gap) - st.rows[st.rows.length - 1].t;
-      st.rows.forEach(r => { r.t += shift; out.push(r); });
-    });
-    return out;
+  /* ---------- talking to n8n ---------- */
+  let pass = '';
+  async function api(action, extra){
+    if (TEST_MODE) return fakeApi(action, extra || {});
+    const r = await fetch(ADMIN_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(Object.assign({ password: pass, action }, extra || {})) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
   }
 
   /* ---------- state ---------- */
-  let rows = [], range = 'all', current = null, flagOnly = false;
-  const flags = (() => { try { return JSON.parse(store.get('HQAC_admin_flags')) || {}; } catch(e){ return {}; } })();
-  const keyOf = r => r.serial + '|' + r.topic + '|' + r.mode + '|' + r.question;
-  const saveFlags = () => store.set('HQAC_admin_flags', JSON.stringify(flags));
-  function inRange(t){ if (range === 'all') return true; if (range === 'today') return dayStart(t) === dayStart(Date.now()); return t >= Date.now() - (+range) * 864e5; }
+  let students = [], today = null, current = null, flagOnly = false, todayOnly = false, currentRows = [];
+  const flags = (() => { try { return JSON.parse(store.get(K_FLAGS)) || {}; } catch(e){ return {}; } })();
+  const keyOf = (serial, r) => serial + '|' + r.topicId + '|' + r.seq;
+  const saveFlags = () => store.set(K_FLAGS, JSON.stringify(flags));
+  const isFlagged = s => Object.keys(flags).some(k => k.startsWith(s.studentSerial + '|'));
 
-  /* ---------- overall numbers ---------- */
+  /* ---------- top numbers ---------- */
   function renderStats(){
-    const today = rows.filter(r => dayStart(r.t) === dayStart(Date.now()));
-    const R = rows.filter(r => inRange(r.t));
     const card = (l, v, cls='') => `<div class="stat ${cls}"><div class="l">${l}</div><div class="v num">${v}</div></div>`;
-    const lbl = {today:'today', '7':'7 days', '30':'30 days', all:'all time'}[range];
+    const t = today || {};
     const html =
-      card('Questions today', today.length) +
-      card('Students today', new Set(today.map(r => r.serial)).size) +
-      card(`New (${lbl})`, R.filter(r => r.mode === 'new').length) +
-      card(`Follow-ups (${lbl})`, R.filter(r => r.mode !== 'new').length) +
-      card(`Cost (${lbl})`, usd(R.reduce((a, r) => a + r.cost, 0)), 'money') +
-      card('Total cost, all students', usd(rows.reduce((a, r) => a + r.cost, 0)), 'money');
+      card('Questions today', t.questions ?? '–') +
+      card('Students today', t.students ?? '–') +
+      card('New today', t.newQuestions ?? '–') +
+      card('Follow-ups today', t.followups ?? '–') +
+      card('Students so far', students.length) +
+      card('Total cost, all students', usd(students.reduce((a, s) => a + s.totalCost, 0)), 'money');
     $('stats').innerHTML = html; $('statsSide').innerHTML = html;
   }
 
   /* ---------- left: student list ---------- */
-  function students(){
-    const q = $('q').value.trim().toLowerCase(), map = new Map();
-    for (const r of rows){
-      if (!map.has(r.serial)) map.set(r.serial, { serial: r.serial, studentSerial: r.studentSerial, course: r.course, name: r.name, all: [] });
-      map.get(r.serial).all.push(r);
-    }
-    let list = [...map.values()].map(s => {
-      const inR = s.all.filter(r => inRange(r.t));
-      const last = s.all.reduce((a, r) => r.t > a.t ? r : a);
-      return { ...s, inR, last, nNew: inR.filter(r => r.mode === 'new').length, nFu: inR.filter(r => r.mode !== 'new').length,
-               total: last.cumulative, lastT: last.t, flagged: s.all.some(r => flags[keyOf(r)]) };
-    }).filter(s => s.inR.length);
-    if (q) list = list.filter(s => `${s.serial} ${s.name} ${s.studentSerial} ${s.course}`.toLowerCase().includes(q) || s.all.some(r => r.question.toLowerCase().includes(q)));
-    if (flagOnly) list = list.filter(s => s.flagged);
-    const by = $('sort').value;
-    list.sort((a, b) => by === 'cost' ? b.total - a.total : by === 'count' ? (b.nNew + b.nFu) - (a.nNew + a.nFu) : b.lastT - a.lastT);
+  function visibleStudents(){
+    const q = $('q').value.trim().toLowerCase();
+    let list = students.slice();
+    if (q) list = list.filter(s => `${s.serial} ${s.name} ${s.studentSerial} ${s.course}`.toLowerCase().includes(q));
+    if (flagOnly) list = list.filter(isFlagged);
+    if (todayOnly) list = list.filter(s => s.lastAt && dayStart(s.lastAt) === dayStart(Date.now()));
+    const by = $('sort').value, t = s => s.lastAt ? new Date(s.lastAt).getTime() : 0;
+    list.sort((a, b) => by === 'cost' ? b.totalCost - a.totalCost : by === 'count' ? (b.totalNew + b.totalFollowups) - (a.totalNew + a.totalFollowups) : t(b) - t(a));
     return list;
   }
   function renderList(){
-    const list = students(), box = $('students');
-    if (!list.length){ box.innerHTML = '<div class="empty">No students match.</div>'; return; }
+    const list = visibleStudents(), box = $('students');
+    if (!list.length){ box.innerHTML = `<div class="empty">${students.length ? 'No students match.' : 'No questions have been asked yet.'}</div>`; return; }
     box.innerHTML = '';
     for (const s of list){
-      const b = document.createElement('button'); b.className = 'srow' + (current === s.serial ? ' on' : '');
-      b.innerHTML = `<div class="av" style="background:${colorOf(s.serial)}">${initials(s.name)}</div>
+      const b = document.createElement('button'); b.className = 'srow' + (current === s.studentSerial ? ' on' : '');
+      b.innerHTML = `<div class="av" style="background:${colorOf(s.studentSerial)}">${initials(s.name)}</div>
         <div class="body">
-          <div class="l1"><span class="nm">${fullName(s)}${s.flagged ? ' ⚠️' : ''}</span><span class="tm">${listWhen(s.lastT)}</span></div>
-          <div class="cc">${courseLine(s)}</div>
-          <div class="prev">${s.last.images ? '📷 ' : ''}${esc(s.last.question)}</div>
-          <div class="l3"><span class="pillc new num">${s.nNew} new</span><span class="pillc fu num">${s.nFu} follow-ups</span><span class="cost num" title="Total cost since joining">${usd(s.total)}</span></div>
+          <div class="l1"><span class="nm">${fullName(s)}${isFlagged(s) ? ' ⚠️' : ''}</span><span class="tm">${listWhen(s.lastAt)}</span></div>
+          <div class="cc">${esc(s.course || '')}</div>
+          <div class="prev">${esc(s.lastQuestion || '📷 photo')}</div>
+          <div class="l3"><span class="pillc new num">${s.totalNew} new</span><span class="pillc fu num">${s.totalFollowups} follow-ups</span><span class="cost num" title="Total cost since joining">${usd(s.totalCost)}</span></div>
         </div>`;
-      b.onclick = () => openStudent(s.serial);
+      b.onclick = () => openStudent(s.studentSerial);
       box.appendChild(b);
     }
   }
 
-  /* ---------- right: one student's messages ---------- */
-  function openStudent(serial, keepScroll){
-    const th = $('thread'), oldTop = th.scrollTop;
+  /* ---------- right: one student's questions ---------- */
+  function frameEl(title, rows, serial, archived){
+    const fr = document.createElement('div'); fr.className = 'frame' + (archived ? ' arch' : '');
+    fr.innerHTML = `<div class="fhead">${esc(title)}</div>`;
+    for (const r of rows){
+      const q = document.createElement('div'); q.className = 'msg in';
+      let photos = '';
+      if (r.imageIds && r.imageIds.length) photos = `<div class="photos">` + r.imageIds.map((id, i) => `<a class="ph" href="https://drive.google.com/file/d/${encodeURIComponent(id)}/view" target="_blank" rel="noopener">📷 Photo ${i + 1}</a>`).join('') + `</div>`;
+      else if (r.photos) photos = `<div class="photos"><span class="ph gone">📷 ${r.photos} photo${r.photos > 1 ? 's' : ''} (deleted after 2 weeks)</span></div>`;
+      q.innerHTML = photos + `<span class="mtag ${r.mode === 'new' ? 'new' : 'fu'}">${r.mode === 'new' ? 'NEW' : 'FOLLOW-UP'}</span>${esc(r.question || '(photo only)')}` +
+        `<div class="meta">${r.at ? timeOf(r.at) : esc(r.when || '')}</div>`;
+      const a = document.createElement('div'), k = keyOf(serial, r), m = modelName(r.model);
+      a.className = 'msg out' + (flags[k] ? ' flagged' : '');
+      a.innerHTML = fmt(r.answer || '') +
+        `<div class="meta"><span class="mdl ${m.cls}" title="${esc(r.model || '')}">🤖 ${esc(m.text)}</span><span>Cost <span class="cost num">${usd(r.cost)}</span></span><span>Total so far <span class="cost num">${usd(r.totalCost)}</span></span>` +
+        `<button class="flag ${flags[k] ? 'on' : ''}">⚠️ ${flags[k] ? 'Flagged' : 'Flag'}</button></div>`;
+      a.querySelector('.flag').onclick = () => { flags[k] ? delete flags[k] : (flags[k] = 1); saveFlags(); a.classList.toggle('flagged', !!flags[k]); const f = a.querySelector('.flag'); f.classList.toggle('on', !!flags[k]); f.textContent = '⚠️ ' + (flags[k] ? 'Flagged' : 'Flag'); renderList(); };
+      fr.append(q, a);
+    }
+    return fr;
+  }
+  function groupByTopic(rows){
+    const topics = [];
+    for (const r of rows){ let f = topics.find(x => x.id === r.topicId); if (!f){ f = { id: r.topicId, rows: [] }; topics.push(f); } f.rows.push(r); }
+    topics.forEach(f => f.rows.sort((a, b) => (a.seq || 0) - (b.seq || 0)));
+    return topics;
+  }
+  async function openStudent(serial){
     current = serial; renderList();
-    const all = rows.filter(r => r.serial === serial).sort((a, b) => a.t - b.t);
-    const R = all.filter(r => inRange(r.t)), last = all[all.length - 1];
+    const s = students.find(x => x.studentSerial === serial); if (!s) return;
     $('dhead').innerHTML = `<button class="hb back" id="back" title="Back">←</button>
-      <div class="av" style="background:${colorOf(serial)}">${initials(last.name)}</div>
-      <div class="who"><b>${fullName(last)}</b><span class="sub">${courseLine(last)} · ${all.length} questions since joining</span></div>
+      <div class="av" style="background:${colorOf(serial)}">${initials(s.name)}</div>
+      <div class="who"><b>${fullName(s)}</b><span class="sub">${esc(s.course || '')} · ${s.totalNew + s.totalFollowups} questions since joining</span></div>
       <div class="dstats">
-        <div><span class="l">New</span><span class="v num">${R.filter(r => r.mode === 'new').length}</span></div>
-        <div><span class="l">Follow-ups</span><span class="v num">${R.filter(r => r.mode !== 'new').length}</span></div>
-        <div><span class="l">Cost${range === 'all' ? '' : ' (period)'}</span><span class="v num money">${usd(R.reduce((a, r) => a + r.cost, 0))}</span></div>
-        <div><span class="l">Total since joining</span><span class="v num money">${usd(last.cumulative)}</span></div>
+        <div><span class="l">New</span><span class="v num">${s.totalNew}</span></div>
+        <div><span class="l">Follow-ups</span><span class="v num">${s.totalFollowups}</span></div>
+        <div><span class="l">Total since joining</span><span class="v num money">${usd(s.totalCost)}</span></div>
       </div>`;
     $('back').onclick = closeStudent;
-    th.innerHTML = '';
-    const topics = [];
-    for (const r of R){ let f = topics.find(x => x.id === r.topic); if (!f){ f = { id: r.topic, rows: [] }; topics.push(f); } f.rows.push(r); }
-    for (const f of topics){
-      if (flagOnly && !f.rows.some(r => flags[keyOf(r)])) continue;
-      const fr = document.createElement('div'); fr.className = 'frame';
-      fr.innerHTML = `<div class="fhead">${when(f.rows[0].t)}</div>`;
-      for (const r of f.rows){
-        const q = document.createElement('div'); q.className = 'msg in';
-        q.innerHTML = (r.images ? `<div class="photos">${'<span>📷</span>'.repeat(r.images)}</div>` : '') +
-          `<span class="mtag ${r.mode === 'new' ? 'new' : 'fu'}">${r.mode === 'new' ? 'NEW' : 'FOLLOW-UP'}</span>${esc(r.question)}` +
-          `<div class="meta">${timeOf(r.t)}</div>`;
-        const a = document.createElement('div'); const k = keyOf(r);
-        a.className = 'msg out' + (flags[k] ? ' flagged' : '');
-        a.innerHTML = esc(r.answer).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') +
-          `<div class="meta"><span>Cost <span class="cost num">${usd(r.cost)}</span></span><span>Total so far <span class="cost num">${usd(r.cumulative)}</span></span>` +
-          `<button class="flag ${flags[k] ? 'on' : ''}">⚠️ ${flags[k] ? 'Flagged' : 'Flag'}</button></div>`;
-        a.querySelector('.flag').onclick = () => { flags[k] ? delete flags[k] : (flags[k] = 1); saveFlags(); openStudent(serial, true); };
-        fr.append(q, a);
-      }
-      th.appendChild(fr);
-    }
-    if (!th.children.length) th.innerHTML = '<div class="pick">No questions in this period.</div>';
+    const th = $('thread'); th.innerHTML = '<div class="pick">Loading…</div>';
     document.body.classList.add('has-student', 'in-detail');
-    th.scrollTop = keepScroll ? oldTop : th.scrollHeight;
+    try {
+      const d = await api('student', { serial });
+      if (current !== serial) return;
+      if (!d || !d.ok) return denied(d);
+      currentRows = d.rows || [];
+      th.innerHTML = '';
+      const older = document.createElement('button'); older.className = 'olderbtn'; older.id = 'olderBtn';
+      older.textContent = '⬆️ Show older questions';
+      older.onclick = () => loadOlder(serial);
+      th.appendChild(older);
+      th.insertAdjacentHTML('beforeend', `<div class="note">Below: this student's last 4 questions (kept for 2 weeks). Older ones are in the archive.</div>`);
+      const topics = groupByTopic(currentRows);
+      if (!topics.length) th.insertAdjacentHTML('beforeend', '<div class="pick">No recent questions. Try "Show older questions".</div>');
+      for (const f of topics) th.appendChild(frameEl(when(f.rows[0].at), f.rows, serial, false));
+      th.scrollTop = th.scrollHeight;
+    } catch (e) { th.innerHTML = `<div class="pick">Couldn't load this student's questions. Check your internet and try again.</div>`; }
   }
-  function closeStudent(){ current = null; document.body.classList.remove('has-student', 'in-detail'); renderList(); }
-  function refresh(){ renderStats(); renderList(); if (current) openStudent(current, true); }
+  async function loadOlder(serial){
+    const btn = $('olderBtn'); btn.disabled = true; btn.textContent = 'Loading older questions…';
+    try {
+      const d = await api('older', { serial });
+      if (current !== serial) return;
+      if (!d || !d.ok) return denied(d);
+      const have = new Set(currentRows.map(r => r.topicId + '|' + r.seq));
+      const rows = (d.rows || []).filter(r => !have.has(r.topicId + '|' + r.seq));
+      const topics = groupByTopic(rows);
+      const th = $('thread'), oldH = th.scrollHeight;
+      const frag = document.createDocumentFragment();
+      if (!topics.length) { const n = document.createElement('div'); n.className = 'note'; n.textContent = 'There are no older questions for this student.'; frag.appendChild(n); }
+      else { const n = document.createElement('div'); n.className = 'note'; n.textContent = `${rows.length} older question${rows.length > 1 ? 's' : ''} from the archive. Photos older than 2 weeks are deleted.`; frag.appendChild(n); }
+      for (const f of topics) frag.appendChild(frameEl(f.rows[0].when || 'Archive', f.rows, serial, true));
+      btn.replaceWith(frag);
+      th.scrollTop = th.scrollHeight - oldH;
+    } catch (e) { btn.disabled = false; btn.textContent = '⬆️ Show older questions'; toast("Couldn't load the older questions. Try again."); }
+  }
+  function closeStudent(){ current = null; currentRows = []; document.body.classList.remove('has-student', 'in-detail'); renderList(); }
 
-  /* ---------- wiring ---------- */
-  $('chips').addEventListener('click', e => {
-    const b = e.target.closest('.chip'); if (!b) return;
-    if (b.id === 'flagOnly'){ flagOnly = !flagOnly; b.classList.toggle('on', flagOnly); }
-    else { range = b.dataset.r; document.querySelectorAll('.chip[data-r]').forEach(x => x.classList.toggle('on', x === b)); }
-    refresh();
-  });
-  $('q').oninput = renderList; $('sort').onchange = renderList;
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && current) closeStudent(); });
-  if (store.get('HQAC_admin_dark') === '1') document.body.classList.add('dark');
-  $('themeBtn').onclick = () => store.set('HQAC_admin_dark', document.body.classList.toggle('dark') ? '1' : '0');
-  function open(){ $('login').style.display = 'none'; $('app').classList.add('on'); rows = fakeData(); refresh(); }
-  $('lgBtn').onclick = () => {
+  /* ---------- open / login ---------- */
+  function denied(d){ store.del(K_PASS); pass = ''; $('app').classList.remove('on'); $('login').style.display = ''; $('lgErr').textContent = (d && d.message) || 'Wrong password.'; }
+  async function loadList(){
+    const d = await api('list');
+    if (!d || !d.ok){ denied(d); return false; }
+    students = (d.students || []).map(s => Object.assign({}, s, { totalNew: Number(s.totalNew || 0), totalFollowups: Number(s.totalFollowups || 0), totalCost: Number(s.totalCost || 0) }));
+    today = d.today || null;
+    $('login').style.display = 'none'; $('app').classList.add('on');
+    renderStats(); renderList();
+    return true;
+  }
+  $('lgBtn').onclick = async () => {
     const p = $('adminPass').value.trim();
     if (!p){ $('lgErr').textContent = 'Please enter the admin password.'; return; }
-    // TEST_MODE: any password opens. Real version: the password is checked by n8n and the data comes only after that.
-    store.set('HQAC_admin_ok', '1'); open();
+    const btn = $('lgBtn'); btn.disabled = true; btn.textContent = 'Checking…'; $('lgErr').textContent = '';
+    pass = p;
+    try { if (await loadList()) store.set(K_PASS, p); }      // remembered on this device only after n8n accepted it
+    catch (e) { $('lgErr').textContent = "Couldn't reach the server. Check your internet and try again."; }
+    finally { btn.disabled = false; btn.textContent = 'Open'; }
   };
   $('adminPass').onkeydown = e => { if (e.key === 'Enter') $('lgBtn').click(); };
-  $('logoutBtn').onclick = () => { store.del('HQAC_admin_ok'); location.reload(); };
+  $('logoutBtn').onclick = () => { store.del(K_PASS); location.reload(); };
+  $('refreshBtn').onclick = async () => { try { if (await loadList()) { toast('Updated'); if (current) openStudent(current); } } catch (e) { toast("Couldn't refresh. Check your internet."); } };
+  $('flagOnly').onclick = () => { flagOnly = !flagOnly; $('flagOnly').classList.toggle('on', flagOnly); renderList(); };
+  $('todayOnly').onclick = () => { todayOnly = !todayOnly; $('todayOnly').classList.toggle('on', todayOnly); renderList(); };
+  $('q').oninput = renderList; $('sort').onchange = renderList;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && current) closeStudent(); });
+  if (store.get(K_DARK) === '1') document.body.classList.add('dark');
+  $('themeBtn').onclick = () => store.set(K_DARK, document.body.classList.toggle('dark') ? '1' : '0');
   if (!TEST_MODE) $('testbar').style.display = 'none';
-  if (store.get('HQAC_admin_ok') === '1') open();
+
+  /* ---------- fake data (only when TEST_MODE is true) ---------- */
+  let FAKE = null;
+  function fakeApi(action, x){
+    if (!FAKE){
+      let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647, pick = a => a[Math.floor(rnd() * a.length)];
+      const names = ['Omar Ewis','Hawraa Rady','Youmna Sadek','Joud Shawki','Yousef Abdelaziz','Sama Moustafa','Mohamed Tarek','Laila Hassan'];
+      const qs = ['Why does light bend when it enters water?','How do I find the critical angle for glass?','Is my ray diagram correct?','What is specific heat capacity?'];
+      const fu = ['Why not 30°?','Can you explain the second step again?','And what if it was diamond?'];
+      const now = Date.now(); FAKE = { students: [], rows: {}, older: {} };
+      names.forEach((name, i) => {
+        const serial = String(100003 + i * 7), rows = [], older = []; let cum = 0, nN = 0, nF = 0;
+        const mk = (t, topic, seq, arch) => { const img = seq === 1 && rnd() < .5 ? 1 + Math.floor(rnd() * 3) : 0, terra = img && rnd() < .5;
+          const cost = +(terra ? .04 + rnd() * .01 : .024 + rnd() * .004).toFixed(5); cum = +(cum + cost).toFixed(5); seq === 1 ? nN++ : nF++;
+          const base = { topicId: topic, mode: seq === 1 ? 'new' : 'followup', seq, question: seq === 1 ? pick(qs) : pick(fu), answer: 'The critical angle is found with **sin c = 1/n**. For glass (n = 1.5), c ≈ 41.8°.', model: terra ? 'openai/gpt-6.1-terra' : 'google/gemini-3.8-flash', cost, totalCost: cum };
+          return arch ? Object.assign(base, { when: new Date(t).toLocaleString('en-GB'), photos: img }) : Object.assign(base, { at: new Date(t).toISOString(), imageIds: Array.from({ length: img }, (_, k) => 'fakeid' + k) }); };
+        for (let k = 0; k < 3; k++){ const t = now - (40 - k * 6) * 864e5; for (let j = 1; j <= 1 + Math.floor(rnd() * 3); j++) older.push(mk(t + j * 2e5, 'a' + i + k, j, true)); }
+        for (let k = 0; k < 1 + Math.floor(rnd() * 4); k++){ const t = now - (i < 4 ? (4 - k) * 36e5 : (9 - k) * 864e5); for (let j = 1; j <= 1 + Math.floor(rnd() * 4); j++) rows.push(mk(t + j * 2e5, 't' + i + k, j, false)); }
+        FAKE.rows[serial] = rows; FAKE.older[serial] = older;
+        const last = rows[rows.length - 1];
+        FAKE.students.push({ studentSerial: serial, serial: String(1001 + i * 3), name, course: 'Nov 2026', totalNew: nN, totalFollowups: nF, totalCost: cum, lastQuestion: last.question, lastAt: last.at });
+      });
+    }
+    return new Promise(res => setTimeout(() => {
+      if (action === 'list') res({ ok: true, students: FAKE.students, today: { questions: 23, students: 4, newQuestions: 9, followups: 14 } });
+      else if (action === 'student') res({ ok: true, rows: FAKE.rows[x.serial] || [] });
+      else res({ ok: true, rows: FAKE.older[x.serial] || [] });
+    }, 250));
+  }
+
+  /* ---------- start ---------- */
+  pass = store.get(K_PASS) || '';
+  if (TEST_MODE) loadList();
+  else if (pass) loadList().catch(() => { $('lgErr').textContent = "Couldn't reach the server. Check your internet and try again."; });
 })();
 </script>
 </body>
