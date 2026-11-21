@@ -21,7 +21,7 @@
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15.5px}
   button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   svg{display:block}
-  .screen{position:fixed;inset:0;display:none;flex-direction:column;max-width:900px;margin:0 auto;background:var(--bg)}
+  .screen{position:fixed;top:0;left:0;right:0;height:var(--vh,100dvh);display:none;flex-direction:column;max-width:900px;margin:0 auto;background:var(--bg)}
   .screen.on{display:flex}
 
   /* ===== login ===== */
@@ -135,6 +135,22 @@
   #nqErr.shake{animation:shake .4s}
   body.dark #nqErr{color:#ff8a80}
   #nqSend{background:var(--accent);color:#fff;font-weight:700;font-size:16px;padding:12px;border-radius:24px}
+
+  body.kb #newq{margin:4px 6px 6px;padding:8px 10px;gap:6px;border-width:2px}
+  body.kb .nqhead{font-size:15px}
+  body.kb .nqhead button{width:26px;height:26px}
+  body.kb .nqsub, body.kb #nqNote{display:none}
+  body.kb #nqPhotos{grid-template-columns:repeat(4,1fr);gap:6px}
+  body.kb .slot{min-height:38px;padding:2px;border-width:1.5px}
+  body.kb .slot .sbtns, body.kb .slot .sor, body.kb .slot .st small, body.kb .srm{display:none}
+  body.kb .slot .st{font-size:11.5px}
+  body.kb .slot.has img{height:38px}
+  body.kb .snum{font-size:10px;padding:0 5px}
+  body.kb #nqText{min-height:54px;max-height:84px;padding:8px 10px}
+  body.kb #nqSend{padding:9px}
+  body.kb .chead{min-height:48px;padding-top:4px;padding-bottom:4px}
+  body.kb .chead .av{width:34px;height:34px}
+  body.kb #status{display:none}
 
   .composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex-shrink:0}
   .pill{flex:1;display:flex;align-items:flex-end;background:var(--pill);border-radius:24px;min-height:48px;padding:0 4px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
@@ -298,6 +314,19 @@
     if ($('lightbox').classList.contains('on')) return overlay('lightbox', false);
     if ($('preview').classList.contains('on')) return hidePreview();
   });
+
+  /* ---------- keyboard: keep the page inside the visible area ---------- */
+  const vv = window.visualViewport;
+  function fitViewport(){
+    const h = vv ? vv.height : innerHeight;
+    document.documentElement.style.setProperty('--vh', h + 'px');
+    document.body.classList.toggle('kb', h < 560);          // a short visible area = the keyboard is open
+    if (vv && (vv.offsetTop || window.scrollY)) window.scrollTo(0, 0);
+    const m = $('msgs'); if (m) m.scrollTop = m.scrollHeight;
+  }
+  if (vv){ vv.addEventListener('resize', fitViewport); vv.addEventListener('scroll', fitViewport); }
+  addEventListener('resize', fitViewport);
+  fitViewport();
 
   /* ---------- theme ---------- */
   if (store.get(K_DARK) === '1') document.body.classList.add('dark');
@@ -609,6 +638,7 @@
   $('pSend').onclick = sendPreview;
   $('bNew').onclick = () => choose('new');
   $('nqSend').onclick = sendNewQ;
+  $('nqPhotos').addEventListener('click', () => { if (document.body.classList.contains('kb') && document.activeElement) document.activeElement.blur(); });
   $('nqPhotos').addEventListener('contextmenu', e => {
     e.preventDefault();
     if (pending.length >= MAX_IMGS){ toast(`Maximum ${MAX_IMGS} photos per question`); return; }
