@@ -239,7 +239,7 @@
   <div id="choose">
     <div id="limitNote">You've reached the limit for this question. Please start a new question.</div>
     <div class="cbtns">
-      <button id="bNew">❓ New question</button>
+      <button id="bNew">❓ Ask a new question</button>
       <button id="bFollow">↩️ Continue this question</button>
     </div>
   </div>
@@ -480,7 +480,7 @@
   function frameTitle(t){ const d = dayLabel(t); return d === 'Today' ? timeOf(t) : `${d}, ${timeOf(t)}`; }
   function render(){
     const box = $('msgs'); box.innerHTML = '';
-    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Go straight to your question: add a photo of it or type it.<br>After each answer, choose <b>Continue this question</b> to ask more about the same question, or <b>New question</b> to start a new one.</div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Go straight to your question: add a photo of it or type it.<br>After each answer, choose <b>Continue this question</b> to ask more about the same question, or <b>Ask a new question</b> to start a new one.</div>`);
     frames.forEach((f, i) => {
       const last = i === frames.length - 1;
       const fr = document.createElement('div'); fr.className = 'frame ' + (last ? 'cur' : 'old');
@@ -522,7 +522,7 @@
   async function addFiles(files){
     files = files.filter(f => f && f.type && f.type.startsWith('image/'));
     if (!files.length) return;
-    if (document.body.classList.contains('mode-choose')){ toast('First choose: New question or Continue this question'); return; }
+    if (document.body.classList.contains('mode-choose')){ toast('First choose: Ask a new question or Continue this question'); return; }
     if (busy){ toast('Please wait for the answer to your last question'); return; }
     for (const f of files){
       if (pending.length >= MAX_IMGS){ toast(`Maximum ${MAX_IMGS} photos per question`); break; }
