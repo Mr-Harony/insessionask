@@ -173,6 +173,10 @@
   #lightbox{background:#0b141a;z-index:40;align-items:center;justify-content:center;padding:16px}
   #lightbox img{max-width:100%;max-height:100%}
   #lbClose{position:absolute;top:calc(10px + env(safe-area-inset-top));right:10px;color:#fff}
+  #ctx{position:fixed;display:none;z-index:70;background:var(--panel);color:var(--text);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);padding:6px;min-width:170px}
+  #ctx.on{display:block}
+  #ctx button{display:block;width:100%;text-align:left;padding:10px 14px;border-radius:7px;font-size:15px}
+  #ctx button:hover{background:var(--accent);color:#fff}
   #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#323739;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
   #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
   @media (min-width:901px){ body{background:#d1d7db} body.dark{background:#0a1014} .screen{box-shadow:0 0 14px rgba(0,0,0,.12)} }
@@ -259,6 +263,10 @@
 </section>
 
 <section class="screen" id="lightbox"><button class="hb" id="lbClose"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button><img alt=""></section>
+<div id="ctx">
+  <button id="ctxPaste">📋 Paste image</button>
+  <button id="ctxUpload">📁 Upload file</button>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -366,14 +374,32 @@
         d.className = 'slot ' + (next ? 'next' : 'off');
         d.innerHTML = `<span class="st">Photo ${i + 1} <small>(Optional)</small></span><div class="sbtns">` +
           (isTouch ? '<button class="sbtn" data-in="camera">📷 Camera</button><button class="sbtn" data-in="gallery">🖼️ Gallery</button>'
-                   : '<button class="sbtn" data-in="gallery">📁 Upload</button>') +
+                   : '<button class="sbtn" data-in="gallery">📁 Upload</button><button class="sbtn" data-act="paste">📋 Paste</button>') +
           '</div>' + (isTouch ? '' : '<span class="sor">or <b>Ctrl+V</b></span>');
-        if (next) d.querySelectorAll('.sbtn').forEach(btn => btn.onclick = () => $(btn.dataset.in).click());
+        if (next) d.querySelectorAll('.sbtn').forEach(btn => btn.onclick = () => btn.dataset.in ? $(btn.dataset.in).click() : pasteFromClipboard());
       }
       box.appendChild(d);
     }
     $('nqNote').innerHTML = `Attach up to <b>${MAX_IMGS} photos</b> · <b>${pending.length}</b> added`;
   }
+  async function pasteFromClipboard(){
+    try {
+      const items = await navigator.clipboard.read(), files = [];
+      for (const it of items){
+        const type = it.types.find(t => t.startsWith('image/'));
+        if (type) files.push(new File([await it.getType(type)], 'pasted.png', { type }));
+      }
+      if (!files.length){ toast('No image in the clipboard. Copy an image first.'); return; }
+      addFiles(files);
+    } catch (e) { toast('The browser blocked Paste. Click the box and press Ctrl+V instead.'); }
+  }
+  function openCtx(x, y){
+    const m = $('ctx'); m.classList.add('on');
+    m.style.left = Math.min(x, innerWidth - m.offsetWidth - 8) + 'px';
+    m.style.top = Math.min(y, innerHeight - m.offsetHeight - 8) + 'px';
+  }
+  const closeCtx = () => $('ctx').classList.remove('on');
+
   // Greetings and small talk are not questions: they are stopped here, before anything is sent.
   const GREET_EN = /\b(hi+|hello+|hey+|good\s*(morning|evening|afternoon|night)|morning|evening|salam|alaikum|thanks?|thank\s*you|thx|ok(ay)?|please|mr|mister|sir|harony|how\s*are\s*you|i\s*have\s*a\s*question|can\s*i\s*ask(\s*a\s*question)?|bye)\b/gi;
   const GREET_AR = /(السلام عليكم|وعليكم السلام|ورحمة الله|وبركاته|صباح الخير|صباح النور|مساء الخير|مساء النور|ازيك|إزيك|عامل ايه|عامل إيه|اخبارك|أخبارك|مرحبا|اهلا|أهلا|شكرا|شكراً|يا مستر|مستر|لو سمحت|من فضلك|ممكن أسأل سؤال|ممكن اسأل سؤال|ممكن أسأل|ممكن اسأل|ممكن سؤال|عندي سؤال|عادي|يعني|تمام|ماشي)/g;
@@ -552,6 +578,15 @@
   $('pSend').onclick = sendPreview;
   $('bNew').onclick = () => choose('new');
   $('nqSend').onclick = sendNewQ;
+  $('nqPhotos').addEventListener('contextmenu', e => {
+    e.preventDefault();
+    if (pending.length >= MAX_IMGS){ toast(`Maximum ${MAX_IMGS} photos per question`); return; }
+    openCtx(e.clientX, e.clientY);
+  });
+  $('ctxPaste').onclick = () => { closeCtx(); pasteFromClipboard(); };
+  $('ctxUpload').onclick = () => { closeCtx(); $('gallery').click(); };
+  document.addEventListener('click', closeCtx);
+  document.addEventListener('scroll', closeCtx, true);
   $('nqClose').onclick = () => { pending = []; afterAnswer(); };
   $('nqText').addEventListener('input', () => { $('nqErr').textContent = ''; });
   $('nqText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !isTouch){ e.preventDefault(); sendNewQ(); } });
