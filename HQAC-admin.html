@@ -158,6 +158,7 @@
   .olderbtn:disabled{opacity:.6}
   .note{align-self:center;text-align:center;font-size:12.5px;color:var(--muted);background:var(--panel);padding:5px 12px;border-radius:8px;margin:8px 0 0;box-shadow:0 1px .5px rgba(11,20,26,.13)}
   .frame.arch{border-style:dashed;opacity:.95}
+  #overview p.feenote{font-size:12.5px;margin-top:-10px}
   .tabs{display:flex;background:var(--head);padding:0 8px;flex-shrink:0}
   .tab{flex:1;padding:9px 6px 8px;color:rgba(255,255,255,.7);font-weight:700;font-size:14.5px;border-bottom:3px solid transparent}
   .tab.on{color:#fff;border-bottom-color:#fff}
@@ -233,6 +234,7 @@
     <div id="overview">
       <h2>Harony Quick Ask Chat</h2>
       <p>Choose a student on the left to see their questions and our answers.</p>
+      <p class="feenote" id="feeNote1"></p>
       <div class="stats" id="stats"></div>
     </div>
     <div id="chatview">
@@ -240,7 +242,7 @@
       <div id="thread"></div>
     </div>
     <div id="statsView">
-      <div class="dhead"><button class="hb back" id="statsBack" title="Back">←</button><div class="who"><b>Statistics</b><span class="sub">Spending per month, in US dollars</span></div></div>
+      <div class="dhead"><button class="hb back" id="statsBack" title="Back">←</button><div class="who"><b>Statistics</b><span class="sub" id="feeNote2">Spending per month, in US dollars</span></div></div>
       <div class="svbody" id="statsBody"></div>
     </div>
   </main>
@@ -254,7 +256,16 @@
   const K_PASS = 'HQAC_admin_pass', K_DARK = 'HQAC_admin_dark', K_FLAGS = 'HQAC_admin_flags';
   const $ = id => document.getElementById(id);
   const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
-  const usd = n => '$' + (Number(n) < 1 ? Number(n).toFixed(4) : Number(n).toFixed(2));
+  // Every amount on this page is what the owner REALLY pays: the model cost that OpenRouter reports,
+  // plus OpenRouter's fee when buying credit, plus the bank's currency fee on top of that.
+  let FEES = { openrouter: 5.5, bank: 3 };          // defaults; the live values come from the table "HQAC settings"
+  const factor = () => (1 + FEES.openrouter / 100) * (1 + FEES.bank / 100);
+  const usd = n => { const v = Number(n) * factor(); return '$' + (v < 1 ? v.toFixed(4) : v.toFixed(2)); };
+  function renderFeeNote(){
+    const t = `OpenRouter fee ${FEES.openrouter}% and bank currency fee ${FEES.bank}%`;
+    $('feeNote1').textContent = `All costs here are what you really pay: model cost + ${t} (model cost × ${factor().toFixed(4)}).`;
+    $('feeNote2').textContent = `Spending per month in US dollars, including ${t}`;
+  }
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<b>$1</b>');
   const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
@@ -452,6 +463,8 @@
     if (!d || !d.ok){ denied(d); return false; }
     students = (d.students || []).map(s => Object.assign({}, s, { totalNew: Number(s.totalNew || 0), totalFollowups: Number(s.totalFollowups || 0), totalCost: Number(s.totalCost || 0) }));
     today = d.today || null;
+    if (d.fees){ if (typeof d.fees.openrouter === 'number') FEES.openrouter = d.fees.openrouter; if (typeof d.fees.bank === 'number') FEES.bank = d.fees.bank; }
+    renderFeeNote();
     $('login').style.display = 'none'; $('app').classList.add('on');
     renderStats(); renderList();
     return true;
