@@ -98,6 +98,29 @@
   .cbtns button{flex:1;padding:13px 8px;border-radius:24px;font-weight:700;font-size:15.5px;background:var(--pill);color:var(--accent);box-shadow:0 1px 2px rgba(11,20,26,.2)}
   #bNew{background:var(--accent);color:#fff}
 
+  /* ===== New question card: the student must add a photo of the question or type it ===== */
+  #newq{position:relative;z-index:2;display:none;flex-direction:column;gap:8px;margin:6px 8px calc(8px + env(safe-area-inset-bottom));padding:12px;background:var(--panel);border:3px solid var(--accent);border-radius:16px;box-shadow:0 2px 10px rgba(0,168,132,.25);flex-shrink:0}
+  .mode-newq #newq{display:flex}
+  .mode-newq .composer{display:none}
+  .nqhead{display:flex;align-items:center;justify-content:space-between;font-size:16.5px}
+  .nqhead button{width:32px;height:32px;border-radius:50%;color:var(--muted);font-size:16px}
+  .nqsub{font-size:13.5px;color:var(--muted);margin-top:-4px}
+  #nqPhotos{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .nqthumb{position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1.5px solid var(--line);flex-shrink:0}
+  .nqthumb img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;display:block}
+  .nqthumb button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:11px;line-height:1}
+  .nqadd{padding:11px 14px;border-radius:12px;border:1.5px dashed var(--accent);color:var(--accent);font-weight:700;font-size:14.5px;background:rgba(0,168,132,.08)}
+  #nqNote{font-size:12.5px;color:var(--muted);margin-top:-2px}
+  #nqNote b{color:var(--text)}
+  #nqText{width:100%;resize:none;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;line-height:1.45;background:rgba(128,128,128,.08);color:var(--text);outline:none;min-height:72px;max-height:150px}
+  #nqText:focus{border-color:var(--accent)}
+  #nqText::placeholder{color:var(--muted)}
+  #nqErr{color:#d93025;font-size:13.5px;font-weight:700}
+  #nqErr:empty{display:none}
+  #nqErr.shake{animation:shake .4s}
+  body.dark #nqErr{color:#ff8a80}
+  #nqSend{background:var(--accent);color:#fff;font-weight:700;font-size:16px;padding:12px;border-radius:24px}
+
   .composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex-shrink:0}
   .pill{flex:1;display:flex;align-items:flex-end;background:var(--pill);border-radius:24px;min-height:48px;padding:0 4px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
   .pill .ib{width:42px;height:48px;display:grid;place-items:center;color:var(--icon);flex-shrink:0}
@@ -184,6 +207,15 @@
       <button id="bNew">❓ New question</button>
       <button id="bFollow">↩️ Follow up</button>
     </div>
+  </div>
+  <div id="newq">
+    <div class="nqhead"><b>❓ New question</b><button id="nqClose" title="Cancel">✕</button></div>
+    <div class="nqsub">Go straight to your question: add a photo of it, type it, or both.</div>
+    <div id="nqPhotos"></div>
+    <div id="nqNote"></div>
+    <textarea id="nqText" rows="2" placeholder="Type your question here…"></textarea>
+    <div id="nqErr"></div>
+    <button id="nqSend">Send question ➤</button>
   </div>
   <div class="composer">
     <div class="pill">
@@ -279,23 +311,70 @@
 
   /* ---------- New question / Follow up ---------- */
   function setMode(m){
-    document.body.classList.remove('mode-choose','mode-compose','mode-wait'); document.body.classList.add('mode-' + m);
+    document.body.classList.remove('mode-choose','mode-compose','mode-wait','mode-newq'); document.body.classList.add('mode-' + m);
     $('text').disabled = m !== 'compose';
   }
   function afterAnswer(){
     if (busy) return setMode('wait');
     const f = cur();
-    if (!f){ intent = 'new'; setMode('compose'); if (!isTouch) $('text').focus(); return; }
+    if (!f){ openNewQ(); return; }
     const full = asked(f) >= MAX_PER_FRAME;
     $('bFollow').style.display = full ? 'none' : '';
     $('limitNote').style.display = full ? 'block' : 'none';
     setMode('choose');
   }
   function choose(kind){
+    if (kind === 'new') return openNewQ();
     intent = kind;
     setMode('compose');
     $('text').focus();
   }
+
+  /* ---------- New question card ---------- */
+  function openNewQ(){
+    intent = 'new'; pending = []; sel = 0;
+    $('nqText').value = ''; $('nqErr').textContent = '';
+    $('nqClose').style.display = cur() ? '' : 'none';     // nothing to go back to on the very first question
+    renderNewQ(); setMode('newq');
+    if (!isTouch) $('nqText').focus();
+    $('msgs').scrollTop = $('msgs').scrollHeight;
+  }
+  function renderNewQ(){
+    const box = $('nqPhotos'); box.innerHTML = '';
+    pending.forEach((src, i) => {
+      const d = document.createElement('div'); d.className = 'nqthumb';
+      d.innerHTML = `<img src="${src}" alt="photo ${i + 1}"><button title="Remove this photo">✕</button>`;
+      d.querySelector('button').onclick = () => { pending.splice(i, 1); renderNewQ(); };
+      d.querySelector('img').onclick = () => openLightbox(src);
+      box.appendChild(d);
+    });
+    const left = MAX_IMGS - pending.length;
+    if (left > 0){
+      const word = pending.length ? 'another photo' : 'a photo';
+      const add = (label, input) => { const b = document.createElement('button'); b.className = 'nqadd'; b.textContent = label; b.onclick = () => $(input).click(); box.appendChild(b); };
+      if (isTouch){ add('📷 Camera', 'camera'); add('🖼️ Gallery', 'gallery'); } else add('＋ Add ' + word, 'gallery');
+      $('nqNote').innerHTML = `Up to <b>${MAX_IMGS} photos</b> in one question · <b>${left} more</b> allowed${isTouch ? '' : ' · or paste with Ctrl+V'}`;
+    } else {
+      $('nqNote').innerHTML = `✔ Maximum reached: <b>${MAX_IMGS} photos</b> in one question`;
+    }
+  }
+  // Greetings and small talk are not questions: they are stopped here, before anything is sent.
+  const GREET_EN = /\b(hi+|hello+|hey+|good\s*(morning|evening|afternoon|night)|morning|evening|salam|alaikum|thanks?|thank\s*you|thx|ok(ay)?|please|mr|mister|sir|harony|how\s*are\s*you|i\s*have\s*a\s*question|can\s*i\s*ask(\s*a\s*question)?|bye)\b/gi;
+  const GREET_AR = /(السلام عليكم|وعليكم السلام|ورحمة الله|وبركاته|صباح الخير|صباح النور|مساء الخير|مساء النور|ازيك|إزيك|عامل ايه|عامل إيه|اخبارك|أخبارك|مرحبا|اهلا|أهلا|شكرا|شكراً|يا مستر|مستر|لو سمحت|من فضلك|ممكن أسأل سؤال|ممكن اسأل سؤال|ممكن أسأل|ممكن اسأل|ممكن سؤال|عندي سؤال|عادي|يعني|تمام|ماشي)/g;
+  const realLength = t => t.toLowerCase().replace(GREET_AR, ' ').replace(GREET_EN, ' ').replace(/[^a-z0-9؀-ۿ]/g, '').length;
+  function nqError(msg){ const e = $('nqErr'); e.textContent = msg; e.classList.remove('shake'); void e.offsetWidth; e.classList.add('shake'); }
+  async function sendNewQ(){
+    const t = $('nqText').value.trim(), imgs = pending.slice();
+    if (!t && !imgs.length){ nqError('Type your question, or add a photo of it.'); $('nqText').focus(); return; }
+    if (!imgs.length && realLength(t) < 5){
+      nqError(realLength(t) < t.replace(/[^a-zA-Z0-9؀-ۿ]/g, '').length ? 'Please skip the greeting and write your question directly.' : 'Please write your full question, or add a photo of it.');
+      $('nqText').focus(); return;
+    }
+    if (busy){ toast('Please wait for the answer to your last question'); return; }
+    intent = 'new'; pending = []; $('nqText').value = '';
+    await ask(t, imgs);
+  }
+  function openLightbox(src){ $('lightbox').querySelector('img').src = src; overlay('lightbox', true); history.pushState({v:'lb'}, ''); }
   const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<b>$1</b>'); // same as Quick Ask
   const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
@@ -307,7 +386,7 @@
   function frameTitle(t){ const d = dayLabel(t); return d === 'Today' ? timeOf(t) : `${d}, ${timeOf(t)}`; }
   function render(){
     const box = $('msgs'); box.innerHTML = '';
-    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Type your question, take a photo, or send photos from your gallery.<br>After each answer, choose <b>Follow up</b> to continue the same question, or <b>New question</b> to start a new one.</div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="sys">👋 Ask about anything in the course. Go straight to your question: add a photo of it or type it.<br>After each answer, choose <b>Follow up</b> to continue the same question, or <b>New question</b> to start a new one.</div>`);
     frames.forEach((f, i) => {
       const last = i === frames.length - 1;
       const fr = document.createElement('div'); fr.className = 'frame ' + (last ? 'cur' : 'old');
@@ -327,7 +406,7 @@
     const tk = m.role === 'me' ? `<span class="tk ${m.read ? 'read' : ''}">${m.delivered || m.read ? '✓✓' : '✓'}</span>` : '';
     h += `<span class="meta">${timeOf(m.t)}${tk}</span>`;
     el.innerHTML = h;
-    el.querySelectorAll('img').forEach(i => i.onclick = () => { $('lightbox').querySelector('img').src = i.src; overlay('lightbox', true); history.pushState({v:'lb'}, ''); });
+    el.querySelectorAll('img').forEach(i => i.onclick = () => openLightbox(i.src));
     return el;
   }
 
@@ -355,6 +434,7 @@
       if (pending.length >= MAX_IMGS){ toast(`Maximum ${MAX_IMGS} photos per question`); break; }
       try { pending.push(await resize(f, 1920, 0.8)); sel = pending.length - 1; } catch(e){ toast("This photo couldn't be opened. Try another one."); }
     }
+    if (document.body.classList.contains('mode-newq')){ $('nqErr').textContent = ''; renderNewQ(); return; }
     if (pending.length) showPreview();
   }
   function showPreview(){
@@ -427,6 +507,7 @@
   }
   async function sendText(){
     const t = $('text').value.trim(); if (!t || busy) { if (busy) toast('Please wait for the answer to your last question'); return; }
+    if (realLength(t) < 2){ toast('Please write your follow-up question directly.'); return; }
     $('text').value = ''; grow($('text'), 130); syncCam();
     await ask(t, []);
   }
@@ -454,6 +535,10 @@
   $('camera').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
   $('pSend').onclick = sendPreview;
   $('bNew').onclick = () => choose('new');
+  $('nqSend').onclick = sendNewQ;
+  $('nqClose').onclick = () => { pending = []; afterAnswer(); };
+  $('nqText').addEventListener('input', () => { $('nqErr').textContent = ''; });
+  $('nqText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !isTouch){ e.preventDefault(); sendNewQ(); } });
   $('bFollow').onclick = () => choose('follow');
   $('pClose').onclick = closePreview;
   $('pDel').onclick = () => { pending.splice(sel, 1); sel = Math.max(0, Math.min(sel, pending.length - 1)); pending.length ? renderPreview() : closePreview(); };
