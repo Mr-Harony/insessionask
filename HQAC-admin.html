@@ -458,7 +458,7 @@
           <div class="mtop"><b>${esc(monthName(m.month))}</b><span class="mcost num">${usd(m.cost)}</span></div>
           <div class="mbar"><i style="width:${Math.max(2, Math.round(m.cost / max * 100))}%"></i></div>
           <div class="mnums"><b class="num">${qn}</b> questions · <b class="num">${m.newCount}</b> new · <b class="num">${m.followups}</b> follow-ups · <b class="num">${m.students}</b> student${m.students === 1 ? '' : 's'}</div>
-          <div class="mnums">🤖 Gemini <b class="num">${m.gemini}</b> · Terra <b class="num">${m.terra}</b> · average <b class="num">${usd(qn ? m.cost / qn : 0)}</b> per question</div>
+          <div class="mnums">💎 Gemini <b class="num">${m.gemini}</b> · 🟠 Terra <b class="num">${m.terra}</b> · average <b class="num">${usd(qn ? m.cost / qn : 0)}</b> per question</div>
           ${m.top && m.top.length ? `<details><summary>Top ${m.top.length} student${m.top.length === 1 ? '' : 's'} by cost</summary>` + m.top.map(t => `<div class="toprow"><span><span class="code">${esc(t.serial)}</span> ${esc(t.name)}</span><span><b class="num">${usd(t.cost)}</b> · ${t.questions} q</span></div>`).join('') + `</details>` : ''}
         </div>`; }).join('');
     } catch (e) { box.innerHTML = `<div class="pick">Couldn't load the statistics. Check your internet and try again.</div>`; }
