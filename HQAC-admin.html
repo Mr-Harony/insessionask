@@ -267,7 +267,8 @@
     $('feeNote2').textContent = `Spending per month in US dollars, including ${t}`;
   }
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<b>$1</b>');
+  const fixNl = s => String(s).replace(/\\n(?!u\b|eq\b|abla\b|eg\b|ewline)/g, '\n');   // the model sometimes types \n instead of a real line break
+  const fmt = s => esc(fixNl(s)).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<b>$1</b>');
   const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
   const dayStart = t => new Date(t).setHours(0,0,0,0);
   function dayLabel(t){ const a = dayStart(t), b = dayStart(Date.now());
