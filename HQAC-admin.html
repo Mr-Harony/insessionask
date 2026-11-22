@@ -188,6 +188,55 @@
   .toprow:last-child{border-bottom:0}
   .toprow span:last-child{white-space:nowrap;color:var(--muted)}
   .toprow b{color:var(--accent)}
+  /* ----- statistics: tiles, cards and charts ----- */
+  :root{ --c-cost:#00a884; --c-new:#1baf7a; --c-fu:#6250d6; --c-gem:#2a78d6; --c-ter:#eb6834; }
+  body.dark{ --c-cost:#00a884; --c-new:#199e70; --c-fu:#9085e9; --c-gem:#3987e5; --c-ter:#d95926; }
+  .sv{max-width:1080px;margin:0 auto}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .kpi{background:var(--panel);border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.08);min-width:0}
+  .kpi .kl{font-size:12.5px;color:var(--muted);font-weight:600}
+  .kpi .kv{font-size:24px;font-weight:700;margin:3px 0 2px}
+  .kpi .ks{font-size:12.5px;color:var(--muted)}
+  .ccard{background:var(--panel);border-radius:14px;padding:14px 16px 12px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .chead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .chead h3{font-size:16.5px;margin:0}
+  .csub{font-size:13px;color:var(--muted);margin-top:2px}
+  .ctrls{display:flex;gap:8px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--bar);border-radius:18px;padding:3px}
+  .seg button{padding:5px 12px;border-radius:15px;font-size:13px;font-weight:600;color:var(--muted)}
+  .seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:2px 0 4px;min-height:4px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .legend b{color:var(--text);font-weight:600}
+  .chart{position:relative}
+  .chart svg{display:block;max-width:100%}
+  .chart text{font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums}
+  .chart .grid{stroke:var(--line);stroke-width:1}
+  .chart .hit{fill:transparent}
+  .chart .col{outline:none;cursor:default}
+  .chart .col.hov .hit{fill:rgba(128,128,128,.13)}
+  .tip{position:absolute;z-index:3;pointer-events:none;display:none;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:12.5px;white-space:nowrap}
+  .tip .tt{font-weight:700;margin-bottom:4px}
+  .tip .tr{display:flex;align-items:center;gap:8px;color:var(--muted);line-height:1.55}
+  .tip .tr i{width:10px;height:2px;border-radius:1px;flex-shrink:0}
+  .tip .tr b{color:var(--text);font-weight:700;margin-left:auto;padding-left:14px;font-variant-numeric:tabular-nums}
+  .ynums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:2px 0 10px}
+  .ynums div{background:var(--bar);border-radius:10px;padding:8px 10px;min-width:0}
+  .ynums b{display:block;font-size:17px}
+  .ynums span{font-size:12px;color:var(--muted)}
+  .segbar{display:flex;gap:2px;height:8px;margin:12px 0 6px}
+  .segbar i{display:block;height:100%;border-radius:4px;min-width:3px}
+  .ccard details{margin-top:8px}
+  .ccard summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:700}
+  .dtwrap{overflow:auto;max-height:340px;margin-top:8px}
+  table.dt thead th{position:sticky;top:0;background:var(--panel)}
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+  table.dt th{font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th:first-child, table.dt td:first-child{text-align:left}
+  table.dt tr:last-child td{border-bottom:0}
+  .sech{font-size:14px;color:var(--muted);margin:18px 2px 8px;font-weight:700}
+  @media (max-width:800px){ .kpis{grid-template-columns:repeat(2,1fr)} .ynums{grid-template-columns:repeat(2,1fr)} .kpi .kv{font-size:21px} }
   #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#323739;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
   #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -247,7 +296,7 @@
       <div id="thread"></div>
     </div>
     <div id="statsView">
-      <div class="dhead"><button class="hb back" id="statsBack" title="Back">←</button><div class="who"><b>Statistics</b><span class="sub" id="feeNote2">Spending per month, in US dollars</span></div></div>
+      <div class="dhead"><button class="hb back" id="statsBack" title="Back">←</button><div class="who"><b>Statistics</b><span class="sub" id="feeNote2">Spending per day, month and school year, in US dollars</span></div></div>
       <div class="svbody" id="statsBody"></div>
     </div>
   </main>
@@ -269,7 +318,7 @@
   function renderFeeNote(){
     const t = `OpenRouter fee ${FEES.openrouter}% and bank currency fee ${FEES.bank}%`;
     $('feeNote1').textContent = `All costs here are what you really pay: model cost + ${t} (model cost × ${factor().toFixed(4)}).`;
-    $('feeNote2').textContent = `Spending per month in US dollars, including ${t}`;
+    $('feeNote2').textContent = `Real cost in US dollars, including ${t}`;
   }
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const fixNl = s => String(s).replace(/\\n(?!u\b|eq\b|abla\b|eg\b|ewline)/g, '\n');   // the model sometimes types \n instead of a real line break
@@ -444,25 +493,183 @@
     else document.body.classList.toggle('in-detail', !!current);
   }
   const monthName = m => new Date(m + '-15T12:00:00').toLocaleDateString('en', { month: 'long', year: 'numeric' });
-  async function loadStats(){
-    const box = $('statsBody'); box.innerHTML = '<div class="pick">Loading…</div>';
-    try {
-      const d = await api('stats');
-      if (!d || !d.ok) return denied(d);
-      if (!Array.isArray(d.months)){ box.innerHTML = '<div class="pick">Statistics will appear after the latest workflow update is published in n8n.</div>'; return; }
-      if (!d.months.length){ box.innerHTML = '<div class="pick">No spending has been recorded yet.</div>'; return; }
-      const max = Math.max(...d.months.map(m => m.cost), 0.000001);
-      box.innerHTML = `<div class="svtotal"><span>Total spent, all months</span><b class="num">${usd(d.total)}</b></div>` + d.months.map(m => {
-        const qn = m.newCount + m.followups;
+  const monthShort = m => new Date(m + '-15T12:00:00').toLocaleDateString('en', { month: 'short' });
+  const dayShort = d => new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const dayLong = d => new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  // the school year runs from 1 July to 30 June
+  const schoolYearOf = month => { const y = +month.slice(0, 4), start = +month.slice(5, 7) >= 7 ? y : y - 1; return start + '/' + String(start + 1).slice(2); };
+  const qOf = x => (x.newCount || 0) + (x.followups || 0);
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const real = n => Number(n || 0) * factor();
+  const EMPTY = { cost: 0, newCount: 0, followups: 0, students: 0, terra: 0, gemini: 0 };
+  let stats = null, dayRange = 30, dayMeasure = 'cost', yearSel = null;
+
+  function yearsFromMonths(months){          // used only until the workflow sends the years itself
+    const by = {};
+    for (const m of months){
+      const k = schoolYearOf(m.month), y = by[k] || (by[k] = Object.assign({}, EMPTY, { year: k, students: null, top: [] }));
+      y.cost += m.cost; y.newCount += m.newCount; y.followups += m.followups; y.terra += m.terra; y.gemini += m.gemini;
+    }
+    return Object.values(by).sort((a, b) => a.year < b.year ? 1 : -1);
+  }
+
+  /* ---------- charts (plain SVG, no library) ---------- */
+  function niceScale(max, whole){
+    if (!(max > 0)) max = whole ? 4 : 0.04;
+    const raw = max / 4, pow = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / pow;
+    let step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pow;
+    if (whole) step = Math.max(1, Math.round(step));
+    const top = Math.ceil(max / step - 1e-9) * step, ticks = [];
+    for (let t = 0; t <= top + step / 2; t += step) ticks.push(+t.toFixed(6));
+    const dec = Math.max(0, ...ticks.map(t => (String(t).split('.')[1] || '').length));
+    return { top, ticks, dec };
+  }
+  // o = { label, money, colors:[css variable per series], labelWidth, cols:[{ x, vals:[...], tip:{ title, rows:[[label, value, cssVar]] } }] }
+  function barChart(host, o){
+    const W = Math.max(280, Math.floor(host.clientWidth || 700)), H = 230, mL = 48, mR = 6, mT = 10, mB = 24;
+    const pw = W - mL - mR, ph = H - mT - mB, n = o.cols.length;
+    const sc = niceScale(Math.max(0, ...o.cols.map(c => c.vals.reduce((a, b) => a + b, 0))), !o.money);
+    const y = v => mT + ph - (v / sc.top) * ph;
+    const band = pw / n, bw = Math.max(2, Math.min(24, band - 2));
+    const every = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(pw / (o.labelWidth || 46)))));
+    const tops = [];
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(o.label)}">`;
+    for (const t of sc.ticks) s += `<line class="grid" x1="${mL}" x2="${W - mR}" y1="${y(t)}" y2="${y(t)}"/><text x="${mL - 7}" y="${y(t) + 4}" text-anchor="end">${o.money ? '$' + t.toFixed(sc.dec) : t}</text>`;
+    o.cols.forEach((c, i) => {
+      const x0 = mL + band * i + (band - bw) / 2, live = c.vals.map((v, k) => [v, k]).filter(p => p[0] > 0);
+      let acc = 0, segs = '';
+      live.forEach(([v, k], j) => {
+        const yb = y(acc); acc += v; const yt = y(acc), gap = j ? 2 : 0;              // 2px gap between stacked parts
+        const hh = Math.max(1, yb - yt - gap), top = yb - gap - hh, r = j === live.length - 1 ? Math.min(4, bw / 2, hh) : 0;   // rounded top end only
+        segs += `<path fill="var(${o.colors[k]})" d="M${x0},${top + hh}V${top + r}Q${x0},${top} ${x0 + r},${top}H${x0 + bw - r}Q${x0 + bw},${top} ${x0 + bw},${top + r}V${top + hh}Z"/>`;
+      });
+      tops.push(y(acc));
+      s += `<g class="col" data-i="${i}" tabindex="0"><rect class="hit" x="${mL + band * i}" y="${mT}" width="${band}" height="${ph}"/>${segs}</g>`;
+      if ((n - 1 - i) % every === 0) s += `<text x="${mL + band * i + band / 2}" y="${H - 7}" text-anchor="middle">${esc(c.x)}</text>`;
+    });
+    host.innerHTML = s + '</svg><div class="tip"></div>';
+    const tip = host.querySelector('.tip'); let shown = -1;
+    const hide = () => { tip.style.display = 'none'; const g = host.querySelector('.col.hov'); if (g) g.classList.remove('hov'); shown = -1; };
+    const show = g => {
+      const i = +g.dataset.i; if (i === shown) return; hide(); shown = i; g.classList.add('hov');
+      const c = o.cols[i]; tip.textContent = '';
+      const t = document.createElement('div'); t.className = 'tt'; t.textContent = c.tip.title; tip.appendChild(t);
+      for (const [label, value, col] of c.tip.rows){
+        const r = document.createElement('div'); r.className = 'tr';
+        const k = document.createElement('i'); if (col) k.style.background = `var(${col})`; r.appendChild(k);
+        const l = document.createElement('span'); l.textContent = label; r.appendChild(l);
+        const b = document.createElement('b'); b.textContent = value; r.appendChild(b); tip.appendChild(r);
+      }
+      tip.style.display = 'block';
+      const cx = mL + band * i + band / 2, tw = tip.offsetWidth, th = tip.offsetHeight;
+      tip.style.left = Math.max(0, Math.min(W - tw, cx - tw / 2)) + 'px';
+      tip.style.top = Math.max(0, tops[i] - th - 8) + 'px';
+    };
+    host.onpointermove = e => { const g = e.target.closest && e.target.closest('.col'); g ? show(g) : hide(); };
+    host.onpointerleave = hide;
+    host.addEventListener('focusin', e => { const g = e.target.closest('.col'); if (g) show(g); });
+    host.addEventListener('focusout', hide);
+  }
+  const keys = pairs => pairs.map(([c, t]) => `<span><i style="background:var(${c})"></i>${t}</span>`).join('');
+
+  /* ---------- Statistics tab ---------- */
+  function drawDaily(){
+    const host = $('dayChart'), days = stats.days;
+    if (!Array.isArray(days)){ host.innerHTML = '<div class="pick">Daily numbers will appear after the latest workflow update is published in n8n.</div>'; $('dayCtrls').style.display = 'none'; return; }
+    const by = Object.fromEntries(days.map(x => [x.day, x])), end = new Date(stats.today + 'T12:00:00Z'), list = [];
+    for (let i = dayRange - 1; i >= 0; i--){ const k = new Date(end - i * 864e5).toISOString().slice(0, 10); list.push(by[k] || Object.assign({ day: k }, EMPTY)); }
+    const cost = list.reduce((a, x) => a + x.cost, 0), q = list.reduce((a, x) => a + qOf(x), 0);
+    $('daySum').textContent = `Last ${dayRange} days: ${usd(cost)} · ${plural(q, 'question')} · average ${usd(cost / dayRange)} a day`;
+    const isCost = dayMeasure === 'cost';
+    $('dayLegend').innerHTML = isCost ? '' : keys([['--c-new', 'New questions'], ['--c-fu', 'Follow-ups']]);
+    barChart(host, { label: isCost ? 'Cost per day' : 'Questions per day', money: isCost, colors: isCost ? ['--c-cost'] : ['--c-new', '--c-fu'], labelWidth: 50,
+      cols: list.map(x => ({ x: dayShort(x.day), vals: isCost ? [real(x.cost)] : [x.newCount, x.followups],
+        tip: { title: dayLong(x.day), rows: [['Cost', usd(x.cost), isCost ? '--c-cost' : ''], ['New questions', x.newCount, isCost ? '' : '--c-new'], ['Follow-ups', x.followups, isCost ? '' : '--c-fu'],
+          ['Students', x.students], ['Gemini / Terra', x.gemini + ' / ' + x.terra]] } })) });
+    const rows = list.filter(x => qOf(x) > 0).reverse();
+    $('dayTable').innerHTML = rows.length ? `<div class="dtwrap"><table class="dt"><thead><tr><th>Day</th><th>Questions</th><th>New</th><th>Follow-ups</th><th>Students</th><th>Gemini</th><th>Terra</th><th>Cost</th></tr></thead><tbody>` +
+      rows.map(x => `<tr><td>${esc(dayShort(x.day))}</td><td>${qOf(x)}</td><td>${x.newCount}</td><td>${x.followups}</td><td>${x.students}</td><td>${x.gemini}</td><td>${x.terra}</td><td><b>${usd(x.cost)}</b></td></tr>`).join('') +
+      `</tbody></table></div>` : '<div class="csub">No questions in these days.</div>';
+    document.querySelectorAll('#segMeasure button').forEach(b => b.classList.toggle('on', b.dataset.v === dayMeasure));
+    document.querySelectorAll('#segRange button').forEach(b => b.classList.toggle('on', +b.dataset.v === dayRange));
+  }
+  function drawYear(){
+    const y = stats.years.find(v => v.year === yearSel); if (!y) return;
+    const start = +y.year.slice(0, 4), mby = Object.fromEntries(stats.months.map(m => [m.month, m])), list = [];
+    for (let i = 0; i < 12; i++){ const k = (start + (i >= 6 ? 1 : 0)) + '-' + String(((6 + i) % 12) + 1).padStart(2, '0'); list.push(mby[k] || Object.assign({ month: k }, EMPTY)); }
+    const q = qOf(y), used = list.filter(m => qOf(m) > 0), top = used.slice().sort((a, b) => b.cost - a.cost)[0];
+    $('yrName').textContent = y.year;
+    $('yrSub').textContent = `1 July ${start} to 30 June ${start + 1}`;
+    $('yrNums').innerHTML = [[usd(y.cost), 'Total cost'], [q, 'Questions'], [y.students == null ? '—' : y.students, 'Students'], [usd(q ? y.cost / q : 0), 'Average per question'],
+      [top ? monthShort(top.month) + ' · ' + usd(top.cost) : '—', 'Most expensive month']].map(([v, l]) => `<div><b class="num">${v}</b><span>${l}</span></div>`).join('');
+    barChart($('yearChart'), { label: 'Cost per month in school year ' + y.year, money: true, colors: ['--c-cost'], labelWidth: 34,
+      cols: list.map(m => ({ x: monthShort(m.month), vals: [real(m.cost)],
+        tip: { title: monthName(m.month), rows: [['Cost', usd(m.cost), '--c-cost'], ['Questions', qOf(m)], ['Students', m.students], ['Gemini / Terra', m.gemini + ' / ' + m.terra]] } })) });
+    const g = y.gemini || 0, t = y.terra || 0, all = g + t, pc = v => all ? Math.round(v / all * 100) + '%' : '0%';
+    $('yrSplit').innerHTML = all ? `<div class="segbar" role="img" aria-label="Gemini ${g} answers, Terra ${t} answers">${g ? `<i style="flex:${g};background:var(--c-gem)"></i>` : ''}${t ? `<i style="flex:${t};background:var(--c-ter)"></i>` : ''}</div>
+      <div class="legend"><span><i style="background:var(--c-gem)"></i>Gemini <b>${g}</b> answers (${pc(g)})</span><span><i style="background:var(--c-ter)"></i>Terra <b>${t}</b> answers (${pc(t)})</span></div>` : '';
+    $('yrTop').innerHTML = y.top && y.top.length ? `<details><summary>Top ${plural(y.top.length, 'student')} by cost this year</summary>` + y.top.map(s => `<div class="toprow"><span><span class="code">${esc(s.serial)}</span> ${esc(s.name)}</span><span><b class="num">${usd(s.cost)}</b> · ${s.questions} q</span></div>`).join('') + `</details>` : '';
+    document.querySelectorAll('#segYear button').forEach(b => b.classList.toggle('on', b.dataset.v === yearSel));
+  }
+  function renderStatsTab(){
+    const d = stats, box = $('statsBody'), months = d.months;
+    const cur = d.today.slice(0, 7), mNow = months.find(m => m.month === cur), yNow = d.years.find(y => y.year === schoolYearOf(cur));
+    const dNow = Array.isArray(d.days) ? (d.days.find(x => x.day === d.today) || EMPTY) : null;
+    if (!yearSel || !d.years.some(y => y.year === yearSel)) yearSel = (yNow || d.years[0]).year;
+    const sub = x => x && qOf(x) ? plural(qOf(x), 'question') + (x.students != null ? ' · ' + plural(x.students, 'student') : '') : 'No questions yet';
+    const tile = (label, cost, text) => `<div class="kpi"><div class="kl">${label}</div><div class="kv num">${cost}</div><div class="ks">${text}</div></div>`;
+    const max = Math.max(...months.map(m => m.cost), 0.000001);
+    box.innerHTML = `<div class="sv">
+      <div class="kpis">
+        ${tile('Today · ' + esc(dayShort(d.today)), dNow ? usd(dNow.cost) : '—', dNow ? sub(dNow) : 'After the workflow update')}
+        ${tile('This month · ' + esc(monthShort(cur)), usd(mNow ? mNow.cost : 0), sub(mNow))}
+        ${tile('School year ' + esc(schoolYearOf(cur)), usd(yNow ? yNow.cost : 0), sub(yNow))}
+        ${tile('All time', usd(d.total), plural(months.reduce((a, m) => a + qOf(m), 0), 'question'))}
+      </div>
+      <div class="ccard">
+        <div class="chead"><div><h3>Daily</h3><div class="csub" id="daySum"></div></div>
+          <div class="ctrls" id="dayCtrls"><div class="seg" id="segMeasure"><button data-v="cost">Cost</button><button data-v="questions">Questions</button></div>
+          <div class="seg" id="segRange"><button data-v="7">7 days</button><button data-v="30">30 days</button><button data-v="90">90 days</button></div></div></div>
+        <div class="legend" id="dayLegend"></div>
+        <div class="chart" id="dayChart"></div>
+        <details><summary>Daily table</summary><div id="dayTable"></div></details>
+      </div>
+      <div class="ccard">
+        <div class="chead"><div><h3>School year <span id="yrName"></span></h3><div class="csub" id="yrSub"></div></div>
+          ${d.years.length > 1 ? `<div class="seg" id="segYear">${d.years.slice().reverse().map(y => `<button data-v="${esc(y.year)}">${esc(y.year)}</button>`).join('')}</div>` : ''}</div>
+        <div class="ynums" id="yrNums"></div>
+        <div class="chart" id="yearChart"></div>
+        <div id="yrSplit"></div>
+        <div id="yrTop"></div>
+      </div>
+      <div class="sech">Months</div>` + months.map(m => {
+        const qn = qOf(m);
         return `<div class="mcard">
           <div class="mtop"><b>${esc(monthName(m.month))}</b><span class="mcost num">${usd(m.cost)}</span></div>
           <div class="mbar"><i style="width:${Math.max(2, Math.round(m.cost / max * 100))}%"></i></div>
           <div class="mnums"><b class="num">${qn}</b> questions · <b class="num">${m.newCount}</b> new · <b class="num">${m.followups}</b> follow-ups · <b class="num">${m.students}</b> student${m.students === 1 ? '' : 's'}</div>
           <div class="mnums">💎 Gemini <b class="num">${m.gemini}</b> · 🟠 Terra <b class="num">${m.terra}</b> · average <b class="num">${usd(qn ? m.cost / qn : 0)}</b> per question</div>
           ${m.top && m.top.length ? `<details><summary>Top ${m.top.length} student${m.top.length === 1 ? '' : 's'} by cost</summary>` + m.top.map(t => `<div class="toprow"><span><span class="code">${esc(t.serial)}</span> ${esc(t.name)}</span><span><b class="num">${usd(t.cost)}</b> · ${t.questions} q</span></div>`).join('') + `</details>` : ''}
-        </div>`; }).join('');
-    } catch (e) { box.innerHTML = `<div class="pick">Couldn't load the statistics. Check your internet and try again.</div>`; }
+        </div>`; }).join('') + `</div>`;
+    box.querySelectorAll('#segMeasure button').forEach(b => b.onclick = () => { dayMeasure = b.dataset.v; drawDaily(); });
+    box.querySelectorAll('#segRange button').forEach(b => b.onclick = () => { dayRange = +b.dataset.v; drawDaily(); });
+    box.querySelectorAll('#segYear button').forEach(b => b.onclick = () => { yearSel = b.dataset.v; drawYear(); });
+    drawDaily(); drawYear();
   }
+  async function loadStats(){
+    const box = $('statsBody'); if (!stats) box.innerHTML = '<div class="pick">Loading…</div>'; else box.style.opacity = .6;
+    try {
+      const d = await api('stats'); box.style.opacity = '';
+      if (!d || !d.ok) return denied(d);
+      if (!Array.isArray(d.months)){ box.innerHTML = '<div class="pick">Statistics will appear after the latest workflow update is published in n8n.</div>'; return; }
+      if (!d.months.length){ box.innerHTML = '<div class="pick">No spending has been recorded yet.</div>'; return; }
+      if (!d.today) d.today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Cairo' });
+      if (!Array.isArray(d.years) || !d.years.length) d.years = yearsFromMonths(d.months);
+      stats = d; renderStatsTab();
+    } catch (e) { box.style.opacity = ''; box.innerHTML = `<div class="pick">Couldn't load the statistics. Check your internet and try again.</div>`; }
+  }
+  let rsT = 0;
+  window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { if (tab === 'stats' && stats && $('dayChart')) { drawDaily(); drawYear(); } }, 150); });
 
   /* ---------- open / login ---------- */
   function denied(d){ store.del(K_PASS); pass = ''; $('app').classList.remove('on'); $('login').style.display = ''; $('lgErr').textContent = (d && d.message) || 'Wrong password.'; }
@@ -525,8 +732,23 @@
     return new Promise(res => setTimeout(() => {
       if (action === 'list') res({ ok: true, students: FAKE.students, today: { questions: 23, students: 4, newQuestions: 9, followups: 14 } });
       else if (action === 'student') res({ ok: true, rows: FAKE.rows[x.serial] || [] });
-      else if (action === 'stats') { const top = FAKE.students.slice(0, 5).map(s => ({ name: s.name, serial: s.serial, cost: s.totalCost, questions: s.totalNew + s.totalFollowups }));
-        res({ ok: true, total: 61.3, months: [ { month: '2027-01', cost: 9.84, newCount: 210, followups: 131, students: 96, terra: 74, gemini: 267, top }, { month: '2026-12', cost: 38.2, newCount: 820, followups: 510, students: 240, terra: 301, gemini: 1029, top }, { month: '2026-11', cost: 13.26, newCount: 300, followups: 170, students: 120, terra: 96, gemini: 374, top } ] }); }
+      else if (action === 'stats') {
+        const top = FAKE.students.slice(0, 5).map(s => ({ name: s.name, serial: s.serial, cost: s.totalCost, questions: s.totalNew + s.totalFollowups }));
+        let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+        const now = new Date(); now.setUTCHours(12, 0, 0, 0); const today = now.toISOString().slice(0, 10), days = [];
+        for (let i = 89; i >= 0; i--){ const dt = new Date(now - i * 864e5), f = (dt.getUTCDay() === 5 ? .25 : 1) * (.45 + rnd());
+          if (i > 75 && rnd() < .6) continue;
+          const n = Math.round(55 * f), fu = Math.round(40 * f * rnd()), t = Math.round((n + fu) * (.2 + rnd() * .25));
+          days.push({ day: dt.toISOString().slice(0, 10), cost: +((n + fu - t) * 0.012 + t * 0.041).toFixed(4), newCount: n, followups: fu, students: Math.round((n + fu) / 2.7) + 1, terra: t, gemini: n + fu - t }); }
+        const months = []; let total = 0;
+        for (let y = 2025, m = 9; y < now.getUTCFullYear() || (y === now.getUTCFullYear() && m <= now.getUTCMonth() + 1); m === 12 ? (y++, m = 1) : m++){
+          const k = y + '-' + String(m).padStart(2, '0'), part = k === today.slice(0, 7) ? now.getUTCDate() / 30 : 1, busy = [4, 5, 10, 11].includes(m) ? 1.7 : (m === 7 || m === 8) ? .3 : 1;
+          const n = Math.round(900 * busy * part * (.7 + rnd() * .6)), fu = Math.round(n * (.4 + rnd() * .3)), t = Math.round((n + fu) * (.22 + rnd() * .12));
+          const cost = +((n + fu - t) * 0.012 + t * 0.041).toFixed(2); total += cost;
+          months.unshift({ month: k, cost, newCount: n, followups: fu, students: Math.round(120 * busy * (.7 + rnd() * .5)), terra: t, gemini: n + fu - t, top }); }
+        const years = yearsFromMonths(months).map(y => Object.assign(y, { students: 310 + Math.round(rnd() * 80), top }));
+        res({ ok: true, today, total: +total.toFixed(2), months, years, days });
+      }
       else res({ ok: true, rows: FAKE.older[x.serial] || [] });
     }, 250));
   }
