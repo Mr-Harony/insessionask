@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr Harony Quick Ask</title>
+  <style>
+    :root {
+      --bg-color: #1e2230;
+      --card-bg: #282c3f;
+      --input-bg: #1e2230;
+      --border-color: #3f445e;
+      --text-main: #f0f2f5;
+      --text-muted: #8c93b0;
+      --primary: #4f6ef7;
+      --primary-hover: #3d5be0;
+      --danger: #ef4444;
+      --box-empty: #232738;
+      --slot-focus: #4f6ef7;
+    }
+
+    body.light-theme {
+      --bg-color: #f0f2f8;
+      --card-bg: #ffffff;
+      --input-bg: #f8fafc;
+      --border-color: #d1d5db;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --danger: #dc2626;
+      --box-empty: #f1f5f9;
+      --slot-focus: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 580px;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .theme-toggle {
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .slots-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .slot-card {
+      background-color: var(--box-empty);
+      border: 2px dashed var(--border-color);
+      border-radius: 10px;
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 155px;
+      position: relative;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .slot-card:focus {
+      border-color: var(--slot-focus);
+      background-color: rgba(79, 110, 247, 0.08);
+      box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.2);
+    }
+
+    .slot-card.has-image {
+      border-style: solid;
+      border-color: var(--border-color);
+      background-color: var(--input-bg);
+    }
+
+    .slot-card.is-disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      filter: grayscale(1);
+      border-style: dashed;
+    }
+
+    .slot-card.is-disabled:focus {
+      border-color: var(--border-color);
+      box-shadow: none;
+      background-color: var(--box-empty);
+    }
+
+    .slot-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .slot-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .slot-btn {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 90%;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .slot-btn:hover {
+      background-color: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .slot-instructions {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.2;
+    }
+
+    .slot-instructions b {
+      color: var(--primary);
+    }
+
+    .preview-box {
+      width: 100%;
+      height: 110px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-box img {
+      max-width: 100%;
+      max-height: 85px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .custom-menu {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+      padding: 5px;
+      min-width: 140px;
+    }
+
+    .custom-menu-item {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 6px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .custom-menu-item:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .response-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      display: none;
+      word-break: break-word;
+    }
+
+    .response-box b, .response-box strong {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h2>Mr Harony Quick Ask</h2>
+      <span class="theme-toggle" id="themeBtn">🌙 Dark / Light</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter your email or username" value="">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password" value="">
+      </div>
+    </div>
+
+    <label>Attach Photos (Camera, Upload or Paste Ctrl+V)</label>
+    <div class="slots-container">
+      
+      <!-- Slot 1 -->
+      <div class="slot-card" id="slot-card-1" tabindex="0" data-slot="1">
+        <span class="slot-title">Photo 1 (Optional)</span>
+        <div class="slot-actions" id="info-1">
+          <button type="button" class="slot-btn" onclick="triggerCamera(1)">📷 Camera</button>
+          <button type="button" class="slot-btn" onclick="triggerFile(1)">📁 Upload</button>
+          <div class="slot-instructions">or <b>Ctrl+V</b></div>
+        </div>
+        <input type="file" id="cam-1" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="file-1" accept="image/*" style="display:none;">
+        <div class="preview-box" id="preview-1">
+          <img id="img-1" src="" alt="Photo 1">
+          <button type="button" class="btn-remove" onclick="removeSlot(1, event)">✖ Remove</button>
+        </div>
+      </div>
+
+      <!-- Slot 2 -->
+      <div class="slot-card is-disabled" id="slot-card-2" tabindex="-1" data-slot="2">
+        <span class="slot-title">Photo 2 (Optional)</span>
+        <div class="slot-actions" id="info-2">
+          <button type="button" class="slot-btn" onclick="triggerCamera(2)">📷 Camera</button>
+          <button type="button" class="slot-btn" onclick="triggerFile(2)">📁 Upload</button>
+          <div class="slot-instructions">or <b>Ctrl+V</b></div>
+        </div>
+        <input type="file" id="cam-2" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="file-2" accept="image/*" style="display:none;">
+        <div class="preview-box" id="preview-2">
+          <img id="img-2" src="" alt="Photo 2">
+          <button type="button" class="btn-remove" onclick="removeSlot(2, event)">✖ Remove</button>
+        </div>
+      </div>
+
+      <!-- Slot 3 -->
+      <div class="slot-card is-disabled" id="slot-card-3" tabindex="-1" data-slot="3">
+        <span class="slot-title">Photo 3 (Optional)</span>
+        <div class="slot-actions" id="info-3">
+          <button type="button" class="slot-btn" onclick="triggerCamera(3)">📷 Camera</button>
+          <button type="button" class="slot-btn" onclick="triggerFile(3)">📁 Upload</button>
+          <div class="slot-instructions">or <b>Ctrl+V</b></div>
+        </div>
+        <input type="file" id="cam-3" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="file-3" accept="image/*" style="display:none;">
+        <div class="preview-box" id="preview-3">
+          <img id="img-3" src="" alt="Photo 3">
+          <button type="button" class="btn-remove" onclick="removeSlot(3, event)">✖ Remove</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label>What is your question?</label>
+      <textarea id="question" placeholder="Write your question here..."></textarea>
+    </div>
+
+    <button type="button" class="submit-btn" id="submitBtn">Ask Mr. Harony</button>
+
+    <div class="response-box" id="responseBox"></div>
+
+    <div class="footer">Secure academic assistant • Mr. Harony</div>
+  </div>
+
+  <!-- Custom Context Menu for Right-Click -->
+  <div class="custom-menu" id="customMenu">
+    <div class="custom-menu-item" id="menuPaste">📋 Paste Image</div>
+    <div class="custom-menu-item" id="menuCamera">📷 Take Photo</div>
+    <div class="custom-menu-item" id="menuUpload">📁 Upload File</div>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = "https://n8n.sciencetoonz.com/webhook/haronyquickask";
+    const images = { 1: null, 2: null, 3: null };
+    let activeMenuSlot = null;
+
+    // استرجاع البيانات المحفوظة محلياً على جهاز الطالب
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('harony_username');
+      const savedPass = localStorage.getItem('harony_password');
+      if (savedUser) document.getElementById('username').value = savedUser;
+      if (savedPass) document.getElementById('password').value = savedPass;
+    });
+
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+    });
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<b>$1</b>');
+    }
+
+    function isSlotActive(slot) {
+      if (slot === 1) return true;
+      if (slot === 2) return images[1] !== null;
+      if (slot === 3) return images[2] !== null;
+      return false;
+    }
+
+    function updateSlotsState() {
+      const card2 = document.getElementById('slot-card-2');
+      if (images[1]) {
+        card2.classList.remove('is-disabled');
+        card2.setAttribute('tabindex', '0');
+      } else {
+        card2.classList.add('is-disabled');
+        card2.setAttribute('tabindex', '-1');
+      }
+
+      const card3 = document.getElementById('slot-card-3');
+      if (images[2]) {
+        card3.classList.remove('is-disabled');
+        card3.setAttribute('tabindex', '0');
+      } else {
+        card3.classList.add('is-disabled');
+        card3.setAttribute('tabindex', '-1');
+      }
+    }
+
+    function triggerCamera(slot) {
+      if (!isSlotActive(slot)) return;
+      document.getElementById(`cam-${slot}`).click();
+    }
+
+    function triggerFile(slot) {
+      if (!isSlotActive(slot)) return;
+      document.getElementById(`file-${slot}`).click();
+    }
+
+    function resetForm() {
+      document.getElementById('question').value = '';
+      [1, 2, 3].forEach(slot => {
+        images[slot] = null;
+        document.getElementById(`file-${slot}`).value = '';
+        document.getElementById(`cam-${slot}`).value = '';
+        document.getElementById(`img-${slot}`).src = '';
+        document.getElementById(`info-${slot}`).style.display = 'flex';
+        document.getElementById(`preview-${slot}`).style.display = 'none';
+        document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
+      });
+      updateSlotsState();
+    }
+
+    [1, 2, 3].forEach(slot => {
+      const card = document.getElementById(`slot-card-${slot}`);
+      const fileInput = document.getElementById(`file-${slot}`);
+      const camInput = document.getElementById(`cam-${slot}`);
+
+      const handleFileSelected = (e) => {
+        if (!isSlotActive(slot)) return;
+        if (e.target.files && e.target.files[0]) {
+          compressAndSaveImage(e.target.files[0], slot);
+        }
+      };
+
+      fileInput.addEventListener('change', handleFileSelected);
+      camInput.addEventListener('change', handleFileSelected);
+
+      card.addEventListener('paste', (e) => {
+        if (!isSlotActive(slot)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        handlePasteData(e.clipboardData, slot);
+      });
+
+      card.addEventListener('contextmenu', (e) => {
+        if (!isSlotActive(slot)) return;
+        e.preventDefault();
+        activeMenuSlot = slot;
+        const menu = document.getElementById('customMenu');
+        menu.style.display = 'block';
+        menu.style.left = `${e.clientX}px`;
+        menu.style.top = `${e.clientY}px`;
+      });
+    });
+
+    window.addEventListener('click', () => {
+      document.getElementById('customMenu').style.display = 'none';
+    });
+
+    document.getElementById('menuPaste').addEventListener('click', async () => {
+      if (!activeMenuSlot || !isSlotActive(activeMenuSlot)) return;
+      try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const imageType = item.types.find(type => type.startsWith('image/'));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            compressAndSaveImage(blob, activeMenuSlot);
+            return;
+          }
+        }
+        alert("No image found in clipboard!");
+      } catch (err) {
+        alert("Clipboard access denied. Please click the slot and press Ctrl+V directly.");
+      }
+    });
+
+    document.getElementById('menuCamera').addEventListener('click', () => {
+      if (activeMenuSlot && isSlotActive(activeMenuSlot)) {
+        triggerCamera(activeMenuSlot);
+      }
+    });
+
+    document.getElementById('menuUpload').addEventListener('click', () => {
+      if (activeMenuSlot && isSlotActive(activeMenuSlot)) {
+        triggerFile(activeMenuSlot);
+      }
+    });
+
+    function handlePasteData(clipboardData, slot) {
+      if (!isSlotActive(slot)) return;
+      if (!clipboardData || !clipboardData.items) return;
+      for (let i = 0; i < clipboardData.items.length; i++) {
+        if (clipboardData.items[i].type.indexOf('image') !== -1) {
+          const blob = clipboardData.items[i].getAsFile();
+          compressAndSaveImage(blob, slot);
+          return;
+        }
+      }
+      alert("No image found in clipboard!");
+    }
+
+    window.addEventListener('paste', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+      const targetSlot = [1, 2, 3].find(s => isSlotActive(s) && !images[s]);
+      if (targetSlot) {
+        handlePasteData(e.clipboardData, targetSlot);
+      }
+    });
+
+    function compressAndSaveImage(file, slot) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1920;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const base64 = canvas.toDataURL('image/jpeg', 0.8);
+          images[slot] = base64;
+
+          document.getElementById(`img-${slot}`).src = base64;
+          document.getElementById(`info-${slot}`).style.display = 'none';
+          document.getElementById(`preview-${slot}`).style.display = 'flex';
+          document.getElementById(`slot-card-${slot}`).classList.add('has-image');
+
+          updateSlotsState();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeSlot(slot, event) {
+      if (event) event.stopPropagation();
+      images[slot] = null;
+      document.getElementById(`file-${slot}`).value = '';
+      document.getElementById(`cam-${slot}`).value = '';
+      document.getElementById(`img-${slot}`).src = '';
+      document.getElementById(`info-${slot}`).style.display = 'flex';
+      document.getElementById(`preview-${slot}`).style.display = 'none';
+      document.getElementById(`slot-card-${slot}`).classList.remove('has-image');
+
+      if (slot === 1) {
+        if (images[2]) removeSlot(2, null);
+        if (images[3]) removeSlot(3, null);
+      } else if (slot === 2) {
+        if (images[3]) removeSlot(3, null);
+      }
+
+      updateSlotsState();
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('submitBtn');
+      const box = document.getElementById('responseBox');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const question = document.getElementById('question').value.trim();
+
+      if (!username || !password) {
+        alert("Please enter your username and password.");
+        return;
+      }
+
+      if (!question && !images[1] && !images[2] && !images[3]) {
+        alert("Please enter a question or attach at least one photo.");
+        return;
+      }
+
+      localStorage.setItem('harony_username', username);
+      localStorage.setItem('harony_password', password);
+
+      btn.disabled = true;
+      btn.textContent = "Analyzing & Solving...";
+      box.style.display = "block";
+      box.textContent = "Connecting to Mr. Harony's assistant...";
+
+      const payload = {
+        username: username,
+        password: password,
+        question: question,
+        image_1: images[1],
+        image_2: images[2],
+        image_3: images[3]
+      };
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const textResponse = await response.text();
+        box.innerHTML = formatMarkdown(textResponse);
+
+        resetForm();
+
+      } catch (err) {
+        box.textContent = "Error: Could not reach the server. Please try again.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Ask Mr. Harony";
+      }
+    });
+
+    updateSlotsState();
+  </script>
+</body>
+</html>
