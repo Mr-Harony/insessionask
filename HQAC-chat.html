@@ -527,7 +527,8 @@
   }
   function openLightbox(src){ $('lightbox').querySelector('img').src = src; overlay('lightbox', true); history.pushState({v:'lb'}, ''); }
   const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const fmt = s => esc(s).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<b>$1</b>'); // same as Quick Ask
+  const fixNl = s => String(s).replace(/\\n(?!u\b|eq\b|abla\b|eg\b|ewline)/g, '\n');   // the model sometimes types \n instead of a real line break
+  const fmt = s => esc(fixNl(s)).replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\*(.*?)\*/g,'<b>$1</b>'); // same as Quick Ask
   const timeOf = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
   function dayLabel(t){
     const a = new Date(t).setHours(0,0,0,0), b = new Date().setHours(0,0,0,0);
