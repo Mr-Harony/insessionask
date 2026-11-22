@@ -369,7 +369,7 @@
       const a = document.createElement('div'), k = keyOf(serial, r), m = modelName(r.model);
       a.className = 'msg out' + (flags[k] ? ' flagged' : '');
       a.innerHTML = fmt(r.answer || '') +
-        `<div class="meta"><span class="mdl ${m.cls}" title="${esc(r.model || '')}">🤖 ${esc(m.text)}</span><span>Cost <span class="cost num">${usd(r.cost)}</span></span><span>Total so far <span class="cost num">${usd(r.totalCost)}</span></span>` +
+        `<div class="meta"><span class="mdl ${m.cls}" title="${esc(r.model || '')}">${/terra/i.test(String(r.model || '')) ? '🟠' : '💎'} ${esc(m.text)}</span><span>Cost <span class="cost num">${usd(r.cost)}</span></span><span>Total so far <span class="cost num">${usd(r.totalCost)}</span></span>` +
         `<button class="flag ${flags[k] ? 'on' : ''}">⚠️ ${flags[k] ? 'Flagged' : 'Flag'}</button></div>`;
       a.querySelector('.flag').onclick = () => { flags[k] ? delete flags[k] : (flags[k] = 1); saveFlags(); a.classList.toggle('flagged', !!flags[k]); const f = a.querySelector('.flag'); f.classList.toggle('on', !!flags[k]); f.textContent = '⚠️ ' + (flags[k] ? 'Flagged' : 'Flag'); renderList(); };
       fr.append(q, a);
