@@ -152,7 +152,12 @@
   body.dark .mdl.terra{background:#4a3212;color:#ffc98a}
   body.dark .mdl.gemini{background:#1c2f55;color:#a9c7ff}
   .photos{flex-wrap:wrap}
-  .ph{display:inline-block;padding:4px 10px;border-radius:8px;background:rgba(128,128,128,.16);font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:none}
+  .ph{display:inline-block;padding:6px 12px;border-radius:8px;background:var(--accent);font-size:13px;font-weight:700;color:#fff;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  a.ph:hover{filter:brightness(1.1);text-decoration:underline}
+  .ph.gone{background:rgba(128,128,128,.16);box-shadow:none}
+  .srt{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:8px;margin:0 0 6px;background:rgba(128,128,128,.16);color:var(--muted)}
+  .srt.draw{background:#ffe9c7;color:#8a4b00}
+  body.dark .srt.draw{background:#4a3410;color:#ffcf87}
   .ph.gone{color:var(--muted);font-weight:600}
   .olderbtn{align-self:center;margin:6px 0 2px;padding:9px 18px;border-radius:20px;background:var(--panel);color:var(--accent);font-weight:700;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,.15)}
   .olderbtn:disabled{opacity:.6}
@@ -355,8 +360,10 @@
     for (const r of rows){
       const q = document.createElement('div'); q.className = 'msg in';
       let photos = '';
-      if (r.imageIds && r.imageIds.length) photos = `<div class="photos">` + r.imageIds.map((id, i) => `<a class="ph" href="https://drive.google.com/file/d/${encodeURIComponent(id)}/view" target="_blank" rel="noopener">📷 Photo ${i + 1}</a>`).join('') + `</div>`;
+      if (r.imageIds && r.imageIds.length) photos = `<div class="photos">` + r.imageIds.map((id, i) => `<a class="ph" href="https://drive.google.com/file/d/${encodeURIComponent(id)}/view" target="_blank" rel="noopener" title="Open the student's photo in Google Drive">🖼️ Open photo ${i + 1} ↗</a>`).join('') + `</div>`;
       else if (r.photos) photos = `<div class="photos"><span class="ph gone">📷 ${r.photos} photo${r.photos > 1 ? 's' : ''} (deleted after 2 weeks)</span></div>`;
+      if (r.imageIds && r.imageIds.length || r.photos) { const draw = /terra/i.test(String(r.model || ''));
+        photos += `<div><span class="srt ${draw ? 'draw' : ''}">Sorter: ${draw ? '✏️ drawing → Terra' : 'no drawing → Gemini'}</span></div>`; }
       q.innerHTML = photos + `<span class="mtag ${r.mode === 'new' ? 'new' : 'fu'}">${r.mode === 'new' ? 'NEW' : 'FOLLOW-UP'}</span>${esc(r.question || '(photo only)')}` +
         `<div class="meta">${r.at ? timeOf(r.at) : esc(r.when || '')}</div>`;
       const a = document.createElement('div'), k = keyOf(serial, r), m = modelName(r.model);
