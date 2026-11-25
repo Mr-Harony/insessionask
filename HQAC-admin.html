@@ -237,6 +237,28 @@
   table.dt tr:last-child td{border-bottom:0}
   .sech{font-size:14px;color:var(--muted);margin:18px 2px 8px;font-weight:700}
   @media (max-width:800px){ .kpis{grid-template-columns:repeat(2,1fr)} .ynums{grid-template-columns:repeat(2,1fr)} .kpi .kv{font-size:21px} }
+  /* ----- pause / resume ----- */
+  .pausebar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px 7px 14px;font-size:13px;font-weight:600;color:var(--muted);background:var(--bar);flex-shrink:0}
+  .pausebar button{padding:6px 12px;border-radius:16px;font-size:13px;font-weight:700;background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.18);white-space:nowrap}
+  .pausebar.on{background:#c62828;color:#fff}
+  .pausebar.on button{background:#fff;color:#b71c1c}
+  .dlg{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px}
+  .dlg.on{display:flex}
+  .dlgcard{background:var(--panel);color:var(--text);border-radius:16px;padding:20px;width:100%;max-width:430px;max-height:100%;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+  .dlgcard h3{margin:0 0 4px;font-size:18px}
+  .dlgsub{font-size:13px;color:var(--muted);margin:0 0 4px}
+  .dlgl{font-size:12.5px;font-weight:700;color:var(--muted);margin:14px 0 6px}
+  .durs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .durs button{padding:10px 6px;border-radius:10px;background:var(--bar);color:var(--text);font-weight:700;font-size:14px;border:2px solid transparent}
+  .durs button.on{border-color:var(--accent);background:var(--panel);color:var(--accent)}
+  #pauseUntilIn{width:100%;font-size:15px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-family:inherit}
+  #pauseUntilIn.on{border-color:var(--accent)}
+  #pausePrev{font-size:13.5px;background:var(--bar);border-radius:10px;padding:10px 12px;line-height:1.45}
+  .dlgerr{color:#c62828;font-size:13px;min-height:18px;margin-top:8px}
+  .dlgbtns{display:flex;gap:10px;margin-top:4px}
+  .dlgbtns button{flex:1;padding:12px;border-radius:24px;font-weight:700;font-size:15px;background:var(--bar);color:var(--text)}
+  .dlgbtns .go{background:#c62828;color:#fff}
+  .dlgbtns .go:disabled{opacity:.45;cursor:default}
   #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#323739;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
   #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -267,6 +289,7 @@
       <button class="tab on" id="tabStudents">Students</button>
       <button class="tab" id="tabStats">Statistics</button>
     </div>
+    <div class="pausebar" id="pauseBar"><span id="pauseTxt">✅ HQAC is running</span><button id="pauseBtn">⏸ Pause HQAC</button></div>
     <div class="testbar" id="testbar">Test version — all students and numbers are fake</div>
     <div class="search"><input type="search" id="q" placeholder="Search name, code or course"></div>
     <div class="chips" id="chips">
@@ -301,6 +324,18 @@
     </div>
   </main>
 </section>
+<div class="dlg" id="pauseDlg"><div class="dlgcard">
+  <h3>Pause HQAC</h3>
+  <p class="dlgsub">Students cannot ask while it is paused. It starts again by itself when the time is over.</p>
+  <div class="dlgl">For how long?</div>
+  <div class="durs" id="durs"><button data-m="60">1 hour</button><button data-m="120">2 hours</button><button data-m="180">3 hours</button><button data-m="360">6 hours</button><button data-m="720">12 hours</button><button data-m="1440">1 day</button></div>
+  <div class="dlgl">Or until a day and time</div>
+  <input type="datetime-local" id="pauseUntilIn">
+  <div class="dlgl">Students will see</div>
+  <div id="pausePrev"></div>
+  <div class="dlgerr" id="pauseErr"></div>
+  <div class="dlgbtns"><button id="pauseCancel">Cancel</button><button id="pauseGo" class="go" disabled>⏸ Pause now</button></div>
+</div></div>
 <div id="toast"></div>
 
 <script>
@@ -671,6 +706,54 @@
   let rsT = 0;
   window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { if (tab === 'stats' && stats && $('dayChart')) { drawDaily(); drawYear(); } }, 150); });
 
+  /* ---------- Pause / Resume (for exam times) ---------- */
+  let pauseUntil = 0, pauseSel = null;                 // pauseUntil: the moment HQAC starts again, 0 = running now
+  const whenShort = ms => new Date(ms).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
+  const whenLong = ms => new Date(ms).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', hour12: true });
+  const leftText = ms => { const m = Math.max(1, Math.round((ms - Date.now()) / 60000)), h = Math.floor(m / 60), d = Math.floor(h / 24); return d ? `${d} d ${h % 24} h` : h ? `${h} h ${m % 60} min` : `${m} min`; };
+  function setPause(iso){ const t = Date.parse(String(iso || '')); pauseUntil = !isNaN(t) && t > Date.now() ? t : 0; renderPause(); }
+  function renderPause(){
+    if (pauseUntil && pauseUntil <= Date.now()) pauseUntil = 0;         // the time is over: it is running again
+    const on = !!pauseUntil; $('pauseBar').classList.toggle('on', on);
+    $('pauseTxt').textContent = on ? `⏸ Paused until ${whenShort(pauseUntil)} · ${leftText(pauseUntil)} left` : '✅ HQAC is running';
+    $('pauseBtn').textContent = on ? '▶️ Resume now' : '⏸ Pause HQAC';
+  }
+  setInterval(renderPause, 30000);
+  const pauseTarget = () => !pauseSel ? 0 : pauseSel.m ? Date.now() + pauseSel.m * 60000 : pauseSel.t;
+  function renderPauseDlg(){
+    document.querySelectorAll('#durs button').forEach(b => b.classList.toggle('on', !!pauseSel && pauseSel.m === +b.dataset.m));
+    $('pauseUntilIn').classList.toggle('on', !!pauseSel && !pauseSel.m);
+    const t = pauseTarget(), ok = t > Date.now();
+    $('pausePrev').textContent = ok ? `Quick Ask is paused because of an exam. It will be back on ${whenLong(t)}.` : 'Choose how long first.';
+    $('pauseErr').textContent = pauseSel && !ok ? 'Please choose a time in the future.' : '';
+    $('pauseGo').disabled = !ok;
+  }
+  function openPauseDlg(){ pauseSel = null; $('pauseUntilIn').value = ''; renderPauseDlg(); $('pauseDlg').classList.add('on'); }
+  const closePauseDlg = () => $('pauseDlg').classList.remove('on');
+  document.querySelectorAll('#durs button').forEach(b => b.onclick = () => { pauseSel = { m: +b.dataset.m }; $('pauseUntilIn').value = ''; renderPauseDlg(); });
+  $('pauseUntilIn').oninput = () => { const t = new Date($('pauseUntilIn').value).getTime(); pauseSel = isNaN(t) ? null : { t }; renderPauseDlg(); };
+  $('pauseCancel').onclick = closePauseDlg;
+  $('pauseDlg').onclick = e => { if (e.target === $('pauseDlg')) closePauseDlg(); };
+  async function sendPause(action, extra){
+    const d = await api(action, extra);
+    if (!d || !d.ok){ closePauseDlg(); denied(d); return false; }
+    if (d.pauseError){ $('pauseErr').textContent = d.pauseError; return false; }
+    if (!('pauseUntil' in d) || 'rows' in d){ toast('Not ready yet: press Publish for the latest workflow update in n8n first.'); return false; }
+    setPause(d.pauseUntil); return true;
+  }
+  $('pauseGo').onclick = async () => {
+    const t = pauseTarget(); if (!(t > Date.now())) return renderPauseDlg();
+    const btn = $('pauseGo'); btn.disabled = true; btn.textContent = 'Pausing…';
+    try { if (await sendPause('pause', pauseSel.m ? { minutes: pauseSel.m } : { until: new Date(pauseSel.t).toISOString() })) { closePauseDlg(); toast('HQAC is paused'); } }
+    catch (e) { $('pauseErr').textContent = "Couldn't reach the server. Check your internet and try again."; }
+    finally { btn.textContent = '⏸ Pause now'; renderPauseDlg(); }
+  };
+  $('pauseBtn').onclick = async () => {
+    if (!pauseUntil) return openPauseDlg();
+    if (!confirm('Start HQAC again now? Students will be able to ask right away.')) return;
+    try { if (await sendPause('resume')) toast('HQAC is running again'); } catch (e) { toast("Couldn't reach the server. Check your internet."); }
+  };
+
   /* ---------- open / login ---------- */
   function denied(d){ store.del(K_PASS); pass = ''; $('app').classList.remove('on'); $('login').style.display = ''; $('lgErr').textContent = (d && d.message) || 'Wrong password.'; }
   async function loadList(){
@@ -680,6 +763,7 @@
     today = d.today || null;
     if (d.fees){ if (typeof d.fees.openrouter === 'number') FEES.openrouter = d.fees.openrouter; if (typeof d.fees.bank === 'number') FEES.bank = d.fees.bank; }
     renderFeeNote();
+    if ('pauseUntil' in d) setPause(d.pauseUntil);
     $('login').style.display = 'none'; $('app').classList.add('on');
     renderStats(); renderList();
     return true;
@@ -730,7 +814,8 @@
       });
     }
     return new Promise(res => setTimeout(() => {
-      if (action === 'list') res({ ok: true, students: FAKE.students, today: { questions: 23, students: 4, newQuestions: 9, followups: 14 } });
+      if (action === 'pause' || action === 'resume'){ FAKE.pause = action === 'resume' ? '' : (x.until || new Date(Date.now() + x.minutes * 60000).toISOString()); res({ ok: true, pauseUntil: FAKE.pause }); }
+      else if (action === 'list') res({ ok: true, pauseUntil: FAKE.pause || '', students: FAKE.students, today: { questions: 23, students: 4, newQuestions: 9, followups: 14 } });
       else if (action === 'student') res({ ok: true, rows: FAKE.rows[x.serial] || [] });
       else if (action === 'stats') {
         const top = FAKE.students.slice(0, 5).map(s => ({ name: s.name, serial: s.serial, cost: s.totalCost, questions: s.totalNew + s.totalFollowups }));
